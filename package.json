@@ -1,0 +1,28 @@
+{
+  "name": "mxfb",
+  "version": "1.0.1",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "make:lib": "mkdir -p lib",
+    "build:scripts": "npx tsc -p scripts/tsconfig.json",
+    "build:src": "npm run build:scripts && rm -rf lib && npm run make:lib && node .scripts/build/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.72",
+    "@types/react-dom": "^18.2.22",
+    "esbuild": "^0.20.2",
+    "typescript": "^5.4.3"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

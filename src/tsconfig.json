@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "../lib",
+    "declaration": true,
+    "moduleResolution": "Node",
+    "rootDir": ".",
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "~/components/*": ["./components/*"],
+      "~/utils/*": ["./utils/*"]
+    }
+  },
+  "exclude": [
+    "../node_modules",
+    "../lib"
+  ]
+}

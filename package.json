@@ -1,13 +1,13 @@
 {
   "name": "@mxfb/tools",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "type": "module",
   "author": "Maxime Fabas",
   "license": "ISC",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/maximefabas/mxfb-tools"
+    "type": "git",
+    "url": "https://github.com/maximefabas/mxfb-tools"
   },
   "scripts": {
     "make:lib": "mkdir -p lib",

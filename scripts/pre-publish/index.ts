@@ -145,11 +145,9 @@ await new Promise(resolve => {
   })
 })
 
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  * Prevent npm publish to happen from here
- * (actually publish from lib)
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

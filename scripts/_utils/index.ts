@@ -1,4 +1,4 @@
-import { promises as fs, existsSync, realpath } from 'node:fs'
+import { promises as fs, existsSync } from 'node:fs'
 import path from 'node:path'
 
 export async function listSubdirectoriesIndexes (root: string, extensions?: string[]): Promise<string[]> {

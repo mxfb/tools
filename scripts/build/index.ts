@@ -9,6 +9,7 @@ import {
   UTILS_AGNOSTIC,
   UTILS_BROWSER,
   UTILS_NODE,
+  LIB,
   LIB_INDEX
 } from '../_config/index.js'
 import { findFirstDuplicate, isInDirectory, listSubdirectoriesIndexes } from '../_utils/index.js'
@@ -31,7 +32,7 @@ await new Promise((resolve, reject) => {
     entryNames: '[dir]/[name]',
     chunkNames: 'chunks/[name]-[hash]',
     assetNames: 'assets/[name]-[hash]',
-    outdir: 'lib',
+    outdir: LIB,
     bundle: true,
     minify: true,
     splitting: true,

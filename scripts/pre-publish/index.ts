@@ -5,6 +5,23 @@ import prompts from 'prompts'
 import semver from 'semver'
 import Git from 'simple-git'
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Paths
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+const CWD = process.cwd()
+const PKG_JSON = path.join(CWD, 'package.json')
+const LIB = path.join(CWD, 'lib')
+const LIB_PKG_JSON = path.join(LIB, 'package.json')
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Git status
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 const git = Git()
 const isClean = (await git.status()).isClean()
 if (!isClean) {
@@ -12,8 +29,12 @@ if (!isClean) {
   process.exit(1)
 }
 
-const CWD = process.cwd()
-const PKG_JSON = path.join(CWD, 'package.json')
+/* * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Read package.json
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 const packageJsonData = await fs.readFile(PKG_JSON, { encoding: 'utf-8' })
 let currentVersion: string | null = null
 try {
@@ -28,6 +49,12 @@ try {
   console.error(err)
   process.exit(1)
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Select target version
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 const targetVersionNumbers = {
   patch: semver.inc(currentVersion, 'patch'),
@@ -60,4 +87,21 @@ else {
   process.exit(1)
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Create lib/package.json
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+await fs.cp(PKG_JSON, LIB_PKG_JSON)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Prevent npm publish to happen from here
+ * (actually publish from lib)
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 console.log('Pre publish: done')
+process.exit(1)
+

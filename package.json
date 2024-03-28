@@ -11,12 +11,15 @@
     "build:src": "npm run build:scripts && rm -rf lib && npm run make:lib && node .scripts/build/index.js",
     "prepublishOnly": "npm run build:src && node .scripts/pre-publish/index.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "d3": "^7.9.0"
+  },
   "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.3",
     "@types/node": "^20.11.30",
     "@types/prompts": "^2.4.9",
     "@types/react": "^18.2.72",

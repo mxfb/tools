@@ -13,11 +13,38 @@ import { listSubdirectoriesIndexes } from '../_utils/index.js'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
+ * Build CLI
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+const cliEntryPoints = await listSubdirectoriesIndexes(CLI, ['.js', '.ts'])
+await Promise.all(cliEntryPoints.map(async indexPath => {
+  return await new Promise((resolve, reject) => {
+    esbuild.build({
+      entryPoints: [indexPath],
+      outdir: 'lib',
+      bundle: true,
+      minify: true,
+      splitting: false,
+      platform: 'node',
+      sourcemap: false,
+      format: 'esm',
+      target: ['esnext']
+    }).then(() => {
+      console.log('built', indexPath)
+      resolve(true)
+    })
+      .catch(err => reject(err))
+  })
+}))
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
  * Build
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-const rootDirs = [CLI, COMPONENTS, UTILS_AGNOSTIC, UTILS_BROWSER, UTILS_NODE]
+const rootDirs = [COMPONENTS, UTILS_AGNOSTIC, UTILS_BROWSER, UTILS_NODE]
 const entryPoints = (await Promise.all(rootDirs.map(async dir => {
   const extensions = ['.js', '.jsx', '.ts', '.tsx']
   return await listSubdirectoriesIndexes(dir, extensions)

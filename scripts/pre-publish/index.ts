@@ -131,7 +131,7 @@ try {
   }
   await fs.writeFile(
     LIB_PKG_JSON,
-    JSON.stringify(libPkgJsonObj, null, 2),
+    `${JSON.stringify(libPkgJsonObj, null, 2)}\n`,
     { encoding: 'utf-8' }
   )
 } catch (err) {

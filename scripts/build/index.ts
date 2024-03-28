@@ -1,3 +1,4 @@
+import process from 'node:process'
 import { promises as fs } from 'node:fs'
 import { exec } from 'node:child_process'
 import path from 'node:path'

@@ -133,7 +133,7 @@ try {
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 await new Promise(resolve => {
-  exec(`cd ${LIB} && npm publish`, (err, stdout, stderr) => {
+  exec(`cd ${LIB} && npm publish --access public`, (err, stdout, stderr) => {
     if (err !== null) console.error(err)
     if (stdout !== '') console.log(stdout)
     if (stderr !== '') console.log(stderr)

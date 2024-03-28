@@ -10,6 +10,7 @@ import {
   LIB_INDEX
 } from '../_config/index.js'
 import { listSubdirectoriesIndexes } from '../_utils/index.js'
+import path from 'node:path'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -19,10 +20,11 @@ import { listSubdirectoriesIndexes } from '../_utils/index.js'
 
 const cliEntryPoints = await listSubdirectoriesIndexes(CLI, ['.js', '.ts'])
 await Promise.all(cliEntryPoints.map(async indexPath => {
+  const parent = path.basename(path.dirname(indexPath))
   return await new Promise((resolve, reject) => {
     esbuild.build({
       entryPoints: [indexPath],
-      outdir: 'lib',
+      outdir: `lib/cli/${parent}`,
       bundle: true,
       minify: true,
       splitting: false,

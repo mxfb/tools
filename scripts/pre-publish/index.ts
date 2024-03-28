@@ -87,7 +87,7 @@ else {
 const cliSubdirectoriesIndexes = await listSubdirectoriesIndexes(CLI)
 const libPkgJsonBin = cliSubdirectoriesIndexes.map(indexPath => {
   const parent = path.basename(path.dirname(indexPath))
-  return [parent, `./cli/${parent}/index.js`]
+  return [`mxfb/${parent}`, `./cli/${parent}/index.js`]
 }).reduce((reduced, [name, path]) => {
   return {
     ...reduced,

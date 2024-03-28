@@ -4,8 +4,6 @@ import prompts from 'prompts'
 import semver from 'semver'
 import Git from 'simple-git'
 import { PKG_JSON, LIB_PKG_JSON, LIB } from '../_config/index.js'
-import { listSubdirectoriesIndexes } from '../_utils/index.js'
-import path from 'node:path'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -92,6 +90,10 @@ type PkgJson = {
   description?: string | undefined
   author?: string | undefined
   license?: string | undefined
+  repository?: {
+    type: string
+    url: string
+  }
   type?: string | undefined
   main?: string | undefined
   module?: string | undefined
@@ -109,6 +111,7 @@ try {
     description: parsed.description,
     author: parsed.author,
     license: parsed.license,
+    repository: parsed.repository,
     type: parsed.type,
     main: 'index.js',
     module: 'index.js',

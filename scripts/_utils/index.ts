@@ -1,4 +1,4 @@
-import { promises as fs, existsSync } from 'node:fs'
+import { promises as fs, existsSync, realpath } from 'node:fs'
 import path from 'node:path'
 
 export async function listSubdirectoriesIndexes (root: string, extensions?: string[]): Promise<string[]> {
@@ -28,4 +28,18 @@ export async function listSubdirectoriesIndexes (root: string, extensions?: stri
     }
   }))).filter((e): e is string => e !== undefined)
   return subdirectoriesIndexes
+}
+
+export function isInDirectory (childPath: string, parentPath: string) {
+  const rel = path.relative(parentPath, childPath)
+  return rel !== '' && !rel.startsWith('..')
+}
+
+export function findFirstDuplicate<T> (arr: T[]) {
+  const seen = new Set<T>()
+  for (const item of arr) {
+    if (seen.has(item)) return item
+    seen.add(item)
+  }
+  return null
 }

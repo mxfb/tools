@@ -1,6 +1,8 @@
 import { promises as fs } from 'node:fs'
 import { exec } from 'node:child_process'
+import path from 'node:path'
 import esbuild from 'esbuild'
+import camelCase from 'camelcase'
 import {
   COMPONENTS,
   UTILS_AGNOSTIC,
@@ -8,7 +10,7 @@ import {
   UTILS_NODE,
   LIB_INDEX
 } from '../_config/index.js'
-import { listSubdirectoriesIndexes } from '../_utils/index.js'
+import { findFirstDuplicate, isInDirectory, listSubdirectoriesIndexes } from '../_utils/index.js'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -67,8 +69,32 @@ await new Promise(resolve => {
  * Create index.js
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
-await fs.writeFile(
-  LIB_INDEX,
-  `export default {}\n`,
-  { encoding: 'utf-8' }
-)
+
+const libIndexImportsNames: string[] = []
+const libIndexImports: string[] = []
+const libIndexExports: string[] = []
+entryPoints.forEach(indexPath => {
+  const isComp = isInDirectory(indexPath, COMPONENTS)
+  const isAgnosticUtil = isInDirectory(indexPath, UTILS_AGNOSTIC)
+  const isBrowserUtil = isInDirectory(indexPath, UTILS_BROWSER)
+  const isNodeUtil = isInDirectory(indexPath, UTILS_NODE)
+  let srcSubFolder
+  if (isComp) { srcSubFolder = './components' }
+  else if (isAgnosticUtil) { srcSubFolder = './utils/agnostic' }
+  else if (isBrowserUtil) { srcSubFolder = './utils/browser' }
+  else if (isNodeUtil) { srcSubFolder = './utils/node' }
+  const parentDir = path.basename(path.dirname(indexPath))
+  const parentDirFormatted = camelCase(parentDir, { pascalCase: isComp })
+  libIndexImportsNames.push(parentDirFormatted)
+  libIndexImports.push(`import * as ${parentDirFormatted} from '${srcSubFolder}/${parentDir}/index.js'`)
+  libIndexExports.push(`export { ${parentDirFormatted} }`)
+})
+
+const libIndexExportsDuplicate = findFirstDuplicate(libIndexImportsNames)
+if (libIndexExportsDuplicate !== null) {
+  console.error(`Duplicate export name in lib: ${libIndexExportsDuplicate}`)
+  process.exit(1)
+}
+const libIndexContent = `${libIndexImports.join('\n')}\n${libIndexExports.join('\n')}\n`
+
+await fs.writeFile(LIB_INDEX, libIndexContent, { encoding: 'utf-8' })

@@ -1,20 +1,11 @@
-import path from 'node:path'
 import { promises as fs } from 'node:fs'
-import { execSync } from 'node:child_process'
+import { exec, execSync } from 'node:child_process'
 import prompts from 'prompts'
 import semver from 'semver'
 import Git from 'simple-git'
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- * Paths
- * 
- * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-const CWD = process.cwd()
-const PKG_JSON = path.join(CWD, 'package.json')
-const LIB = path.join(CWD, 'lib')
-const LIB_PKG_JSON = path.join(LIB, 'package.json')
+import { PKG_JSON, LIB_PKG_JSON, CLI, LIB } from '../_config/index.js'
+import { listSubdirectoriesIndexes } from '../_utils/index.js'
+import path from 'node:path'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -93,7 +84,76 @@ else {
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+const cliSubdirectoriesIndexes = await listSubdirectoriesIndexes(CLI)
+const libPkgJsonBin = cliSubdirectoriesIndexes.map(indexPath => {
+  const parent = path.basename(path.dirname(indexPath))
+  return [parent, `./cli/${parent}/index.js`]
+}).reduce((reduced, [name, path]) => {
+  return {
+    ...reduced,
+    [name as string]: path as string
+  }
+}, {} as Record<string, string>)
+
 await fs.cp(PKG_JSON, LIB_PKG_JSON)
+const libPkgJsonData = await fs.readFile(LIB_PKG_JSON, { encoding: 'utf-8' })
+type PkgJson = {
+  name?: string | undefined
+  version?: string | undefined
+  description?: string | undefined
+  author?: string | undefined
+  license?: string | undefined
+  type?: string | undefined
+  main?: string | undefined
+  module?: string | undefined
+  scripts?: Record<string, string> | undefined
+  bin?: Record<string, string> | undefined
+  dependencies?: Record<string, string> | undefined
+  devDependencies?: Record<string, string> | undefined
+  peerDependencies?: Record<string, string> | undefined
+}
+let libPkgJsonObj: PkgJson | null = null
+try {
+  const parsed = JSON.parse(libPkgJsonData) as PkgJson
+  libPkgJsonObj = {
+    name: parsed.name,
+    version: parsed.version,
+    description: parsed.description,
+    author: parsed.author,
+    license: parsed.license,
+    type: parsed.type,
+    main: 'index.js',
+    module: 'index.js',
+    bin: libPkgJsonBin,
+    dependencies: parsed.dependencies,
+    peerDependencies: parsed.peerDependencies,
+    devDependencies: parsed.devDependencies
+  }
+  await fs.writeFile(
+    LIB_PKG_JSON,
+    JSON.stringify(libPkgJsonObj, null, 2),
+    { encoding: 'utf-8' }
+  )
+} catch (err) {
+  console.error(`Something went wrong while parsing lib/package.json`)
+  process.exit(1)
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Publish from lib
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+await new Promise(resolve => {
+  exec(`cd ${LIB} && npm publish`, (err, stdout, stderr) => {
+    if (err !== null) console.error(err)
+    if (stdout !== '') console.log(stdout)
+    if (stderr !== '') console.log(stderr)
+    resolve(true)
+  })
+})
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *

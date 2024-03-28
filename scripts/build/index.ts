@@ -2,7 +2,6 @@ import { promises as fs } from 'node:fs'
 import { exec } from 'node:child_process'
 import esbuild from 'esbuild'
 import {
-  CLI,
   COMPONENTS,
   UTILS_AGNOSTIC,
   UTILS_BROWSER,
@@ -10,35 +9,6 @@ import {
   LIB_INDEX
 } from '../_config/index.js'
 import { listSubdirectoriesIndexes } from '../_utils/index.js'
-import path from 'node:path'
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- * Build CLI
- * 
- * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-const cliEntryPoints = await listSubdirectoriesIndexes(CLI, ['.js', '.ts'])
-await Promise.all(cliEntryPoints.map(async indexPath => {
-  const parent = path.basename(path.dirname(indexPath))
-  return await new Promise((resolve, reject) => {
-    esbuild.build({
-      entryPoints: [indexPath],
-      outdir: `lib/cli/${parent}`,
-      bundle: true,
-      minify: true,
-      splitting: false,
-      platform: 'node',
-      sourcemap: false,
-      format: 'esm',
-      target: ['esnext']
-    }).then(() => {
-      console.log('built', indexPath)
-      resolve(true)
-    })
-      .catch(err => reject(err))
-  })
-}))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *

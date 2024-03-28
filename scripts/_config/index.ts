@@ -11,7 +11,6 @@ export const LIB_INDEX = path.join(LIB, 'index.js')
 export const LIB_PKG_JSON = path.join(LIB, 'package.json')
 
 // src
-export const CLI = path.join(SRC, 'cli')
 export const COMPONENTS = path.join(SRC, 'components')
 export const UTILS = path.join(SRC, 'utils')
 

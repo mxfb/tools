@@ -3,7 +3,7 @@ import { exec, execSync } from 'node:child_process'
 import prompts from 'prompts'
 import semver from 'semver'
 import Git from 'simple-git'
-import { PKG_JSON, LIB_PKG_JSON, CLI, LIB } from '../_config/index.js'
+import { PKG_JSON, LIB_PKG_JSON, LIB } from '../_config/index.js'
 import { listSubdirectoriesIndexes } from '../_utils/index.js'
 import path from 'node:path'
 
@@ -84,17 +84,6 @@ else {
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-const cliSubdirectoriesIndexes = await listSubdirectoriesIndexes(CLI)
-const libPkgJsonBin = cliSubdirectoriesIndexes.map(indexPath => {
-  const parent = path.basename(path.dirname(indexPath))
-  return [`mxfb/${parent}`, `./cli/${parent}/index.js`]
-}).reduce((reduced, [name, path]) => {
-  return {
-    ...reduced,
-    [name as string]: path as string
-  }
-}, {} as Record<string, string>)
-
 await fs.cp(PKG_JSON, LIB_PKG_JSON)
 const libPkgJsonData = await fs.readFile(LIB_PKG_JSON, { encoding: 'utf-8' })
 type PkgJson = {
@@ -107,7 +96,6 @@ type PkgJson = {
   main?: string | undefined
   module?: string | undefined
   scripts?: Record<string, string> | undefined
-  bin?: Record<string, string> | undefined
   dependencies?: Record<string, string> | undefined
   devDependencies?: Record<string, string> | undefined
   peerDependencies?: Record<string, string> | undefined
@@ -124,7 +112,6 @@ try {
     type: parsed.type,
     main: 'index.js',
     module: 'index.js',
-    bin: libPkgJsonBin,
     dependencies: parsed.dependencies,
     peerDependencies: parsed.peerDependencies,
     devDependencies: parsed.devDependencies

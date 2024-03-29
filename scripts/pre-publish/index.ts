@@ -137,8 +137,7 @@ try {
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 await new Promise(resolve => {
-  console.log('OTP ENV VAR', process.env.OTP)
-  exec(`cd ${LIB} && npm publish --access public`, (err, stdout, stderr) => {
+  exec(`cd ${LIB} && npm publish --access public --otp=${process.env.OTP}`, (err, stdout, stderr) => {
     if (err !== null) console.error(err)
     if (stdout !== '') console.log(stdout)
     if (stderr !== '') console.log(stderr)

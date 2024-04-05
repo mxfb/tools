@@ -75,10 +75,7 @@ export default async function listSubpaths (
       const isSymlink = childLstats.isSymbolicLink()
       const isFile = !isDirectory && !isSymlink
       const isHidden = path.basename(childAbsPath).startsWith('.')
-      let type: ChildType
-      if (isDirectory) { type = 'directory' }
-      else if (isSymlink) { type = 'symlink' }
-      else { type = 'file' }
+      const type = isDirectory ? 'directory' : (isSymlink ? 'symlink' : 'file')
       if (isDirectory && options.directories === false) throw true
       if (isSymlink && options.symlinks === false) throw false
       if (isFile && options.files === false) throw false

@@ -1,15 +1,15 @@
-import { Stats, promises as fs, realpath } from 'node:fs'
+import { Stats, promises as fs } from 'node:fs'
 import path from 'node:path'
 
-type ChildType = 'file' | 'directory' | 'symlink'
+export type ChildType = 'file' | 'directory' | 'symlink'
 
-type ChildDetails = {
+export type ChildDetails = {
   type: ChildType
   hidden: boolean
   realPath: string
 }
 
-type Options = {
+export type Options = {
   directories?: boolean
   files?: boolean
   symlinks?: boolean
@@ -20,7 +20,7 @@ type Options = {
   filter?: (path: string, details: ChildDetails) => boolean | Promise<boolean>
 }
 
-const defaultOptions: Required<Options> = {
+export const defaultOptions: Required<Options> = {
   directories: true,
   files: true,
   symlinks: true,
@@ -31,24 +31,24 @@ const defaultOptions: Required<Options> = {
   filter: () => true
 }
 
-const fillOptions = (input: Options): Required<Options> => {
+export const fillOptions = (input: Options): Required<Options> => {
   return {
     ...defaultOptions,
     ...input
   }
 }
 
-type Context = {
+export type Context = {
   depth?: number
   lstats?: Stats | null
 }
 
-const defaultContext: Required<Context> = {
+export const defaultContext: Required<Context> = {
   depth: 0,
   lstats: null
 }
 
-const fillContext = (input: Context): Required<Context> => {
+export const fillContext = (input: Context): Required<Context> => {
   return {
     ...defaultContext,
     ...input

@@ -64,8 +64,12 @@ export default async function listSubpaths (
   const context = fillContext(_context)
   const subpaths: string[] = []
   if (context.depth > options.maxDepth) return subpaths
-  const pathStat = context.lstats ?? await fs.lstat(inputPath)
-  if (!pathStat.isDirectory()) return subpaths
+  try {
+    const pathStat = context.lstats ?? await fs.lstat(inputPath)
+    if (!pathStat.isDirectory()) return subpaths
+  } catch (err) {
+    return subpaths
+  }
   const childrenRelPaths = await fs.readdir(inputPath)
   await Promise.all(childrenRelPaths.map(async childRelPath => {
     const childAbsPath = path.join(inputPath, childRelPath)

@@ -6,8 +6,6 @@ export default function interpolate (
   return bound1 + ratio * (bound2 - bound1)
 }
 
-export { interpolate }
-
 export function ratio (value: number, bound1: number, bound2?: number) {
   if (bound2 === undefined) return value / bound1
   return (value - bound1) / (bound2 - bound1)

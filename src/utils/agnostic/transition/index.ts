@@ -1,4 +1,6 @@
-type Callback = (val: number, timeMs: number) => void
+import wait from '~/utils/agnostic/wait'
+
+export type Callback = (val: number, timeMs: number) => void
 
 export enum Ease {
   LINEAR = 'linear',
@@ -34,9 +36,9 @@ export enum Ease {
   EASE_IN_OUT_BOUNCE = 'ease-in-out-bounce'
 }
 
-type EasingFunction = (progress: number) => number
+export type EasingFunction = (progress: number) => number
 
-type EasingDictionary = Record<string, EasingFunction>
+export type EasingDictionary = Record<string, EasingFunction>
 
 export default async function transition (
   to: number,
@@ -64,12 +66,6 @@ export default async function transition (
       actualCallback(step, time)
     }
   }
-}
-
-export async function wait (durationMs: number) {
-  return new Promise(resolve => {
-    window.setTimeout(() => resolve(true), durationMs)
-  })
 }
 
 // Easing functions taken from https://easings.net/

@@ -12,7 +12,11 @@ import {
   LIB,
   LIB_INDEX
 } from '../_config/index.js'
-import { findFirstDuplicate, isInDirectory, listSubdirectoriesIndexes } from '../_utils/index.js'
+import {
+  findFirstDuplicate,
+  isInDirectory,
+  listSubdirectoriesIndexes
+} from '../_utils/index.js'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -40,7 +44,7 @@ await new Promise((resolve, reject) => {
     sourcemap: false,
     format: 'esm',
     target: ['esnext'],
-    external: ['react', 'react-dom']
+    external: ['chalk', 'jsdom', 'react', 'react-dom']
   }).then(() => {
     console.log('Build completed')
     resolve(true)

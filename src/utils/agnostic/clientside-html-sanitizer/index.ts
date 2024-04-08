@@ -1,6 +1,8 @@
+import getDocument from '~/utils/agnostic/get-document'
+
 export type AttributeNameValPair = {
-  attributeName: string|RegExp
-  attributeValues?: Array<string|RegExp>
+  attributeName: string | RegExp
+  attributeValues?: Array<string | RegExp>
 }
 
 export type Options = {
@@ -12,13 +14,15 @@ export type Options = {
   forbiddenAttributes?: { [tagName: string]: AttributeNameValPair[] }
   depth?: number
   verbose?: boolean
+  documentObj?: Document
 }
 
 export const defaultOptions: Options = { depth: 20 }
 
-export default function sanitize (
+export default async function sanitize (
   inputStr: string,
-  options: Options = defaultOptions): string {
+  options: Options = defaultOptions): Promise<string> {
+  const document = options.documentObj ?? await getDocument()
   const wrapperDiv = document.createElement('div')
   const { inputFreeTransform } = options
   wrapperDiv.innerHTML = inputFreeTransform !== undefined ? inputFreeTransform(inputStr) : inputStr
@@ -29,7 +33,7 @@ export default function sanitize (
 
 export function sanitizeElement (
   element: Element,
-  options: Options = defaultOptions): Element|null {
+  options: Options = defaultOptions): Element | null {
   const { tagName, attributes, childNodes } = element
   const {
     allowedTags = [],

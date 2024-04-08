@@ -13,6 +13,11 @@ export function randomHash (length: number = 4) {
     .join('')
 }
 
+export function randomHashPattern (pattern: number[], joiner: string = '-'): string {
+  return pattern.map(length => randomHash(length))
+    .join(joiner)
+}
+
 export default function randomUUID () {
-  return `${randomHash(8)}-${randomHash(4)}-${randomHash(4)}-${randomHash(4)}-${randomHash(12)}`
+  return randomHashPattern([8, 4, 4, 4, 12])
 }

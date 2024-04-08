@@ -1,4 +1,4 @@
-import roundNumbers from '~/utils/round-numbers'
+import roundNumbers from '~/utils/_sort_this/round-numbers'
 
 export function getHarmonic (
   min: number,
@@ -59,10 +59,8 @@ export function createScale (descriptor: ScaleDescriptor) {
   } = descriptor
   return function scale (level: number) {
     if (steps < 2) return
-    const loBoundRange = [loLevelMin, hiLevelMin]
-    const hiBoundRange = [loLevelMax, hiLevelMax]
-    const loBoundVal = getHarmonic(loBoundRange[0], loBoundRange[1], level - 1, steps - 1)
-    const hiBoundVal = getHarmonic(hiBoundRange[0], hiBoundRange[1], level - 1, steps - 1)
+    const loBoundVal = getHarmonic(loLevelMin, hiLevelMin, level - 1, steps - 1)
+    const hiBoundVal = getHarmonic(loLevelMax, hiLevelMax, level - 1, steps - 1)
     if (loBoundVal === undefined) return
     if (hiBoundVal === undefined) return
     const affine = getAffineFunction(loBound, loBoundVal, hiBound, hiBoundVal)

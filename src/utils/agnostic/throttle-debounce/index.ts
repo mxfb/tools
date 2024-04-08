@@ -1,3 +1,5 @@
+import { Timeout } from './types'
+
 type BasicFunction = (...args: any[]) => any
 
 /**
@@ -11,19 +13,19 @@ export function throttle <T extends BasicFunction = BasicFunction>(
   let currentDelayMs = delayMs
   let lastArgs: any[] = []
   let lastExecutedOn: number = 0
-  let lastReturnValue: ReturnType<T>|undefined = undefined
-  let nextExecutionTimeout: number|null = null
+  let lastReturnValue: ReturnType<T> | undefined = undefined
+  let nextExecutionTimeout: Timeout | number | null = null
   
   /** Schedules a next call according to the delay */
   function scheduleNextCall () {
-    if (typeof nextExecutionTimeout === 'number') {
-      window?.clearTimeout(nextExecutionTimeout)
+    if (nextExecutionTimeout !== null) {
+      clearTimeout(nextExecutionTimeout)
       nextExecutionTimeout = null
     }
     const now = Date.now()
     const nextExecutionTimestamp = lastExecutedOn + currentDelayMs
     const msTillNextExecution = nextExecutionTimestamp - now
-    nextExecutionTimeout = window?.setTimeout(() => {
+    nextExecutionTimeout = setTimeout(() => {
       nextExecutionTimeout = null
       const returnValue = toThrottleFunc(...lastArgs)      
       lastReturnValue = returnValue
@@ -46,9 +48,7 @@ export function throttle <T extends BasicFunction = BasicFunction>(
         isCached: false
       }
     }
-    if (typeof nextExecutionTimeout !== 'number') {
-      scheduleNextCall()
-    }
+    if (nextExecutionTimeout === null) scheduleNextCall()
     return {
       returnValue: lastReturnValue,
       lastExecutedOn,
@@ -60,9 +60,7 @@ export function throttle <T extends BasicFunction = BasicFunction>(
   /** Changes the throttle delay */
   function setDelay (delayMs: number) {
     currentDelayMs = delayMs
-    if (typeof nextExecutionTimeout === 'number') {
-      scheduleNextCall()
-    }
+    if (nextExecutionTimeout !== null) scheduleNextCall()
   }
 
   return {
@@ -83,8 +81,8 @@ export function debounce <T extends BasicFunction = BasicFunction>(
   let lastArgs: any[] = []
   let lastCalledOn: number = 0
   let lastExecutedOn: number = 0
-  let lastReturnValue: ReturnType<T>|undefined = undefined
-  let nextExecutionTimeout: number|null = null
+  let lastReturnValue: ReturnType<T> | undefined = undefined
+  let nextExecutionTimeout: Timeout | number | null = null
 
   /** Schedules a next call according to the delay */
   function scheduleNextCall () {
@@ -95,7 +93,7 @@ export function debounce <T extends BasicFunction = BasicFunction>(
     const now = Date.now()
     const nextExecutionTimestamp = lastCalledOn + currentDelayMs
     const msTillNextExecution = nextExecutionTimestamp - now
-    nextExecutionTimeout = window?.setTimeout(() => {
+    nextExecutionTimeout = setTimeout(() => {
       nextExecutionTimeout = null
       const returnValue = toDebounceFunc(...lastArgs)
       lastReturnValue = returnValue
@@ -132,9 +130,7 @@ export function debounce <T extends BasicFunction = BasicFunction>(
   /** Changes the debounce delay */
   function setDelay (delayMs: number) {
     currentDelayMs = delayMs
-    if (typeof nextExecutionTimeout === 'number') {
-      scheduleNextCall()
-    }
+    if (nextExecutionTimeout !== null) scheduleNextCall()
   }
 
   return {

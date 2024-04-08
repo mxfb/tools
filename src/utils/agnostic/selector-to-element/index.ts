@@ -1,4 +1,7 @@
-export default function selectorToElement (selector: string) {
+import getDocument from '~/utils/agnostic/get-document'
+
+export default async function selectorToElement (selector: string, documentObj?: Document) {
+  const document = documentObj ?? await getDocument()
   // RegExps
   const tagRegexp = /^[A-Za-z]+/
   // The dot is apparently a valid character but is prevented here

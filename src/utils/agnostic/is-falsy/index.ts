@@ -1,4 +1,4 @@
-import { nullishValues } from '~/utils/is-nullish'
+import { nullishValues } from '~/utils/agnostic/is-nullish'
 
 const falsyValues = [...nullishValues, false, '', 0, -0, NaN] as (string | number | bigint | boolean | null | undefined)[]
 if (window.BigInt !== undefined) falsyValues.push(window.BigInt(0))

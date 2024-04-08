@@ -105,7 +105,7 @@ class Log<T extends ConsoleMethod = ConsoleMethod> {
 }
 
 export default class Logger {
-  #threads: Map<string, Log[]> = new Map()
+  _private_threads: Map<string, Log[]> = new Map()
   constructor () {
     // this.assert = this.assert.bind(this)
     // this.count = this.count.bind(this)
@@ -153,13 +153,13 @@ export default class Logger {
     data: ConsoleMethodsParams[T]
   ): this {
     const log = new Log(type, data)
-    const thread = this.#threads.get(threadName) ?? []
-    this.#threads.set(threadName, [...thread, log])
+    const thread = this._private_threads.get(threadName) ?? []
+    this._private_threads.set(threadName, [...thread, log])
     return this
   }
 
   print (this: Logger, threadFilter?: string, withStack?: boolean) {
-    const allLogs = [...this.#threads.entries()]
+    const allLogs = [...this._private_threads.entries()]
       .map(([threadName, logs]) => logs.map(log => ({ threadName, log })))
       .flat()
       .sort((eltA, eltB) => (eltA.log.time.getTime() - eltB.log.time.getTime()))
@@ -176,7 +176,7 @@ export default class Logger {
   }
 
   printThreads (this:Logger, withStack?: boolean) {
-    [...this.#threads.entries()].forEach(([threadName, logs]) => {
+    [...this._private_threads.entries()].forEach(([threadName, logs]) => {
       console.group(`%c${threadName}`, 'font-weight: 800; color: white; background: black; padding: 4px;')
       logs.forEach(log => {
         console.log(`+${log.elapsedTimeMs}s –`, log.displayTime)

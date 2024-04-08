@@ -27,16 +27,16 @@
   "devDependencies": {
     "@types/chalk": "^2.2.0",
     "@types/jsdom": "^21.1.6",
-    "@types/node": "^20.11.30",
+    "@types/node": "^20.12.5",
     "@types/prompts": "^2.4.9",
-    "@types/react": "^18.2.72",
-    "@types/react-dom": "^18.2.22",
+    "@types/react": "^18.2.74",
+    "@types/react-dom": "^18.2.24",
     "@types/semver": "^7.5.8",
     "camelcase": "^8.0.0",
     "esbuild": "^0.20.2",
     "prompts": "^2.4.2",
     "semver": "^7.6.0",
-    "simple-git": "^3.23.0",
-    "typescript": "^5.4.3"
+    "simple-git": "^3.24.0",
+    "typescript": "^5.4.4"
   }
 }

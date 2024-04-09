@@ -1,5 +1,5 @@
 import sanitize, { Options as SanitizerOptions } from '~/utils/agnostic/clientside-html-sanitizer'
-import getDocument from '~/utils/agnostic/get-document'
+import { getDocument } from '~/utils/agnostic/crossenv'
 
 type Options = {
   sanitize?: SanitizerOptions

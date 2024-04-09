@@ -1,4 +1,4 @@
-import getDocument from '~/utils/agnostic/get-document'
+import { getDocument } from '~/utils/agnostic/crossenv'
 
 export default async function selectorToElement (selector: string, documentObj?: Document) {
   const document = documentObj ?? await getDocument()

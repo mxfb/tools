@@ -1,6 +1,3 @@
-declare var window: any
-declare var navigator: any
-declare var self: any
 declare var Deno: any
 declare var AWS: any
 
@@ -14,7 +11,7 @@ export enum RuntimeName {
   AWS_LAMBDA = 'AWS Lambda'
 }
 
-export default function detectRuntime (): RuntimeName | null {
+export function detectRuntime (): RuntimeName | null {
   /* Node.js */
   if (typeof process !== 'undefined'
     && typeof process.versions !== 'undefined'
@@ -42,3 +39,17 @@ export default function detectRuntime (): RuntimeName | null {
   /* Other */
   return null
 }
+
+export async function getDocument (): Promise<Document> {
+  const runtime = detectRuntime()
+  const runtimesWithGlobalWindow = [
+    RuntimeName.BROWSER,
+    RuntimeName.ELECTRON
+  ]
+  const runtimeHasGlobalWindow = runtimesWithGlobalWindow.includes(runtime as RuntimeName)
+  const document = runtimeHasGlobalWindow
+    ? window.document
+    : new (await import('jsdom')).JSDOM().window.document
+  return document
+}
+

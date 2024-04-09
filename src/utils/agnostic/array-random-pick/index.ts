@@ -1,6 +1,11 @@
-export default function arrayRandomPick (arr: any[], exclude: any[] = []): any {
+export const errorSybol = Symbol()
+export type ErrorSymbol = typeof errorSybol
+
+export default function arrayRandomPick<T> (arr: T[], exclude: T[] = []): T | ErrorSymbol {
   const filteredArr = [...arr].filter(elt => !exclude.includes(elt))
   const length = filteredArr.length
+  if (length === 0) return errorSybol
   const pos = Math.floor(Math.random() * length)
-  return filteredArr[pos]
+  const found = filteredArr[pos] as T
+  return found
 }

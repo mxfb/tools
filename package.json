@@ -13,10 +13,12 @@
     "make:lib": "mkdir -p lib",
     "make:tests": "mkdir -p .tests",
     "build:scripts": "npx tsc -p scripts/tsconfig.json",
-    "build:src": "npm run build:scripts && rm -rf lib && npm run make:lib && node .scripts/build/index.js",
+    "exec:build": "node .scripts/build/index.js",
+    "exec:pre-publish": "node .scripts/pre-publish/index.js",
+    "build:src": "npm run build:scripts && rm -rf lib && npm run make:lib && npm run exec:build",
     "build:tests": "npx tsc -p tests/tsconfig.json",
     "test": "npm run build:src && rm -rf .tests && npm run make:tests && npm run build:tests && node .tests/index.js",
-    "prepublishOnly": "npm run build:src && node .scripts/pre-publish/index.js"
+    "prepublishOnly": "npm run build:src && npm run exec:pre-publish"
   },
   "peerDependencies": {
     "chalk": "^5.3.0",

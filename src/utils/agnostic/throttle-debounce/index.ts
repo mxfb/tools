@@ -87,7 +87,7 @@ export function debounce <T extends BasicFunction = BasicFunction>(
   /** Schedules a next call according to the delay */
   function scheduleNextCall () {
     if (typeof nextExecutionTimeout === 'number') {
-      window.clearTimeout(nextExecutionTimeout)
+      clearTimeout(nextExecutionTimeout)
       nextExecutionTimeout = null
     }
     const now = Date.now()

@@ -1,18 +1,18 @@
-export function random (bound1: number): number
-export function random (bound1: number, bound2: number | undefined): number
-export function random (bound1: number = 1, bound2?: number | undefined) {
+export function random (bound1: number): number | undefined
+export function random (bound1: number, bound2: number | undefined): number | undefined
+export function random (bound1: number = 1, bound2?: number | undefined): number | undefined {
   const min = bound2 === undefined ? 0 : bound1
   const max = bound2 === undefined ? bound1 : bound2
-  if (min === max || min > max) return NaN
+  if (min === max || min > max) return undefined
   const range = max - min
   return (Math.random() * range) + min
 }
 
 export default random
 
-export function randomInt (bound1: number = 1, bound2?: number) {
+export function randomInt (bound1: number = 1, bound2?: number): number | undefined {
   const rand = random(bound1, bound2)
-  return Math.floor(rand)
+  return rand !== undefined ? Math.floor(rand) : undefined
 }
 
 export const hexChars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']

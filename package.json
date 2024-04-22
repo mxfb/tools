@@ -1,5 +1,5 @@
 {
-  "name": "@design-edito/tools",
+  "name": "@mxfb/tools",
   "version": "0.0.30",
   "description": "",
   "type": "module",
@@ -7,7 +7,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lm-design-edito/lm-tools"
+    "url": "https://github.com/mxfb/tools"
   },
   "scripts": {
     "make:lib": "mkdir -p lib",

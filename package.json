@@ -17,7 +17,7 @@
     "exec:pre-publish": "node .scripts/pre-publish/index.js",
     "build:src": "npm run build:scripts && rm -rf lib && npm run make:lib && npm run exec:build",
     "build:tests": "npx tsc -p tests/tsconfig.json",
-    "test": "npm run build:src && rm -rf .tests && npm run make:tests && npm run build:tests && node .tests/index.js",
+    "tests": "npm run build:src && rm -rf .tests && npm run make:tests && npm run build:tests && node .tests/index.js",
     "prepublishOnly": "npm run build:src && npm run exec:pre-publish"
   },
   "peerDependencies": {

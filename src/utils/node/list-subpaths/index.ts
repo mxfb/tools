@@ -1,5 +1,6 @@
 import { Stats, promises as fs } from 'node:fs'
 import path from 'node:path'
+import { stringMatchesSome } from '~/utils/agnostic/string-matches'
 
 export type ChildType = 'file' | 'directory' | 'symlink'
 
@@ -18,8 +19,8 @@ export type Options = {
   dedupeSimlinksContents?: boolean
   maxDepth?: number
   returnRelative?: boolean
-  exclude?: RegExp | null
-  include?: RegExp | null
+  exclude?: RegExp | string | (RegExp | string)[] | null
+  include?: RegExp | string | (RegExp | string)[] | null
   filter?: ((path: string, details: ChildDetails) => boolean | Promise<boolean>)
 }
 
@@ -107,8 +108,8 @@ async function listAbsoluteSubpaths (
         ? await fs.realpath(childAbsPath)
         : childAbsPath
       const childPathForFilters = options.returnRelative ? childRelFromRootPath : childAbsPath
-      const isInExclude = options.exclude?.test(childPathForFilters) === true
-      const isInInclude = options.include?.test(childPathForFilters) === true
+      const isInExclude = stringMatchesSome(childPathForFilters, options.exclude ?? [])
+      const isInInclude = stringMatchesSome(childPathForFilters, options.include ?? [])
       if (isInExclude && !isInInclude) throw false
       const isInFilter = await options.filter(childPathForFilters, { type, hidden: isHidden, realPath })
       if (!isInFilter) throw true

@@ -1,6 +1,13 @@
 export default function stringNormalizeIndent (input: string, indentLevel: number = 0) {
   const indent = (' ').repeat(indentLevel)
   const lines = input.split('\n')
-  const normalizedLines = lines.map(line => line.replace(/^\s*/igm, indent))
+  const noIndentLines = lines.map(line => line.replace(/^\s*/igm, ''))
+  const pipeReplacedLines = noIndentLines.map(line => {
+    const nbPipeCharsOnLineStart = line.match(/^\|+/igm)?.length ?? 0
+    const noPipeLine = line.slice(nbPipeCharsOnLineStart)
+    const replacedPipes = (' ').repeat(nbPipeCharsOnLineStart)
+    return replacedPipes + noPipeLine
+  })
+  const normalizedLines = pipeReplacedLines.map(line => indent + line)
   return normalizedLines.join('\n')
 }

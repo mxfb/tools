@@ -16,30 +16,6 @@ import {
   updateConfig
 } from '../lib/utils/node/mxfb-cli-config/index.js'
 
-await deleteConfigDir('THIS IS A DESTRUCTIVE AND DEFINITIVE ACTION')
-const firstConfig = await getConfig()
-console.log('firstConfig', firstConfig)
-console.log('Wait for 2s...')
-await wait(2000)
-const config = await getConfig(true)
-console.log('config', config)
-console.log('Wait for 2s...')
-await wait(2000)
-const updated = await updateConfig(curr => ({
-  ...curr,
-  mxfb_projects_sync: {
-    lm_path: 'cc',
-    mxfb_path: 'sss'
-  }
-}))
-console.log('updated', updated)
-console.log('Wait for 2s...')
-await wait(2000)
-const deleted = await deleteConfigDir('THIS IS A DESTRUCTIVE AND DEFINITIVE ACTION')
-console.log('deleted', deleted)
-console.log('Bye.')
-
-
 /* * * * * * * * * * * * * * * *
  * Random
  * * * * * * * * * * * * * * * */

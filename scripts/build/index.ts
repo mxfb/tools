@@ -44,7 +44,16 @@ await new Promise((resolve, reject) => {
     sourcemap: false,
     format: 'esm',
     target: ['esnext'],
-    external: ['chalk', 'jsdom', 'react', 'react-dom']
+    external: [
+      'chalk',
+      'fs-extra',
+      'get-image-colors',
+      'jsdom',
+      'node-fetch',
+      'react',
+      'react-dom',
+      'sharp'
+    ]
   }).then(() => {
     console.log('Build completed')
     resolve(true)

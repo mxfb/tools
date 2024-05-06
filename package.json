@@ -1,6 +1,6 @@
 {
   "name": "@mxfb/tools",
-  "version": "0.0.38",
+  "version": "0.0.39",
   "description": "",
   "type": "module",
   "author": "Maxime Fabas",
@@ -47,6 +47,5 @@
     "simple-git": "^3.24.0",
     "typescript": "^5.4.4"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

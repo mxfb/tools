@@ -1,4 +1,4 @@
-import isConstructorFunction, { ConstructorFunction } from '~/utils/agnostic/is-constructor-function'
+import isConstructorFunction, { ConstructorFunction } from '~/agnostic/is-constructor-function'
 type TypeCheckerFunction = (input: unknown) => boolean
 type TypeChecker = ConstructorFunction | TypeCheckerFunction
 

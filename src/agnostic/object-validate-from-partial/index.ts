@@ -1,4 +1,4 @@
-import isObject from '~/utils/agnostic/is-object'
+import isObject from '~/agnostic/is-object'
 
 export default function validateScheme<T> (obj: T, scheme: Partial<T>): boolean {
   if (!isObject(obj)) return false

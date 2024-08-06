@@ -1,4 +1,4 @@
-import roundNumbers from '~/utils/agnostic/round-numbers'
+import roundNumbers from '~/agnostic/round-numbers'
 
 export function getHarmonic (
   min: number,

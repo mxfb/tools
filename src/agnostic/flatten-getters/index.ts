@@ -1,4 +1,4 @@
-import { toRecord } from '~/utils/agnostic/cast'
+import { toRecord } from '~/agnostic/cast'
 
 export default function flattenGetters (obj: unknown): Record<string, unknown> {
   try {

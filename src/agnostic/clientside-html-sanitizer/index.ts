@@ -1,4 +1,4 @@
-import { getDocument } from '~/utils/agnostic/crossenv'
+import { getDocument } from '~/agnostic/crossenv'
 
 export type AttributeNameValPair = {
   attributeName: string | RegExp

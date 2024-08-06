@@ -1,4 +1,4 @@
-import isFalsy from '~/utils/agnostic/is-falsy'
+import isFalsy from '~/agnostic/is-falsy'
 
 export function toBoolean (value: unknown) {
   if (typeof value === 'boolean') return value

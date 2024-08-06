@@ -1,4 +1,4 @@
-import wait from '~/utils/agnostic/wait'
+import wait from '~/agnostic/wait'
 
 export type Callback = (val: number, timeMs: number) => void
 

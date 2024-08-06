@@ -1,6 +1,6 @@
 import { Stats, promises as fs } from 'node:fs'
 import path from 'node:path'
-import { stringMatchesSome } from '~/utils/agnostic/string-matches'
+import { stringMatchesSome } from '~/agnostic/string-matches'
 
 export type ChildType = 'file' | 'directory' | 'symlink'
 

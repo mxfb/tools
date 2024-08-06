@@ -10,8 +10,10 @@
     "rootDir": ".",
     "noUncheckedIndexedAccess": true,
     "paths": {
+      "~/agnostic/*": ["./agnostic/*"],
+      "~/browser/*": ["./browser/*"],
       "~/components/*": ["./components/*"],
-      "~/utils/*": ["./*"]
+      "~/node/*": ["./node/*"]
     }
   },
   "exclude": [

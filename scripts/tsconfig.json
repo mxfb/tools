@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
-    "baseUrl": ".",
+    "baseUrl": "..",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "outDir": "../.scripts",
@@ -9,13 +9,24 @@
     "moduleResolution": "Node",
     "target": "ESNext",
     "lib": ["ESNext"],
-    "rootDir": ".",
+    "rootDir": "..",
     "noUncheckedIndexedAccess": true,
-    "declaration": true
+    "declaration": true,
+    "paths": {
+      "~/agnostic/*": ["src/agnostic/*"],
+      "~/browser/*": ["src/browser/*"],
+      "~/node/*": ["src/node/*"],
+      "~/src/*": ["src/*"],
+      "~/scripts/*": ["scripts/*"]
+    }
   },
-  "include": ["**/*"],
+  "include": [
+    "../scripts/**/*",
+    "../src/**/*"
+  ],
   "exclude": [
     "../node_modules",
-    "../.scripts"
+    "../.scripts",
+    "../src/components/**/*"
   ]
 }

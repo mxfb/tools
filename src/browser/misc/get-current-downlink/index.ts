@@ -12,7 +12,7 @@
 //   ExtendedConnection
 // }
 
-export default function getCurrentDownlink (): number|undefined {
+export function getCurrentDownlink (): number|undefined {
   const navigator = window.navigator as any // ExtendedNavigator|undefined
   const connection = (
     navigator?.connection

@@ -12,8 +12,15 @@ export function onExit (callback: () => void | Promise<void>) {
   process.on('exit', callback)
 }
 
-export function anyway (callback: () => void | Promise<void>) {
-  beforeForcedExit(callback)
-  beforeExit(callback)
-  onExit(callback)
+export function onAllExits (callback: () => void | Promise<void>) {
+  let alreadyCalled = false
+  const actualCallback = () => {
+    if (!alreadyCalled) {
+      alreadyCalled = true
+      callback()
+    }
+  }
+  beforeForcedExit(actualCallback)
+  beforeExit(actualCallback)
+  onExit(actualCallback)
 }

@@ -5,29 +5,41 @@ import path from 'node:path'
 import esbuild from 'esbuild'
 import camelCase from 'camelcase'
 import { COMPONENTS, AGNOSTIC, BROWSER, NODE, LIB, LIB_INDEX } from '../_config/index.js'
-import { findFirstDuplicate, isInDirectory, listSubdirectoriesIndexes } from '../_utils/index.js'
+import { findFirstDuplicate } from '../_utils/index.js'
+import { Files } from '~/node/files/index.js'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  * Build
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 const rootDirs = [COMPONENTS, AGNOSTIC, BROWSER, NODE]
-const entryPoints = (await Promise.all(rootDirs.map(async dir => {
-  const extensions = ['.js', '.jsx', '.ts', '.tsx']
-  return await listSubdirectoriesIndexes(dir, extensions)
+const entryPoints = (await Promise.all(rootDirs.map(async dirPath => {
+  return await Files.Subpaths.list(dirPath, {
+    directories: true,
+    files: false,
+    symlinks: false,
+    hidden: false,
+    followSimlinks: false,
+    dedupeSimlinksContents: false,
+    maxDepth: 100,
+    returnRelative: false,
+    filter: async (path: string) => {
+      const children = await fs.readdir(path)
+      return children.includes('index.ts')
+    }
+  })
 }))).flat()
 
 await new Promise((resolve, reject) => {
   esbuild.build({
     entryPoints,
-    entryNames: '[dir]/[name]',
+    entryNames: '[dir]/[name]/index',
     chunkNames: 'chunks/[name]-[hash]',
     assetNames: 'assets/[name]-[hash]',
     outdir: LIB,
     bundle: true,
-    minify: true,
+    minify: false,
     splitting: true,
     platform: 'node',
     sourcemap: false,
@@ -69,10 +81,10 @@ const libIndexImportsNames: string[] = []
 const libIndexImports: string[] = []
 const libIndexExports: string[] = []
 entryPoints.forEach(indexPath => {
-  const isComp = isInDirectory(indexPath, COMPONENTS)
-  const isAgnosticUtil = isInDirectory(indexPath, AGNOSTIC)
-  const isBrowserUtil = isInDirectory(indexPath, BROWSER)
-  const isNodeUtil = isInDirectory(indexPath, NODE)
+  const isComp = Files.isInDirectory(indexPath, COMPONENTS)
+  const isAgnosticUtil = Files.isInDirectory(indexPath, AGNOSTIC)
+  const isBrowserUtil = Files.isInDirectory(indexPath, BROWSER)
+  const isNodeUtil = Files.isInDirectory(indexPath, NODE)
   let srcSubFolder
   if (isComp) { srcSubFolder = './components' }
   else if (isAgnosticUtil) { srcSubFolder = './agnostic' }

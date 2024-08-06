@@ -1,4 +1,4 @@
-import roundNumbers from '~/agnostic/round-numbers'
+import { round } from '~/agnostic/numbers/round'
 
 export function getHarmonic (
   min: number,
@@ -36,8 +36,8 @@ function getAffineFunction (
 
 function getCssValueFromAffine (affine: AffineFunction) {
   const { slope, yIntercept } = affine
-  const roundedSlope = roundNumbers(100 * slope, 3)
-  const roundedIntercept = roundNumbers(yIntercept, 2)
+  const roundedSlope = round(100 * slope, 3)
+  const roundedIntercept = round(yIntercept, 2)
   return `calc(${roundedSlope}vw + ${roundedIntercept}px)`
 }
 
@@ -66,7 +66,7 @@ export function createScale (descriptor: ScaleDescriptor) {
     const affine = getAffineFunction(loBound, loBoundVal, hiBound, hiBoundVal)
     const cssFormula = getCssValueFromAffine(affine)
     return clamp === true
-      ? `clamp(${roundNumbers(loBoundVal, 2)}px, ${cssFormula}, ${roundNumbers(hiBoundVal, 2)}px)`
+      ? `clamp(${round(loBoundVal, 2)}px, ${cssFormula}, ${round(hiBoundVal, 2)}px)`
       : cssFormula
   }
 }

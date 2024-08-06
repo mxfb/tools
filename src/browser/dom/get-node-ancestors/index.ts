@@ -1,4 +1,4 @@
-export default function getNodeAncestors (node: Node) {
+export function getNodeAncestors (node: Node) {
   const returned: Element[] = []
   let currentElement: Element | null = node.parentElement
   while (currentElement !== null) {

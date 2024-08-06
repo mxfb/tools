@@ -6,11 +6,11 @@ type WriteFileData = Parameters<typeof fs.writeFile>[1]
 type ReadOptions = Parameters<typeof fs.readFile>[1]
 type WriteOptions = Parameters<typeof fs.writeFile>[2]
 
-export type EditorFunc = (curr: ReadFileData) => WriteFileData
+export type ReadWriteEditorFunc = (curr: ReadFileData) => WriteFileData
 
-export default async function readWriteFile (
+export async function readWrite (
   path: Path,
-  editor: EditorFunc,
+  editor: ReadWriteEditorFunc,
   ...options: [ReadOptions?, WriteOptions?]) {
   const [readOptions, writeOptions] = options
   const read = await fs.readFile(path, readOptions)

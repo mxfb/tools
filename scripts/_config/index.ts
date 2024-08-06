@@ -13,10 +13,8 @@ export const LIB_PKG_JSON = path.join(LIB, 'package.json')
 
 // src
 export const COMPONENTS = path.join(SRC, 'components')
-export const UTILS = path.join(SRC, 'utils')
+export const AGNOSTIC = path.join(SRC, 'agnostic')
+export const BROWSER = path.join(SRC, 'browser')
+export const NODE = path.join(SRC, 'node')
 
-// src/utils
-export const UTILS_AGNOSTIC = path.join(UTILS, 'agnostic')
-export const UTILS_BROWSER = path.join(UTILS, 'browser')
-export const UTILS_NODE = path.join(UTILS, 'node')
 

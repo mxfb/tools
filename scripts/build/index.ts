@@ -4,19 +4,8 @@ import { exec } from 'node:child_process'
 import path from 'node:path'
 import esbuild from 'esbuild'
 import camelCase from 'camelcase'
-import {
-  COMPONENTS,
-  UTILS_AGNOSTIC,
-  UTILS_BROWSER,
-  UTILS_NODE,
-  LIB,
-  LIB_INDEX
-} from '../_config/index.js'
-import {
-  findFirstDuplicate,
-  isInDirectory,
-  listSubdirectoriesIndexes
-} from '../_utils/index.js'
+import { COMPONENTS, AGNOSTIC, BROWSER, NODE, LIB, LIB_INDEX } from '../_config/index.js'
+import { findFirstDuplicate, isInDirectory, listSubdirectoriesIndexes } from '../_utils/index.js'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -24,7 +13,7 @@ import {
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-const rootDirs = [COMPONENTS, UTILS_AGNOSTIC, UTILS_BROWSER, UTILS_NODE]
+const rootDirs = [COMPONENTS, AGNOSTIC, BROWSER, NODE]
 const entryPoints = (await Promise.all(rootDirs.map(async dir => {
   const extensions = ['.js', '.jsx', '.ts', '.tsx']
   return await listSubdirectoriesIndexes(dir, extensions)
@@ -81,14 +70,14 @@ const libIndexImports: string[] = []
 const libIndexExports: string[] = []
 entryPoints.forEach(indexPath => {
   const isComp = isInDirectory(indexPath, COMPONENTS)
-  const isAgnosticUtil = isInDirectory(indexPath, UTILS_AGNOSTIC)
-  const isBrowserUtil = isInDirectory(indexPath, UTILS_BROWSER)
-  const isNodeUtil = isInDirectory(indexPath, UTILS_NODE)
+  const isAgnosticUtil = isInDirectory(indexPath, AGNOSTIC)
+  const isBrowserUtil = isInDirectory(indexPath, BROWSER)
+  const isNodeUtil = isInDirectory(indexPath, NODE)
   let srcSubFolder
   if (isComp) { srcSubFolder = './components' }
-  else if (isAgnosticUtil) { srcSubFolder = './utils/agnostic' }
-  else if (isBrowserUtil) { srcSubFolder = './utils/browser' }
-  else if (isNodeUtil) { srcSubFolder = './utils/node' }
+  else if (isAgnosticUtil) { srcSubFolder = './agnostic' }
+  else if (isBrowserUtil) { srcSubFolder = './browser' }
+  else if (isNodeUtil) { srcSubFolder = './node' }
   const parentDir = path.basename(path.dirname(indexPath))
   const parentDirFormatted = camelCase(parentDir, { pascalCase: isComp })
   libIndexImportsNames.push(parentDirFormatted)

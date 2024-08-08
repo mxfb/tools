@@ -16,6 +16,7 @@
       "~/agnostic/*": ["src/agnostic/*"],
       "~/browser/*": ["src/browser/*"],
       "~/node/*": ["src/node/*"],
+      "~/shared/*": ["src/shared/*"],
       "~/src/*": ["src/*"],
       "~/scripts/*": ["scripts/*"]
     }
@@ -27,6 +28,6 @@
   "exclude": [
     "../node_modules",
     "../.scripts",
-    "../src/components/**/*"
+    "../src/**/*"
   ]
 }

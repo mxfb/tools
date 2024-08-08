@@ -1,5 +1,12 @@
-export function selectorToElement (selector: string, documentObj: Document) {
-  const document = documentObj
+import { Crossenv } from '~/agnostic/misc/crossenv'
+import {
+  Codes as LibErrorCodes,
+  register as libErrorsRegister
+} from '~/shared/errors'
+
+export function selectorToElement (selector: string, documentObj?: Document) {
+  const actualDocument = documentObj ?? Crossenv.getDocument()
+  if (actualDocument === null) throw libErrorsRegister.getError(LibErrorCodes.NO_DOCUMENT_PLEASE_PROVIDE, 'The optional second parameter expects a Document object')
   // RegExps
   const tagRegexp = /^[A-Za-z]+/
   // The dot is apparently a valid character but is prevented here
@@ -21,7 +28,7 @@ export function selectorToElement (selector: string, documentObj: Document) {
     .replace(/\]$/, '')
     .split('='))
   // Returning
-  const element = document.createElement(tag)
+  const element = actualDocument.createElement(tag)
   if (id !== null) { element.id = id }
   element.classList.add(...classes)
   attributes.forEach(([name, value = '']) => {

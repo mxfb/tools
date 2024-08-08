@@ -1,3 +1,9 @@
+import { Crossenv } from '~/agnostic/misc/crossenv'
+import {
+  Codes as LibErrorCodes,
+  register as libErrorsRegister
+} from '~/shared/errors'
+
 export namespace Sanitize {
   export type AttributeNameValPair = {
     attributeName: string | RegExp
@@ -13,24 +19,27 @@ export namespace Sanitize {
     forbiddenAttributes?: { [tagName: string]: AttributeNameValPair[] }
     depth?: number
     verbose?: boolean
+    documentObj?: Document
   }
 
   export const defaultOptions: Options = { depth: 20 }
   
-  export function sanitize (inputStr: string, documentObj: Document, options: Options = defaultOptions): string {
-    const document = documentObj
-    const wrapperDiv = document.createElement('div')
+  export function sanitize (inputStr: string, options: Options = defaultOptions): string {
+    const actualDocument = options.documentObj ?? Crossenv.getDocument()
+    if (actualDocument === null) throw libErrorsRegister.getError(LibErrorCodes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
+    const wrapperDiv = actualDocument.createElement('div')
     const { inputFreeTransform } = options
     wrapperDiv.innerHTML = inputFreeTransform !== undefined ? inputFreeTransform(inputStr) : inputStr
-    const sanitizedWrapper = sanitizeElement(wrapperDiv, documentObj, options)
+    const sanitizedWrapper = sanitizeElement(wrapperDiv, options)
     const returned = sanitizedWrapper?.innerHTML
     return returned ?? ''
   }
   
   export function sanitizeElement (
     element: Element,
-    documentObj: Document,
     options: Options = defaultOptions): Element | null {
+    const actualDocument = options.documentObj ?? Crossenv.getDocument()
+    if (actualDocument === null) throw libErrorsRegister.getError(LibErrorCodes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
     const { tagName, attributes, childNodes } = element
     const {
       allowedTags = [],
@@ -57,7 +66,7 @@ export namespace Sanitize {
       if (verbose === true) console.warn(tagName, 'tag is not allowed')
       return null
     }
-    const returnedElement = documentObj.createElement(tagName)
+    const returnedElement = actualDocument.createElement(tagName)
     
     // Element's attributes checkup
     const returnedAttributes = Array.from(attributes).filter(({ name: attributeName, value: attributeValue }) => {
@@ -127,7 +136,7 @@ export namespace Sanitize {
     // Element's children sanitization
     const sanitizedChildNodes = Array.from(childNodes)
       .map((node: Node) => {
-        if (node.nodeType === Node.ELEMENT_NODE) return sanitizeElement(node as Element, documentObj, { ...options, depth: depth - 1 })
+        if (node.nodeType === Node.ELEMENT_NODE) return sanitizeElement(node as Element, { ...options, depth: depth - 1 })
         else if (node.nodeType === Node.TEXT_NODE) return node
         else if (options.keepComments === true && node.nodeType === Node.COMMENT_NODE) return node
         return null

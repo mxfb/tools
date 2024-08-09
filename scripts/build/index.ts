@@ -1,12 +1,9 @@
 import process from 'node:process'
 import { promises as fs } from 'node:fs'
 import { exec } from 'node:child_process'
-import path from 'node:path'
 import esbuild from 'esbuild'
-import camelCase from 'camelcase'
-import { COMPONENTS, AGNOSTIC, BROWSER, NODE, LIB } from '../_config/index.js'
-import { findFirstDuplicate } from '../_utils/index.js'
-import { Files } from '~/node/files/index.js'
+import { COMPONENTS, AGNOSTIC, BROWSER, NODE, LIB } from '../_config'
+import { Files } from '~/node/files'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *

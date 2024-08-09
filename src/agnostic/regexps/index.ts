@@ -5,7 +5,7 @@ export namespace Regexps {
       .split('')
       .forEach(char => flagsSet.add(char))
     )
-    return [...flagsSet.values()].join('')
+    return Array.from(flagsSet.values()).join('')
   }
   
   export function setFlags (regexp: RegExp, _flags: string): RegExp {
@@ -57,30 +57,30 @@ export namespace Regexps {
     const regexp = fromStartToEnd(_regexp, _flags)
     return returnMatches ? string.match(regexp) : regexp.test(string)
   }
-  
+
   export function fromStrings (strings: string[]): RegExp {
     const rootsMap = stringsToRootsMap(strings)
     const source = sourceFromRootsMap(rootsMap, false)
     const regexp = new RegExp(source)
     return regexp
   }
-  
+
   function escape (string: string) {
     return string
       .replace(/\s/igm, '\\s')
       .replace(/\n/igm, '\\n')
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   }
-  
+
   type RootsMap = Map<string, { subRootsMap: RootsMap, isWordEnd: boolean }>
   
   function stringsToRootsMap (strings: string[], rootsMap: RootsMap = new Map()): RootsMap {
     const lengthSorted = strings.sort((strA, strB) => strA.length - strB.length)
     lengthSorted.forEach(string => {
-      const [firstChar, ...lastChars] = string
+      const [firstChar, ...lastChars] = string.split('')
       const isWordEnd = lastChars.length === 0
       if (firstChar === undefined) return
-      const roots = [...rootsMap.keys()]
+      const roots = Array.from(rootsMap.keys())
       const foundRoot = roots.find(root => new RegExp(`^(${escape(root)})`).test(string))
       const subRootsMap = foundRoot !== undefined
         ? rootsMap.get(foundRoot)?.subRootsMap
@@ -99,7 +99,7 @@ export namespace Regexps {
     rootsMap: RootsMap,
     isOptional: boolean
   ): string {
-    const rootsMapEntries = [...rootsMap.entries()]
+    const rootsMapEntries = Array.from(rootsMap.entries())
     if (rootsMapEntries.length === 0) return ''
     const regexpBody = rootsMapEntries.map(([root, rootData]) => {
       return `${escape(root)}${sourceFromRootsMap(

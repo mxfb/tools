@@ -139,12 +139,7 @@ try {
 const { otp } = await prompts({
   name: 'otp',
   type: 'text',
-  message: 'Enter your NPM OTP token',
-  choices: [
-    { title: 'Patch', description: `(${targetVersionNumbers.patch})`, value: 'patch' },
-    { title: 'Minor', description: `(${targetVersionNumbers.minor})`, value: 'minor' },
-    { title: 'Minor', description: `(${targetVersionNumbers.major})`, value: 'major' }
-  ]
+  message: 'Enter your NPM OTP token'
 })
 
 await new Promise(resolve => {

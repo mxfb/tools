@@ -12,40 +12,43 @@
   "scripts": {
     "make:lib": "mkdir -p lib",
     "make:tests": "mkdir -p .tests",
-    "build:scripts": "npx tsc -p scripts/tsconfig.json",
+    "clean:scripts": "rm -rf .scripts",
+    "bundle:scripts": "npx esbuild scripts/build/index.ts scripts/pre-publish/index.ts --outdir=.scripts --bundle --platform=node --format=esm --external:esbuild --external:prompts --external:@kwsites --external:debug",
+    "tscheck:scripts": "npx tsc --project scripts/tsconfig.json --noEmit",
+    "build:scripts": "npm run clean:scripts && npm run bundle:scripts && npm run tscheck:scripts",
     "exec:build": "node .scripts/build/index.js",
     "exec:pre-publish": "node .scripts/pre-publish/index.js",
-    "build:src": "npm run build:scripts && rm -rf lib && npm run make:lib && npm run exec:build",
+    "build:src": "rm -rf lib && npm run make:lib && npm run exec:build",
     "build:tests": "npx tsc -p tests/tsconfig.json",
-    "tests": "npm run build:src && rm -rf .tests && npm run make:tests && npm run build:tests && node .tests/index.js",
-    "prepublishOnly": "npm run build:src && npm run exec:pre-publish"
+    "build": "npm run build:scripts && npm run build:src",
+    "tests": "npm run build && rm -rf .tests && npm run make:tests && npm run build:tests && node .tests/index.js",
+    "prepublishOnly": "npm run build && npm run exec:pre-publish"
   },
   "peerDependencies": {
     "chalk": "^5.3.0",
     "fs-extra": "^11.2.0",
     "get-image-colors": "^4.0.1",
-    "jsdom": "^24.0.0",
+    "jsdom": "^24.1.1",
     "node-fetch": "^3.3.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "sharp": "^0.33.3"
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",
     "@types/fs-extra": "^11.0.4",
     "@types/get-image-colors": "^4.0.5",
-    "@types/jsdom": "^21.1.6",
-    "@types/node": "^20.12.5",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.1.0",
     "@types/prompts": "^2.4.9",
-    "@types/react": "^18.2.74",
-    "@types/react-dom": "^18.2.24",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "@types/semver": "^7.5.8",
     "camelcase": "^8.0.0",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.23.0",
     "prompts": "^2.4.2",
-    "semver": "^7.6.0",
-    "simple-git": "^3.24.0",
-    "typescript": "^5.4.4"
-  },
-  "dependencies": {}
+    "semver": "^7.6.3",
+    "simple-git": "^3.25.0",
+    "typescript": "^5.5.4"
+  }
 }

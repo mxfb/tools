@@ -4,7 +4,7 @@ import { exec, execSync } from 'node:child_process'
 import prompts from 'prompts'
 import semver from 'semver'
 import Git from 'simple-git'
-import { PKG_JSON, LIB_PKG_JSON, LIB } from '../_config/index.js'
+import { PKG_JSON, LIB_PKG_JSON, LIB } from '../_config'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -136,8 +136,19 @@ try {
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+const { otp } = await prompts({
+  name: 'otp',
+  type: 'text',
+  message: 'Enter your NPM OTP token',
+  choices: [
+    { title: 'Patch', description: `(${targetVersionNumbers.patch})`, value: 'patch' },
+    { title: 'Minor', description: `(${targetVersionNumbers.minor})`, value: 'minor' },
+    { title: 'Minor', description: `(${targetVersionNumbers.major})`, value: 'major' }
+  ]
+})
+
 await new Promise(resolve => {
-  exec(`cd ${LIB} && npm publish --access public --otp=${process.env.OTP}`, (err, stdout, stderr) => {
+  exec(`cd ${LIB} && npm publish --access public --otp=${otp}`, (err, stdout, stderr) => {
     if (err !== null) console.error(err)
     if (stdout !== '') console.log(stdout)
     if (stderr !== '') console.log(stderr)

@@ -9,11 +9,13 @@
     "moduleResolution": "Node",
     "rootDir": ".",
     "noUncheckedIndexedAccess": true,
+    "jsx": "react-jsx",
     "paths": {
       "~/agnostic/*": ["./agnostic/*"],
       "~/browser/*": ["./browser/*"],
       "~/components/*": ["./components/*"],
-      "~/node/*": ["./node/*"]
+      "~/node/*": ["./node/*"],
+      "~/shared/*": ["./shared/*"]
     }
   },
   "exclude": [

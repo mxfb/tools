@@ -14,6 +14,7 @@ import {
 } from './is-nullish'
 import { Logs as LogsNamespace } from './logs'
 import { Random as RandomNamespace } from './random'
+import { Tennis as TennisNamespace } from './tennis'
 
 export namespace Misc {
   // Assert
@@ -36,5 +37,7 @@ export namespace Misc {
   export import Logs = LogsNamespace
   // Random
   export import Random = RandomNamespace
+  // Tennis
+  export import Tennis = TennisNamespace
 }
 

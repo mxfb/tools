@@ -1,4 +1,7 @@
-export function isObject (unk: unknown): unk is object {
+export function isObject (unk: unknown): unk is object | null {
   return typeof unk === 'object'
-    && unk !== null
+}
+
+export function isNonNullObject (unk: unknown): unk is object {
+  return unk !== null && isObject(unk)
 }

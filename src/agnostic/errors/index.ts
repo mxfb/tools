@@ -30,14 +30,14 @@ export namespace Errors {
   }
 
   export class Register<Idx extends Index> {
-    private _index: Idx
+    index: Idx
 
     constructor (index: Idx) {
-      this._index = index
+      this.index = index
     }
 
     getFactory<C extends keyof Idx> (code: C): Idx[C] {
-      return this._index[code]
+      return this.index[code]
     }
 
     getData<C extends keyof Idx> (code: C, ...params: ParamsOfNullableFunc<Idx[C]['makeDetails']>): Data<Idx, C> {

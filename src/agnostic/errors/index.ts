@@ -3,23 +3,25 @@ type ParamsOfNullableFunc<F extends AnyFunc | undefined | null> = F extends AnyF
 type ReturnTypeOfNullableFunc<F extends AnyFunc | undefined | null> = F extends AnyFunc ? ReturnType<F> : undefined
 
 export namespace Errors {
-  export type ErrFactory<Params extends any[] = any[], Details = any> = {
+  export type Factory<Params extends any[] = any[], Details = any> = {
     message: string
     makeDetails?: (...params: Params) => Details
   }
 
-  export type ErrData<RS extends RegisterSource, C extends keyof RS> = {
+  export type Index<Params extends any[] = any[], Details = any> = {
+    [code: string]: Factory<Params, Details>
+  }
+
+  export type Data<RS extends Index, C extends keyof RS> = {
     code: C,
     message: RS[C]['message'],
     details: ReturnTypeOfNullableFunc<RS[C]['makeDetails']>
   }
 
-  export type RegisterSource<P extends any[] = any[], D = any> = { [code: string]: ErrFactory<P, D> }
-
-  export class CustomError<RS extends RegisterSource, C extends keyof RS> extends Error {
-    code: ErrData<RS, C>['code']
-    details: ErrData<RS, C>['details']
-    constructor (data: ErrData<RS, C>) {
+  export class CustomError<Idx extends Index, Code extends keyof Idx> extends Error {
+    code: Data<Idx, Code>['code']
+    details: Data<Idx, Code>['details']
+    constructor (data: Data<Idx, Code>) {
       const { code, message, details } = data
       super(message)
       this.code = code
@@ -27,18 +29,18 @@ export namespace Errors {
     }
   }
 
-  export class Register<RS extends RegisterSource> {
-    private _source: RS
+  export class Register<Idx extends Index> {
+    private _index: Idx
 
-    constructor (source: RS) {
-      this._source = source
+    constructor (index: Idx) {
+      this._index = index
     }
 
-    getFactory<C extends keyof RS> (code: C): RS[C] {
-      return this._source[code]
+    getFactory<C extends keyof Idx> (code: C): Idx[C] {
+      return this._index[code]
     }
 
-    getData<C extends keyof RS> (code: C, ...params: ParamsOfNullableFunc<RS[C]['makeDetails']>): ErrData<RS, C> {
+    getData<C extends keyof Idx> (code: C, ...params: ParamsOfNullableFunc<Idx[C]['makeDetails']>): Data<Idx, C> {
       const core = this.getFactory(code)
       const { message, makeDetails } = core
       return {
@@ -48,7 +50,7 @@ export namespace Errors {
       }
     }
 
-    getError<C extends keyof RS> (code: C, ...params: ParamsOfNullableFunc<RS[C]['makeDetails']>): CustomError<RS, C> {
+    getError<C extends keyof Idx> (code: C, ...params: ParamsOfNullableFunc<Idx[C]['makeDetails']>): CustomError<Idx, C> {
       return new CustomError(this.getData(code, ...params))
     }
   }

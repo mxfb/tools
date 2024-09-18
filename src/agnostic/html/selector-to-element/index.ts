@@ -1,12 +1,9 @@
 import { Crossenv } from '~/agnostic/misc/crossenv'
-import {
-  Codes as LibErrorCodes,
-  register as libErrorsRegister
-} from '~/shared/errors'
+import * as ERR from '~/shared/errors'
 
 export function selectorToElement (selector: string, documentObj?: Document) {
   const actualDocument = documentObj ?? Crossenv.getDocument()
-  if (actualDocument === null) throw libErrorsRegister.getError(LibErrorCodes.NO_DOCUMENT_PLEASE_PROVIDE, 'The optional second parameter expects a Document object')
+  if (actualDocument === null) throw ERR.register.getError(ERR.Codes.NO_DOCUMENT_PLEASE_PROVIDE, 'The optional second parameter expects a Document object')
   // RegExps
   const tagRegexp = /^[A-Za-z]+/
   // The dot is apparently a valid character but is prevented here

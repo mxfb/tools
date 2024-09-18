@@ -1,9 +1,6 @@
 import { Sanitize } from '~/agnostic/html/sanitize'
 import { Crossenv } from '~/agnostic/misc/crossenv'
-import {
-  Codes as LibErrorCodes,
-  register as libErrorsRegister
-} from '~/shared/errors'
+import * as ERR from '~/shared/errors'
 
 type Options = {
   sanitize?: Sanitize.Options,
@@ -13,7 +10,7 @@ type Options = {
 // [WIP] should not embed sanitizing stuff
 export function stringToNodes (dirtyStr: string, options?: Options): Node[] {
   const actualDocument = options?.documentObj ?? Crossenv.getDocument()
-  if (actualDocument === null) throw libErrorsRegister.getError(LibErrorCodes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
+  if (actualDocument === null) throw ERR.register.getError(ERR.Codes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
   const sanitizeOptions: Sanitize.Options = {
     ...options?.sanitize,
     documentObj: options?.sanitize?.documentObj ?? options?.documentObj

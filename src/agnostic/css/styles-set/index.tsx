@@ -2,7 +2,7 @@ import { Component } from 'react'
 import { createRoot as reactCreateRoot, Root as ReactRoot } from 'react-dom/client'
 import { Crossenv } from '~/agnostic/misc/crossenv'
 import { Random } from '~/agnostic/misc/random'
-import { Codes as LibErrorCodes, register as libErrorsRegister } from '~/shared/errors'
+import * as ERR from '~/shared/errors'
 
 export type StylesSetItem = {
   type: 'string' | 'url'
@@ -136,7 +136,7 @@ export class StylesSet {
 
   async getDomString (documentObj?: Document): Promise<string> {
     const actualDocumentObj = documentObj ?? Crossenv.getDocument()
-    if (actualDocumentObj === null) throw libErrorsRegister.getError(LibErrorCodes.NO_DOCUMENT)
+    if (actualDocumentObj === null) throw ERR.register.getError(ERR.Codes.NO_DOCUMENT)
     return new Promise(resolve => {
       const tempElt = actualDocumentObj.createElement('div')
       const tempRoot = reactCreateRoot(tempElt)

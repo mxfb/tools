@@ -1,8 +1,5 @@
 import { Crossenv } from '~/agnostic/misc/crossenv'
-import {
-  Codes as LibErrorCodes,
-  register as libErrorsRegister
-} from '~/shared/errors'
+import * as ERR from '~/shared/errors'
 
 export namespace Sanitize {
   export type AttributeNameValPair = {
@@ -26,7 +23,7 @@ export namespace Sanitize {
   
   export function sanitize (inputStr: string, options: Options = defaultOptions): string {
     const actualDocument = options.documentObj ?? Crossenv.getDocument()
-    if (actualDocument === null) throw libErrorsRegister.getError(LibErrorCodes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
+    if (actualDocument === null) throw ERR.register.getError(ERR.Codes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
     const wrapperDiv = actualDocument.createElement('div')
     const { inputFreeTransform } = options
     wrapperDiv.innerHTML = inputFreeTransform !== undefined ? inputFreeTransform(inputStr) : inputStr
@@ -39,7 +36,7 @@ export namespace Sanitize {
     element: Element,
     options: Options = defaultOptions): Element | null {
     const actualDocument = options.documentObj ?? Crossenv.getDocument()
-    if (actualDocument === null) throw libErrorsRegister.getError(LibErrorCodes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
+    if (actualDocument === null) throw ERR.register.getError(ERR.Codes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
     const { tagName, attributes, childNodes } = element
     const {
       allowedTags = [],

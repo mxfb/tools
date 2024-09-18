@@ -1,53 +1,44 @@
-import { Errors } from '../../errors'
-
 export namespace Outcome {
-  /* * * * * * * * * * * * * * * * * * * * * *
-   *
-   * OUTCOME
-   *  
-   * * * * * * * * * * * * * * * * * * * * * */
-
-  export type Success<Payload = unknown> = {
-    success: true
-    returned: Payload
+  export type Success<Payload extends any = any> = {
+    success: true,
+    payload: Payload
   }
 
   export type Failure<
-    Payload = unknown,
-    ErrorsIndex extends Errors.Index = { [key: string]: any }
+    Code extends string = string,
+    Msg extends string = string,
+    Details extends any = any
   > = {
-    success: false
-    returned: Payload
-    errorCode: keyof ErrorsIndex
+    success: false,
+    code: Code,
+    message: Msg,
+    details?: Details
   }
 
   export type Outcome<
-    SuccesPayload = unknown,
-    FailurePayload = SuccesPayload,
-    ErrorsIndex extends Errors.Index = { [key: string]: any }
-  > = Success<SuccesPayload> | Failure<FailurePayload, ErrorsIndex>
+    Payload extends any = any,
+    Code extends string = string,
+    Msg extends string = string,
+    Details extends any = any
+  > = Success<Payload> | Failure<Code, Msg, Details>
 
-  export function makeSuccess<S = any> (returned: S): Success<S> {
+  export function makeSuccess<Payload extends any> (payload: Payload): Success<Payload> {
     return {
       success: true,
-      returned
+      payload
     }
   }
 
   export function makeFailure<
-    FailurePayload = any,
-    ErrorsIndex extends Errors.Index = { [key: string]: any }
-  > (returned: FailurePayload, code: keyof ErrorsIndex): Failure<FailurePayload, ErrorsIndex> {
+    Code extends string = string,
+    Msg extends string = string,
+    Details extends any | undefined = undefined
+  > (code: Code, message: Msg, details?: Details): Failure<Code, Msg, Details> {
     return {
       success: false,
-      returned,
-      errorCode: code
+      code,
+      message,
+      details
     }
   }
-
-  export type Outcomer<
-    SuccesPayload,
-    FailurePayload,
-    Params extends any[]
-  > = (...params: Params) => Outcome<SuccesPayload, FailurePayload> | Promise<Outcome<SuccesPayload, FailurePayload>>
 }

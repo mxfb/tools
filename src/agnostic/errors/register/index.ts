@@ -1,17 +1,17 @@
-import { Outcome } from "~/agnostic/misc/outcome"
+import { Outcome } from '~/agnostic/misc/outcome'
 
 export namespace Register {
   export type RegisterEntry = {
     message: string
-    detailsMaker?: (...params: any[]) => any
+    detailsMaker: (...params: any[]) => any
   }
   
   export function from<Source extends { [k: string]: RegisterEntry }> (source: Source) {
     type RegisterKeys = keyof Source
     type Message<Code extends RegisterKeys> = Source[Code]['message']
-    type DetailsMaker<Code extends RegisterKeys> = Source[Code]['detailsMaker'] extends (...params: any[]) => any ? Source[Code]['detailsMaker'] : undefined
-    type DetailsMakerParams<Code extends RegisterKeys> = DetailsMaker<Code> extends (...params: infer P) => any ? P : []
-    type Details<Code extends RegisterKeys> = DetailsMaker<Code> extends (...params: any[]) => infer R ? R : never
+    type DetailsMaker<Code extends RegisterKeys> = Source[Code]['detailsMaker']
+    type DetailsMakerParams<Code extends RegisterKeys> = Parameters<DetailsMaker<Code>>
+    type Details<Code extends RegisterKeys> = ReturnType<DetailsMaker<Code>>
 
     function getMessage<Code extends RegisterKeys> (code: Code): Message<Code> {
       const message = source[code]!.message

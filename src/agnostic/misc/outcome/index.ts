@@ -5,7 +5,7 @@ export namespace Outcome {
   }
 
   export type Failure<
-    Code extends string = string,
+    Code extends any = any,
     Msg extends string = string,
     Details extends any = any
   > = {
@@ -17,7 +17,7 @@ export namespace Outcome {
 
   export type Either<
     Payload extends any = any,
-    Code extends string = string,
+    Code extends any = any,
     Msg extends string = string,
     Details extends any = any
   > = Success<Payload> | Failure<Code, Msg, Details>
@@ -30,7 +30,7 @@ export namespace Outcome {
   }
 
   export function makeFailure<
-    Code extends string = string,
+    Code extends any = any,
     Msg extends string = string,
     Details extends any | undefined = undefined
   > (code: Code, message: Msg, details?: Details): Failure<Code, Msg, Details> {
@@ -44,13 +44,13 @@ export namespace Outcome {
 
   export function make<Payload extends any> (success: true, payload: Payload): Success<Payload>
   export function make<
-    Code extends string = string,
+    Code extends any = any,
     Msg extends string = string,
     Details extends any | undefined = undefined
   > (success: false, code: Code, message: Msg, details?: Details): Failure<Code, Msg, Details>
   export function make<
     Payload extends any,
-    Code extends string = string,
+    Code extends any = any,
     Msg extends string = string,
     Details extends any | undefined = undefined
   > (success: boolean, payloadOrCode: Payload | Code, message?: Msg, details?: Details) {

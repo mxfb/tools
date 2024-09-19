@@ -1,3 +1,5 @@
+import { Outcome } from "~/agnostic/misc/outcome"
+
 export namespace Register {
   export type RegisterEntry = {
     message: string
@@ -25,6 +27,12 @@ export namespace Register {
       const maker = getDetailsMaker(code) as undefined | ((...p: any[]) => any)
       const details = maker?.(...params)
       return details
+    }
+
+    function getFailureOutcome<Code extends RegisterKeys> (code: Code, ...params: DetailsMakerParams<Code>): Outcome.Failure<Code, Message<Code>, Details<Code>> {
+      const message = getMessage(code)
+      const details = getDetails(code, ...params)
+      return Outcome.makeFailure(code, message, details)
     }
 
     class CustomError<Code extends RegisterKeys> extends Error {

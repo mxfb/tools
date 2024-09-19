@@ -55,6 +55,7 @@ export namespace Register {
       getDetailsMaker,
       getDetails,
       getError,
+      getFailureOutcome,
       CustomError,
       source
     }

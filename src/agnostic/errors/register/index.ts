@@ -11,6 +11,7 @@ export namespace Register {
   export type DetailsMaker<Source extends { [k: string]: RegisterEntry }, Code extends RegisterKeys<Source>> = Source[Code]['detailsMaker']
   export type DetailsMakerParams<Source extends { [k: string]: RegisterEntry }, Code extends RegisterKeys<Source>> = Parameters<DetailsMaker<Source, Code>>
   export type Details<Source extends { [k: string]: RegisterEntry }, Code extends RegisterKeys<Source>> = ReturnType<DetailsMaker<Source, Code>>  
+  export type FailureOutcome<Source extends { [k: string]: RegisterEntry }, Code extends RegisterKeys<Source>> = Outcome.Failure<Code, Message<Source, Code>, Details<Source, Code>>
   
   export function from<Source extends { [k: string]: RegisterEntry }> (source: Source) {
     function getMessage<Code extends RegisterKeys<Source>> (code: Code): Message<Source, Code> {
@@ -29,7 +30,7 @@ export namespace Register {
       return details
     }
 
-    function getFailureOutcome<Code extends RegisterKeys<Source>> (code: Code, ...params: DetailsMakerParams<Source, Code>): Outcome.Failure<Code, Message<Source, Code>, Details<Source, Code>> {
+    function getFailureOutcome<Code extends RegisterKeys<Source>> (code: Code, ...params: DetailsMakerParams<Source, Code>): FailureOutcome<Source, Code> {
       const message = getMessage(code)
       const details = getDetails(code, ...params)
       return Outcome.makeFailure(code, message, details)

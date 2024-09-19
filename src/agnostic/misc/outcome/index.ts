@@ -10,9 +10,11 @@ export namespace Outcome {
     Details extends any = any
   > = {
     success: false,
-    code: Code,
-    message: Msg,
-    details?: Details
+    error: {
+      code: Code,
+      message: Msg,
+      details?: Details
+    }
   }
 
   export type Either<
@@ -36,9 +38,11 @@ export namespace Outcome {
   > (code: Code, message: Msg, details?: Details): Failure<Code, Msg, Details> {
     return {
       success: false,
-      code,
-      message,
-      details
+      error: {
+        code,
+        message,
+        details
+      }
     }
   }
 

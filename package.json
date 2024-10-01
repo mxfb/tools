@@ -40,6 +40,7 @@
     "@types/semver": "^7.5.8",
     "camelcase": "^8.0.0",
     "esbuild": "^0.23.1",
+    "node-fetch": "^3.3.2",
     "prompts": "^2.4.2",
     "semver": "^7.6.3",
     "simple-git": "^3.26.0",

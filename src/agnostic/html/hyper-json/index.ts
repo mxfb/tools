@@ -2,6 +2,8 @@ import { isFalsy } from '~/agnostic/booleans/is-falsy'
 import { isInEnum } from '~/agnostic/objects/enums/is-in-enum'
 import { isRecord } from '~/agnostic/objects/is-record'
 
+/* [WIP] THIS FILE IS NOT AGNOSTIC AS IS */
+
 const htmlString = `<tag attr="val">
   <child>text</child>
   TRUC !!

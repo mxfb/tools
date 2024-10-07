@@ -5,28 +5,61 @@ import { WebCrawler } from '../lib/agnostic/misc/web-crawler/index.js'
 import { Logs } from '../lib/agnostic/misc/logs/index.js'
 // import listSubpaths from '../lib/utils/node/list-subpaths'
 // import * as rand from '../lib/utils/agnostic/random'
+import { LoremIpsum } from '../lib/agnostic/misc/lorem-ipsum/index.js'
+import { HyperJson } from '../lib/agnostic/html/hyper-json'
 
-const crawler = WebCrawler.create({
-  limit: 100,
-  delayMs: () => 600 + Math.random() * 800,
-  fetcher: async url => {
-    const res = await fetch(url)
-    return await res.text() as string | null
-  },
-  processor: (url, content, { push, flush }) => {
-    console.log(Logs.styles.important(url))
-    console.log('\n=====\n')
-    console.log(content)
-    console.log('\n=====\n')
-    const links = (content ?? '').match(/http(s)?:\/\/\S+/igm)
-    console.log('links')
-    console.log(links)
-    console.log('\n=====\n')
-    push(...Array.from(links ?? []))
-  }
-})
+/* * * * * * * * * * * * * * * *
+ * Lorem Ipsum
+ * * * * * * * * * * * * * * * */
 
-crawler.crawl('https://fr.wikipedia.org/wiki/Sleaford_Mods')
+console.log(LoremIpsum.generateSentences(10, 4, 6))
+
+
+/* * * * * * * * * * * * * * * *
+ * Hyper Json
+ * * * * * * * * * * * * * * * */
+new HyperJson.Tree({} as Element)
+
+
+
+
+
+
+
+
+/* * * * * * * * * * * * * * * *
+ * Crawler
+ * * * * * * * * * * * * * * * */
+// const crawler = WebCrawler.create({
+//   limit: 100,
+//   delayMs: () => 600 + Math.random() * 800,
+//   fetcher: async url => {
+//     const res = await fetch(url)
+//     return await res.text() as string | null
+//   },
+//   processor: (url, content, { push, flush }) => {
+//     console.log(Logs.styles.important(url))
+//     console.log('\n=====\n')
+//     console.log(content)
+//     console.log('\n=====\n')
+//     const links = (content ?? '').match(/http(s)?:\/\/\S+/igm)
+//     console.log('links')
+//     console.log(links)
+//     console.log('\n=====\n')
+//     push(...Array.from(links ?? []))
+//   }
+// })
+
+// crawler.crawl('https://fr.wikipedia.org/wiki/Sleaford_Mods')
+
+
+
+
+
+
+
+
+
 
 /* * * * * * * * * * * * * * * *
  * Random

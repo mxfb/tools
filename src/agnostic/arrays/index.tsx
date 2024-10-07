@@ -21,13 +21,13 @@ export namespace Arrays {
   }
 
   // [WIP] not sure about this symbol thing
-  export const randomPickErrorSybol = Symbol()
-  export type RandomPickErrorSymbol = typeof randomPickErrorSybol
+  // [WIP] should use shared/errors
+  export const ERR_SYMBOL = Symbol()
 
-  export function randomPick<T> (arr: T[], exclude: T[] = []): T | RandomPickErrorSymbol {
+  export function randomPick<T> (arr: T[], exclude: T[] = []): T | typeof ERR_SYMBOL {
     const filteredArr = [...arr].filter(elt => !exclude.includes(elt))
     const length = filteredArr.length
-    if (length === 0) return randomPickErrorSybol
+    if (length === 0) return ERR_SYMBOL
     const pos = Math.floor(Math.random() * length)
     const found = filteredArr[pos] as T
     return found

@@ -11,10 +11,13 @@
     "noUncheckedIndexedAccess": true,
     "jsx": "react-jsx",
     "paths": {
+      "~/agnostic": ["./agnostic/index.ts"],
       "~/agnostic/*": ["./agnostic/*"],
-      "~/browser/*": ["./browser/*"],
+      "~/components": ["./components/index.tsx"],
       "~/components/*": ["./components/*"],
+      "~/node": ["./node/index.ts"],
       "~/node/*": ["./node/*"],
+      "~/shared": ["./shared/index.ts"],
       "~/shared/*": ["./shared/*"]
     }
   },

@@ -13,6 +13,7 @@ import {
   isNotNullish as isNotNullishFunc,
 } from './is-nullish'
 import { Logs as LogsNamespace } from './logs'
+import { LoremIpsum as LoremIpsumNamespace } from './lorem-ipsum'
 import { Random as RandomNamespace } from './random'
 
 export namespace Misc {
@@ -34,6 +35,8 @@ export namespace Misc {
   export const isNotNullish = isNotNullishFunc
   // Logs
   export import Logs = LogsNamespace
+  // LoremIpsum
+  export import LoremIpsum = LoremIpsumNamespace
   // Random
   export import Random = RandomNamespace
 }

@@ -1,4 +1,4 @@
-export function timeoutCall<T extends any> (callback: () => T, timeoutMs: number) {
+export function timeoutCall<T> (callback: () => T, timeoutMs: number): Promise<T> {
   return new Promise(async (resolve, reject) => {
     const rejectTimeout = setTimeout(() => reject(false), timeoutMs)
     const callbackResult = await callback()

@@ -4,7 +4,7 @@ import { exec, execSync } from 'node:child_process'
 import prompts from 'prompts'
 import semver from 'semver'
 import Git from 'simple-git'
-import { PKG_JSON, LIB_PKG_JSON, LIB } from '../_config'
+import { PKG_JSON, LIB_PKG_JSON, LIB } from '../_config/index.js'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *

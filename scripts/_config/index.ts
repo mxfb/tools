@@ -14,7 +14,4 @@ export const LIB_PKG_JSON = path.join(LIB, 'package.json')
 // src
 export const COMPONENTS = path.join(SRC, 'components')
 export const AGNOSTIC = path.join(SRC, 'agnostic')
-export const BROWSER = path.join(SRC, 'browser')
 export const NODE = path.join(SRC, 'node')
-
-

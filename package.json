@@ -9,26 +9,52 @@
     "type": "git",
     "url": "https://github.com/lm-design-edito/lm-tools"
   },
+  "exports": {
+    "./agnostic/misc/crossenv/get-window": {
+      "browser": "./lib/agnostic/misc/crossenv/get-window/browser.js",
+      "default": "./lib/agnostic/misc/crossenv/get-window/index.js"
+    }
+  },
   "scripts": {
-    "make:lib": "mkdir -p lib",
-    "make:tests": "mkdir -p .tests",
-    "clean:scripts": "rm -rf .scripts",
-    "bundle:scripts": "npx esbuild scripts/build/index.ts scripts/pre-publish/index.ts --outdir=.scripts --bundle --platform=node --format=esm --external:esbuild --external:prompts --external:@kwsites --external:debug",
-    "tscheck:scripts": "npx tsc --project scripts/tsconfig.json --noEmit",
-    "build:scripts": "npm run clean:scripts && npm run bundle:scripts && npm run tscheck:scripts",
-    "exec:build": "node .scripts/build/index.js",
-    "exec:pre-publish": "node .scripts/pre-publish/index.js",
-    "build:src": "rm -rf lib && npm run make:lib && npm run exec:build",
-    "build:tests": "npx tsc -p tests/tsconfig.json",
-    "build": "npm run build:scripts && npm run build:src",
-    "tests": "npm run build && rm -rf .tests && npm run make:tests && npm run build:tests && node .tests/index.js",
-    "prepublishOnly": "npm run build && npm run exec:pre-publish"
+    "_remove:scripts": "rm -rf .scripts",
+    "_remove:lib": "rm -rf lib",
+    "_remove:tests": "rm -rf .tests",
+    "_make:scripts": "npm run _remove:scripts && mkdir -p .scripts",
+    "_make:lib": "npm run _remove:lib && mkdir -p lib",
+    "_make:tests": "npm run _remove:tests && mkdir -p .tests",
+    "_bundle:scripts": "npx esbuild scripts/**/*.ts --outdir=.scripts --bundle --platform=node --format=esm --packages=external",
+    "_bundle:src": "node .scripts/build/index.js",
+    "_bundle:tests:node": "npx esbuild tests/node.ts --outfile=.tests/node.js --bundle --platform=node --format=esm --packages=external",
+    "_bundle:tests:browser": "npx esbuild tests/browser.ts --outfile=.tests/browser.js --bundle --format=esm && cp tests/index.html .tests/index.html",
+    "_bundle:tests": "npx concurrently -n 'bundle:node   ,bundle:browser' 'npm run _bundle:tests:node' 'npm run _bundle:tests:browser'",
+    "_check:scripts": "npx tsc --project scripts/tsconfig.json --noEmit",
+    "_check:src": "npx tsc --project src/tsconfig.json --noEmit",
+    "_check:tests": "npx tsc --project tests/tsconfig.json --noEmit",
+    "_serve:tests": "npx http-server .tests -p ${PORT:-3000} --cors -c-1",
+    "_tests:node": "node .tests/node.js",
+    "_tests:browser": "PORT=${PORT:-3000} npm run _serve:tests",
+    "_tests:headless": "PORT=${PORT:-3000} node .scripts/tests-headless/index.js",
+    "_tests": "PORT=${PORT:-3000} npm run _tests:node && npm run _tests:headless",
+    "build:scripts": "npm run _make:scripts && npm run _bundle:scripts && npm run _check:scripts",
+    "build:src": "npm run _make:lib && npm run _bundle:src && npm run _check:src",
+    "build:tests": "npm run _make:tests && npm run _bundle:tests && npm run _check:tests",
+    "build": "npx concurrently -n 'build:scripts,build:tests  ' 'npm run build:scripts' 'npm run build:tests' && npm run build:src",
+    "tests:node": "npm run build:tests && npm run _tests:node",
+    "tests:browser": "PORT=${PORT:-3000} npm run build:tests && npm run _tests:browser",
+    "tests:headless": "PORT=${PORT:-3000} npm run build:tests && npm run _tests:headless",
+    "tests": "PORT=${PORT:-3000} npm run build:tests && npm run _tests",
+    "prepublishOnly": "npm run build && node .scripts/pre-publish/index.js"
   },
   "peerDependencies": {
     "chalk": "^5.3.0",
     "jsdom": "^25.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
+  },
+  "peerDependenciesMeta": {
+    "jsdom": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",
@@ -39,9 +65,11 @@
     "@types/react-dom": "^18.3.0",
     "@types/semver": "^7.5.8",
     "camelcase": "^8.0.0",
+    "concurrently": "^9.0.1",
     "esbuild": "^0.23.1",
     "node-fetch": "^3.3.2",
     "prompts": "^2.4.2",
+    "puppeteer": "^23.5.1",
     "semver": "^7.6.3",
     "simple-git": "^3.26.0",
     "typescript": "^5.6.2"

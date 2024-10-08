@@ -1,24 +1,34 @@
-import process from 'node:process'
-import path from 'node:path'
-import fetch from 'node-fetch'
-import { WebCrawler } from '../lib/agnostic/misc/web-crawler/index.js'
-import { Logs } from '../lib/agnostic/misc/logs/index.js'
+// import process from 'node:process'
+// import path from 'node:path'
+// import fetch from 'node-fetch'
+// import { WebCrawler } from '../lib/agnostic/misc/web-crawler/index.js'
+// import { Logs } from '../lib/agnostic/misc/logs/index.js'
+import { HyperJson } from '~/agnostic/html/hyper-json'
+import { Logs } from '~/agnostic/misc/logs/index.js'
+import { JSDOM } from 'jsdom'
 // import listSubpaths from '../lib/utils/node/list-subpaths'
 // import * as rand from '../lib/utils/agnostic/random'
-import { LoremIpsum } from '../lib/agnostic/misc/lorem-ipsum/index.js'
-import { HyperJson } from '../lib/agnostic/html/hyper-json'
+// import { LoremIpsum } from '../lib/agnostic/misc/lorem-ipsum/index.js'
+// import { HyperJson } from '../lib/agnostic/html/hyper-json/index.js'
+
+console.log(Logs.styles.title('Node tests.'))
+const doc = new JSDOM('<doctype html><html><head></head><body></body></html>').window.document
+const elt = doc.createElement('div')
+console.log(new HyperJson.Tree(elt))
+console.log('done.')
+process.exit(0)
 
 /* * * * * * * * * * * * * * * *
  * Lorem Ipsum
  * * * * * * * * * * * * * * * */
 
-console.log(LoremIpsum.generateSentences(10, 4, 6))
+// console.log(LoremIpsum.generateSentences(10, 4, 6))
 
 
 /* * * * * * * * * * * * * * * *
  * Hyper Json
  * * * * * * * * * * * * * * * */
-new HyperJson.Tree({} as Element)
+// new HyperJson.Tree({} as Element)
 
 
 

@@ -1,23 +1,19 @@
 import { isFalsy } from '~/agnostic/booleans/is-falsy'
 import { isInEnum } from '~/agnostic/objects/enums/is-in-enum'
 import { isRecord } from '~/agnostic/objects/is-record'
-
-/* [WIP] THIS FILE IS NOT AGNOSTIC AS IS */
-
-const htmlString = `<tag attr="val">
-  <child>text</child>
-  TRUC !!
-  <child>text</child>
-  <!-- Comment -->
-</tag>`
-
-const htmlElement = document.createElement('div')
-htmlElement.innerHTML = htmlString
-// console.log(new HyperJson.Tree(htmlElement).evaluate())
+import { getWindow } from '~/agnostic/misc/crossenv/get-window'
 
 export namespace HyperJson {
-  export const isElement = (node: Node): node is Element => node.nodeType === Node.ELEMENT_NODE
-  export const isText = (node: Node): node is Text => node.nodeType === Node.TEXT_NODE
+  // Cross-env stuff
+  const crossenvWindow = getWindow()
+  const document = crossenvWindow.document
+  const Element = crossenvWindow.Element
+  const Text = crossenvWindow.Text
+  const Node = crossenvWindow.Node
+  
+  // Private utils
+  const isElement = (node: Node): node is Element => node.nodeType === Node.ELEMENT_NODE
+  const isText = (node: Node): node is Text => node.nodeType === Node.TEXT_NODE
   
   export enum TyperTagName {
     NULL = 'null',
@@ -58,6 +54,12 @@ export namespace HyperJson {
     constructor (node: T)
     constructor (node: T, parent: Tree, pathFromParent: number | string)
     constructor (node: T, parent?: Tree, pathFromParent?: number | string) {
+
+      this.initValue = this.initValue.bind(this)
+      this.getInnerValue = this.getInnerValue.bind(this)
+      this.wrapInnerValue = this.wrapInnerValue.bind(this)
+      this.evaluate = this.evaluate.bind(this)
+
       // Node, parent, root
       this.node = node
       this.name = this.node instanceof Element ? this.node.getAttribute('_name') : null
@@ -227,19 +229,20 @@ export namespace HyperJson {
         }, initialValue)
       return innerValue
     }
-  
+
     wrapInnerValue (this: Tree<T>, innerValue: Value): Value | Transformer {
       const { type, node } = this
       // Si transformer, soit inner est un array et on le prend comme la liste de param
       // soit innerValue est le premier param donné au transformer
-      if (type === 'transformer') return (input: Value) => {
-        console.log('I am a transformer. I was given those params')
+      if (type === 'transformer') return (contextValue: Value) => {
+        console.log(`I am a transformer. My name is ${this.tagName}.`)
+        console.log('I have this innerValue (these are my params):')
         console.log(innerValue)
-        console.log('And this input')
-        console.log(input)
-        return input
+        console.log('And this context value:')
+        console.log(contextValue)
+        return contextValue
       }
-  
+
       /* [WIP] Below, possibly better to use cast transformer generators
          rather than having a specific/different innerValue to type process here */
       if (type === 'null') return null
@@ -307,5 +310,4 @@ export namespace HyperJson {
       return wrapped
     }
   }
-    
 }

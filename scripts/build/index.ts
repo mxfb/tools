@@ -2,15 +2,15 @@ import process from 'node:process'
 import { promises as fs } from 'node:fs'
 import { exec } from 'node:child_process'
 import esbuild from 'esbuild'
-import { COMPONENTS, AGNOSTIC, BROWSER, NODE, LIB } from '../_config'
-import { Files } from '~/node/files'
+import { COMPONENTS, AGNOSTIC, NODE, LIB } from '../_config/index.js'
+import { Files } from '../../src/node/files/index'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  * Build
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
-const rootDirs = [COMPONENTS, AGNOSTIC, BROWSER, NODE]
+const rootDirs = [COMPONENTS, AGNOSTIC, NODE]
 const entryPoints = (await Promise.all(rootDirs.map(async dirPath => {
   return await Files.Subpaths.list(dirPath, {
     directories: true,
@@ -42,9 +42,9 @@ await new Promise((resolve, reject) => {
     sourcemap: false,
     format: 'esm',
     target: ['esnext'],
-    external: ['chalk', 'jsdom', 'react', 'react-dom']
+    external: ['chalk', 'jsdom', 'react', 'react-dom'],
+    logLevel: 'info'
   }).then(() => {
-    console.log('Build completed')
     resolve(true)
   }).catch(err => {
     console.error(err)

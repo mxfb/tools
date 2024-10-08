@@ -10,6 +10,7 @@
     "target": "ESNext",
     "lib": ["ESNext"],
     "rootDir": "..",
+    "jsx": "react-jsx",
     "noUncheckedIndexedAccess": true,
     "declaration": true,
     "paths": {
@@ -28,6 +29,6 @@
   "exclude": [
     "../node_modules",
     "../.scripts",
-    "../src/**/*"
+    "../src/components/**/*"
   ]
 }

@@ -1,3 +1,6 @@
+import { getWindow as getWindowFunction } from './get-window'
+import { getDocument as getDocumentFunction } from './get-document'
+
 declare var Deno: any
 declare var AWS: any
 
@@ -41,10 +44,6 @@ export namespace Crossenv {
     return null
   }
 
-  export function getDocument (): Document | null {
-    const runtime = detectRuntime()
-    const runtimesWithGlobalWindow = [RuntimeName.BROWSER, RuntimeName.ELECTRON]
-    const runtimeHasGlobalWindow = runtimesWithGlobalWindow.includes(runtime as RuntimeName)
-    return runtimeHasGlobalWindow ? window.document : null
-  }    
+  export const getWindow = getWindowFunction
+  export const getDocument = getDocumentFunction
 }

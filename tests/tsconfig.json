@@ -1,19 +1,26 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "module": "ESNext",
     "target": "ESNext",
     "strict": true,
-    "baseUrl": ".",
+    "baseUrl": "..",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "outDir": "../.tests",
     "declaration": true,
     "moduleResolution": "Node",
-    "rootDir": ".",
-    "noUncheckedIndexedAccess": true
+    "rootDir": "..",
+    "noUncheckedIndexedAccess": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "~/*": ["src/*"]
+    }
   },
-  "include": ["**/*"],
+  "include": [
+    "./**/*",
+    "../src/**/*"
+  ],
   "exclude": [
     "../node_modules",
     "../lib"

@@ -4,7 +4,7 @@
     "baseUrl": "..",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "../.scripts",
+    "outDir": "../.temp/scripts",
     "module": "ESNext",
     "moduleResolution": "Node",
     "target": "ESNext",
@@ -28,7 +28,7 @@
   ],
   "exclude": [
     "../node_modules",
-    "../.scripts",
+    "../.temp/scripts",
     "../src/components/**/*"
   ]
 }

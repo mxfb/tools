@@ -119,6 +119,7 @@ export namespace HyperJson {
       else if (this.tagName === TyperTagName.RECORD) { this.type = 'record' }
       else if (isInEnum(TransformerTagName, this.tagName as any)) { this.type = 'transformer' }
       else { this.type = 'element' }
+      console.log(this)
     }
   
     initValue (this: Tree<T>): Value {
@@ -140,6 +141,7 @@ export namespace HyperJson {
   
     getInnerValue (this: Tree<T>, initialValue: Value) {
       const { subtrees } = this
+      console.log('---', this, subtrees)
       const innerValue = Array
         .from(subtrees.entries())
         .reduce((currentValue, [subpath, subTree]) => {

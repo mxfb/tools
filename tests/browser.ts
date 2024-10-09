@@ -5,8 +5,10 @@ console.log(Logs.styles.title('Browser tests.'))
 
 console.log('EYRYYRGERG')
 
-const elt = document.createElement('div')
-elt.innerHTML = '<number>7</number>'
+const elt = document.createElement('number')
+elt.innerHTML = `
+  7
+`
 const tree = new HyperJson.Tree(elt)
 const val = tree.evaluate()
 console.log(val)

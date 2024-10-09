@@ -1,3 +1,5 @@
+// [WIP] everything should be in its own file here
+
 export namespace Regexps {
   export function mergeFlags (...flagStrs: string[]): string {
     const flagsSet = new Set<string>()

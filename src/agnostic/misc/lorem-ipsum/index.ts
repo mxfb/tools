@@ -1,5 +1,5 @@
 import { Arrays } from '~/agnostic/arrays'
-import { Random } from '~/agnostic/misc/random'
+import { Random } from '~/agnostic/random'
 import { Agnostic } from '~/agnostic/index'
 
 export namespace LoremIpsum {

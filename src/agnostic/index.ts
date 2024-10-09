@@ -1,5 +1,4 @@
 import { Arrays as ArraysNamespace } from './arrays'
-import { Async as AsyncNamespace } from './async'
 import { Booleans as BooleansNamespace } from './booleans'
 import { Css as CssNamespace } from './css'
 import { Errors as ErrorsNamespace } from './errors'
@@ -13,7 +12,6 @@ import { Strings as StringsNamespace } from './strings'
 
 export namespace Agnostic {
   export import Arrays = ArraysNamespace
-  export import Async = AsyncNamespace
   export import Booleans = BooleansNamespace
   export import Css = CssNamespace
   export import Errors = ErrorsNamespace

@@ -1,7 +1,6 @@
 import { Component } from 'react'
 import { createRoot as reactCreateRoot, Root as ReactRoot } from 'react-dom/client'
-import { Crossenv } from '~/agnostic/misc/crossenv'
-import { Random } from '~/agnostic/misc/random'
+import { Random } from '~/agnostic/random'
 import * as ERR from '~/shared/errors'
 
 export type StylesSetItem = {
@@ -135,7 +134,7 @@ export class StylesSet {
   }
 
   async getDomString (documentObj?: Document): Promise<string> {
-    const actualDocumentObj = documentObj ?? Crossenv.getDocument()
+    const actualDocumentObj = documentObj ?? window.document
     if (actualDocumentObj === null) throw ERR.register.getError(ERR.Codes.NO_DOCUMENT)
     return new Promise(resolve => {
       const tempElt = actualDocumentObj.createElement('div')

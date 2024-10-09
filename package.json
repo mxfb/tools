@@ -16,34 +16,91 @@
     }
   },
   "scripts": {
-    "_remove:scripts": "rm -rf .scripts",
-    "_remove:lib": "rm -rf lib",
-    "_remove:tests": "rm -rf .tests",
-    "_make:scripts": "npm run _remove:scripts && mkdir -p .scripts",
-    "_make:lib": "npm run _remove:lib && mkdir -p lib",
-    "_make:tests": "npm run _remove:tests && mkdir -p .tests",
-    "_bundle:scripts": "npx esbuild scripts/**/*.ts --outdir=.scripts --bundle --platform=node --format=esm --packages=external",
-    "_bundle:src": "node .scripts/build/index.js",
-    "_bundle:tests:node": "npx esbuild tests/node.ts --outfile=.tests/node.js --bundle --platform=node --format=esm --packages=external",
-    "_bundle:tests:browser": "npx esbuild tests/browser.ts --outfile=.tests/browser.js --bundle --format=esm && cp tests/index.html .tests/index.html",
-    "_bundle:tests": "npx concurrently -n 'bundle:node   ,bundle:browser' 'npm run _bundle:tests:node' 'npm run _bundle:tests:browser'",
-    "_check:scripts": "npx tsc --project scripts/tsconfig.json --noEmit",
-    "_check:src": "npx tsc --project src/tsconfig.json --noEmit",
-    "_check:tests": "npx tsc --project tests/tsconfig.json --noEmit",
-    "_serve:tests": "npx http-server .tests -p ${PORT:-3000} --cors -c-1",
-    "_tests:node": "node .tests/node.js",
-    "_tests:browser": "PORT=${PORT:-3000} npm run _serve:tests",
-    "_tests:headless": "PORT=${PORT:-3000} node .scripts/tests-headless/index.js",
-    "_tests": "PORT=${PORT:-3000} npm run _tests:node && npm run _tests:headless",
-    "build:scripts": "npm run _make:scripts && npm run _bundle:scripts && npm run _check:scripts",
-    "build:src": "npm run _make:lib && npm run _bundle:src && npm run _check:src",
-    "build:tests": "npm run _make:tests && npm run _bundle:tests && npm run _check:tests",
-    "build": "npx concurrently -n 'build:scripts,build:tests  ' 'npm run build:scripts' 'npm run build:tests' && npm run build:src",
-    "tests:node": "npm run build:tests && npm run _tests:node",
-    "tests:browser": "PORT=${PORT:-3000} npm run build:tests && npm run _tests:browser",
-    "tests:headless": "PORT=${PORT:-3000} npm run build:tests && npm run _tests:headless",
-    "tests": "PORT=${PORT:-3000} npm run build:tests && npm run _tests",
-    "prepublishOnly": "npm run build && node .scripts/pre-publish/index.js"
+    "_remove:*//": "echo 'REMOVE DIRECTORY'",
+    "_remove:scripts": "echo '[_remove:scripts] \\033[1mstarting...\\033[0m' && rm -rf .scripts",
+    "_remove:tests": "echo '[_remove:tests] \\033[1mstarting...\\033[0m' && rm -rf .tests",
+    "_remove:lib": "echo '[_remove:lib] \\033[1mstarting...\\033[0m' && rm -rf lib",
+
+    "_make:*//": "echo 'REMOVE =====> MAKE DIRECTORY'",
+    "_DEPRECATED_make:scripts": "echo '[_make:scripts] \\033[1mstarting...\\033[0m' && npm run _remove:scripts && mkdir -p .scripts",
+    "_DEPRECATED_make:tests": "echo '[_make:tests] \\033[1mstarting...\\033[0m' && npm run _remove:tests && mkdir -p .tests",
+    "_DEPRECATED_make:lib": "echo '[_make:lib] \\033[1mstarting...\\033[0m' && npm run _remove:lib && mkdir -p lib",
+    "_make:scripts": "echo '[_make:scripts] \\033[1mstarting...\\033[0m' && mkdir -p .scripts",
+    "_make:tests": "echo '[_make:tests] \\033[1mstarting...\\033[0m' && mkdir -p .tests",
+    "_make:lib": "echo '[_make:lib] \\033[1mstarting...\\033[0m' && mkdir -p lib",
+
+    "_check:*//": "echo 'TYPECHECK ON DIRECTORY'",
+    "_check:scripts": "echo '[_check:scripts] \\033[1mstarting...\\033[0m' && npx tsc --project scripts/tsconfig.json --noEmit",
+    "_check:tests": "echo '[_check:tests] \\033[1mstarting...\\033[0m' && npx tsc --project tests/tsconfig.json --noEmit",
+    "_check:src": "echo '[_check:src] \\033[1mstarting...\\033[0m' && npx tsc --project src/tsconfig.json --noEmit",
+    
+    "_bundle:*//": "echo 'RUN ESBUILD ON DIRECTORY OR FILE'",
+    "_bundle:scripts": "echo '[_bundle:scripts] \\033[1mstarting...\\033[0m' && npx esbuild scripts/**/*.ts --outdir=.scripts --bundle --platform=node --format=esm --packages=external",
+    "_bundle:tests:node": "echo '[_bundle:tests:node] \\033[1mstarting...\\033[0m' && npx esbuild tests/node.ts --outfile=.tests/node.js --bundle --platform=node --format=esm --packages=external",
+    "_bundle:tests:browser": "echo '[_bundle:tests:browser] \\033[1mstarting...\\033[0m' && npx esbuild tests/browser.ts --outfile=.tests/browser.js --bundle --format=esm",
+    "_bundle:tests:index": "echo '[_bundle:tests:index] \\033[1mstarting...\\033[0m' && cp tests/index.html .tests/index.html",
+
+    "_bundle:tests//": "echo 'RUN _bundle NODE +++ RUN _bundle BROWSER'",
+    "_bundle:tests": "echo '[_bundle:tests] \\033[1mstarting...\\033[0m' && npx concurrently -n '_bundle:tests:node,_bundle:tests:browser' 'npm run _bundle:tests:node' 'npm run _bundle:tests:browser' && npm run _bundle:tests:index",
+
+    "_bundle:src//": "echo 'RUN CUSTOM ESBUILD ON src DIRECTORY 🚨🚨 .scripts'",
+    "_bundle:src": "echo '[_bundle:src] \\033[1mstarting...\\033[0m' && node .scripts/build/index.js",
+
+    "_bundle:watch:tests:*//": "echo 'RUN ESBUILD WATCH ON FILE'",
+    "_bundle:watch:tests:node": "echo '[_bundle:watch:tests:node] \\033[1mstarting...\\033[0m' && npm run _bundle:tests:node -- --watch",
+    "_bundle:watch:tests:browser": "echo '[_bundle:watch:tests:browser] \\033[1mstarting...\\033[0m' && npm run _bundle:tests:browser -- --watch",
+    "_bundle:watch:tests:index": "echo '[_bundle:watch:tests:browser] \\033[1mstarting...\\033[0m' && npx chokidar 'tests/index.html' -c 'npm run _bundle:tests:index'",
+
+    "_bundle:watch:tests//": "echo 'RUN _watch NODE +++ RUN _watch BROWSER +++ RUN _watch INDEX'",
+    "_bundle:watch:tests": "echo '[_bundle:watch:tests] \\033[1mstarting...\\033[0m' && npx concurrently -n '_bundle:watch:tests:node,_bundle:watch:tests:browser,_bundle:watch:tests:index' 'npm run _bundle:watch:tests:node' 'npm run _bundle:watch:tests:browser' 'npm run _bundle:watch:tests:browser'",
+
+    "_tests:node//": "echo 'RUNS .tests/node.js 🚨🚨 .tests'",
+    "_tests:node": "echo '[_tests:node] \\033[1mstarting...\\033[0m' && node .tests/node.js",
+    
+    "_tests:headless//": "echo 'RUNS .scripts/tests-headless 🚨🚨 .scripts'",
+    "_tests:headless": "echo '[_tests:headless] \\033[1mstarting...\\033[0m' && PORT=${PORT:-3000} node .scripts/tests-headless/index.js",
+    
+    "_tests://": "echo 'RUN _tests NODE =====> RUN _tests HEADLESS 🚨🚨 .tests, .scripts'",
+    "_tests": "echo '[_tests] \\033[1mstarting...\\033[0m' && PORT=${PORT:-3000} npm run _tests:node && npm run _tests:headless",
+    
+    "_tests:watch:node//": "echo 'RUN CHOKIDAR ON .tests AND _tests:node 🚨🚨 .tests'",
+    "_tests:watch:node": "echo '[_tests:watch:node] \\033[1mstarting...\\033[0m' && npm run _tests:node && npx chokidar '.tests/**/*' -c 'npm run _tests:node'",
+    
+    "_tests:watch:headless//": "echo 'RUN CHOKIDAR ON .tests AND _tests:headless 🚨🚨 .scripts'",
+    "_tests:watch:headless": "echo '[_tests:watch:headless] \\033[1mstarting...\\033[0m' && PORT=${PORT:-3000} npm run _tests:headless && npx chokidar '.tests/**/*' -c 'PORT=${PORT:-3000} npm run _tests:headless'",
+    
+    "_tests:watch//": "echo 'RUN _tests:watch:node +++ RUN _tests:watch:headless 🚨🚨 .tests, .scripts'",
+    "_tests:watch": "echo '[_tests:watch] \\033[1mstarting...\\033[0m' && PORT=${PORT:-3000} npx concurrently -n '_tests:watch:node,_tests:watch:headless' 'npm run _tests:watch:node' 'npm run _tests:watch:headless'",
+
+    "_serve:tests//": "echo 'SERVE THE .tests DIRECTORY 🚨🚨 .tests'",
+    "_serve:tests": "echo '[_serve:tests] \\033[1mstarting...\\033[0m' && npx http-server .tests -p ${PORT:-3000} --cors -c-1",
+
+    "_sleep": "echo '\\033[1mSTART SLEEP\\033[0m' && sleep 5 && echo '\\033[1mSTOP SLEEP\\033[0m'",
+    
+    "build:*//": "echo 'RUN _make =====> RUN _bundle =====> RUN _check'",
+    "build:scripts": "echo '[build:scripts] \\033[1mstarting...\\033[0m' && npm run _make:scripts && npm run _bundle:scripts && npm run _check:scripts",
+    "build:tests": "echo '[build:tests] \\033[1mstarting...\\033[0m' && npm run _make:tests && npm run _bundle:tests && npm run _check:tests",
+    
+    "build:src//": "echo 'RUN _make =====> RUN _bundle:scripts =====> RUN _bundle:src =====> RUN _check:src'",
+    "build:src": "echo '[build:src] \\033[1mstarting...\\033[0m' && npm run _make:lib && npm run _bundle:scripts && npm run _bundle:src && npm run _check:src",
+    
+    "build//": "echo 'RUN build:scripts +++ RUN build:tests =====> RUN build:src'",
+    "build": "echo '[build] \\033[1mstarting...\\033[0m' && npx concurrently -n 'build:scripts,build:tests' 'npm run build:scripts' 'npm run build:tests' && npm run build:src",
+    
+    "tests:node//": "echo 'RUN build:tests =====> RUN _tests:node'",
+    "tests:node": "echo '[tests:node] \\033[1mstarting...\\033[0m' && npm run build:tests && npm run _tests:node",
+    
+    "tests:headless//": "echo 'RUN build:tests =====> RUN _serve:tests =====> RUN _tests:headless =====> KILL _serve:tests'",
+    "tests:headless": "npm run _serve:tests & pid=$! && echo '[tests:headless] \\033[1mstarting...\\033[0m' && PORT=${PORT:-3000} npm run build:tests && npm run _tests:headless; kill $pid",
+    
+    "tests//": "echo 'RUN build:tests =====> RUN _serve:tests =====> RUN _tests =====> KILL _serve:tests'",
+    "tests": "npm run _serve:tests & pid=$! && echo '[tests] \\033[1mstarting...\\033[0m' && PORT=${PORT:-3000} npm run build:tests && npm run _tests; kill $pid",
+    
+    "prepublishOnly//": "echo 'RUN build =====> RUN .scripts/pre-publish'",
+    "prepublishOnly": "echo '[prepublishOnly] \\033[1mstarting...\\033[0m' && npm run build && node .scripts/pre-publish/index.js",
+
+    "start//": "echo 'RUN build =====> RUN _serve:tests =====> RUN _bundle:watch:tests ++++ RUN _tests:watch =====> KILL _serve:tests'",
+    "start": "npm run _serve:tests & pid=$! && echo '[start] \\033[1mstarting...\\033[0m' && npm run build && npx concurrently -n '_bundle:watch:tests,_tests:watch' 'npm run _bundle:watch:tests' 'PORT=${PORT:-3000} npm run _tests:watch' && kill $pid"
   },
   "peerDependencies": {
     "chalk": "^5.3.0",
@@ -65,6 +122,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/semver": "^7.5.8",
     "camelcase": "^8.0.0",
+    "chokidar-cli": "^3.0.0",
     "concurrently": "^9.0.1",
     "esbuild": "^0.23.1",
     "node-fetch": "^3.3.2",

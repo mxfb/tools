@@ -1,7 +1,7 @@
 import { getWindow } from '../get-window'
 import { GetWindowReturnType } from '../types'
 
-export function getDocument (): GetWindowReturnType['document'] {
-  const window = getWindow()
+export async function getDocument (): Promise<GetWindowReturnType['document']> {
+  const window = await getWindow()
   return window.document
 }

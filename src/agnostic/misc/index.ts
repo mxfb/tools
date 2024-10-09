@@ -1,5 +1,6 @@
 import { Assert as AssertNamespace } from './assert'
 import { Cast as CastNamespace } from './cast'
+import { Crawler as CrawlerNamespace } from './crawler'
 import { Crossenv as CrossenvNamespace } from './crossenv'
 import { getCurrentDownlink as getCurrentDownlinkFunc } from './get-current-downlink'
 import {
@@ -14,13 +15,15 @@ import {
 } from './is-nullish'
 import { Logs as LogsNamespace } from './logs'
 import { LoremIpsum as LoremIpsumNamespace } from './lorem-ipsum'
-import { Random as RandomNamespace } from './random'
+import { Random as RandomNamespace } from '../random'
 
 export namespace Misc {
   // Assert
   export import Assert = AssertNamespace
   // Cast
   export import Cast = CastNamespace
+  // Crawler
+  export import Crawler = CrawlerNamespace
   // Crossenv
   export import Crossenv = CrossenvNamespace
   // Get current downlink

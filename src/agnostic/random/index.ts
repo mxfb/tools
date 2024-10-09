@@ -1,3 +1,5 @@
+// [WIP] everything should be in its own file here
+
 export namespace Random {
   export function random (bound1?: number): number | undefined
   export function random (bound1?: number, bound2?: number | undefined): number | undefined

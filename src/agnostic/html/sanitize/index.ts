@@ -1,4 +1,3 @@
-import { Crossenv } from '~/agnostic/misc/crossenv'
 import * as ERR from '~/shared/errors'
 
 export namespace Sanitize {
@@ -22,7 +21,7 @@ export namespace Sanitize {
   export const defaultOptions: Options = { depth: 20 }
   
   export function sanitize (inputStr: string, options: Options = defaultOptions): string {
-    const actualDocument = options.documentObj ?? Crossenv.getDocument()
+    const actualDocument = options.documentObj ?? window.document
     if (actualDocument === null) throw ERR.register.getError(ERR.Codes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
     const wrapperDiv = actualDocument.createElement('div')
     const { inputFreeTransform } = options
@@ -35,7 +34,7 @@ export namespace Sanitize {
   export function sanitizeElement (
     element: Element,
     options: Options = defaultOptions): Element | null {
-    const actualDocument = options.documentObj ?? Crossenv.getDocument()
+    const actualDocument = options.documentObj ?? window.document
     if (actualDocument === null) throw ERR.register.getError(ERR.Codes.NO_DOCUMENT_PLEASE_PROVIDE, 'See documentObj in the options object')
     const { tagName, attributes, childNodes } = element
     const {

@@ -1,6 +1,6 @@
-import { wait } from '~/agnostic/async/wait'
+import { wait } from '~/agnostic/time/wait'
 
-export namespace WebCrawler {
+export namespace Crawler {
   export function create<T extends any> (
     options: {
       limit: number

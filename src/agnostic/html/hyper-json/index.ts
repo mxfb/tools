@@ -1,11 +1,11 @@
 import { isFalsy } from '~/agnostic/booleans/is-falsy'
 import { isInEnum } from '~/agnostic/objects/enums/is-in-enum'
 import { isRecord } from '~/agnostic/objects/is-record'
-import { getWindow } from '~/agnostic/misc/crossenv/get-window'
+// import { getWindow } from '~/agnostic/misc/crossenv/get-window'
 
 export namespace HyperJson {
   // Cross-env stuff
-  const crossenvWindow = getWindow()
+  const crossenvWindow = window //getWindow()
   const document = crossenvWindow.document
   const Element = crossenvWindow.Element
   const Text = crossenvWindow.Text

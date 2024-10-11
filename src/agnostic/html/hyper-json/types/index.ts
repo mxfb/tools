@@ -12,21 +12,18 @@ export namespace Types {
     RECORD = 'record'
   }
   
-  export enum TransformerTagName {
-    MAP = 'map',
-    REF = 'ref',
-    ADD = 'add',
-    MULT = 'mult',
-    APPEND = 'append'
-  }
-  
   export type PrimitiveValue = null | string | number | boolean | Element | Text | NodeListOf<Text | Element> | Transformer
   export type Value = PrimitiveValue | Value[] | { [k: string]: Value }
-  export type Transformer = (currentValue: Value, hooks: {
-    merger: Tree['mergeValues']
-    resolver: Tree['resolve']
-  }) => Value
-  export type TransformerGenerator = (path: string | number, ...args: Value[]) => Transformer
+  export type TransformerHooks = { resolver: Tree['resolve'] }
+  export type TransformerReturnType = {
+    action: 'MERGE' | 'REPLACE' | 'ERROR'
+    value: Value
+  } | {
+    action: null
+  }
+  export type AnonymousTransformer = (currentValue: Value, hooks: TransformerHooks) => TransformerReturnType
+  export type Transformer = AnonymousTransformer & { transformerName: string }
+  export type TransformerGenerator = (name: string, ...args: Value[]) => Transformer
 
   export type Serialized = { type: 'null', value: null }
     | { type: 'boolean', value: boolean }

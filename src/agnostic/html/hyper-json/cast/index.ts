@@ -32,12 +32,12 @@ export namespace Cast {
   }
   
   export const toText = (input: Value): Text => {
-    if (input instanceof getWindow().Text) return input
+    if (input instanceof getWindow().Text) return input.cloneNode(true) as Text
     return getWindow().document.createTextNode(toString(input))
   }
   
   export const toElement = (input: Value): Element => {
-    if (input instanceof getWindow().Element) return input
+    if (input instanceof getWindow().Element) return input.cloneNode(true) as Element
     const elt = getWindow().document.createElement('div')
     if (input instanceof getWindow().Text) {
       elt.append(input.cloneNode(true))
@@ -54,31 +54,37 @@ export namespace Cast {
   }
 
   export const toNodeList = (input: Value): NodeListOf<Element | Text> => {
-    if (input instanceof getWindow().NodeList) return input
-    const frag = getWindow().document.createDocumentFragment()
+    const elt = getWindow().document.createElement('div')
+    if (input instanceof getWindow().NodeList) {
+      elt.append(...Array.from(input).map(i => i.cloneNode(true)))
+      return elt.childNodes as NodeListOf<Element | Text>
+    }
     if (input instanceof getWindow().Element
       || input instanceof getWindow().Text) {
-      frag.append(input.cloneNode(true) as Element | Text)
-      return frag.childNodes as NodeListOf<Element | Text>
+      elt.append(input.cloneNode(true) as Element | Text)
+      return elt.childNodes as NodeListOf<Element | Text>
     }
-    if (Array.isArray(input)) return frag.childNodes as NodeListOf<Element | Text>
-    if (isRecord(input)) return frag.childNodes as NodeListOf<Element | Text>
-    frag.append(`${input}`)
-    return frag.childNodes as NodeListOf<Element | Text>
+    if (Array.isArray(input)) return elt.childNodes as NodeListOf<Element | Text>
+    if (isRecord(input)) return elt.childNodes as NodeListOf<Element | Text>
+    elt.innerHTML = `${input}`
+    return elt.childNodes as NodeListOf<Element | Text>
   }
 
   export const toArray = (input: Value): Value[] => {
-    if (Array.isArray(input)) return input
+    if (Array.isArray(input)) return [...input]
     if (input instanceof getWindow().NodeList) return Array.from(input)
     return [input]
   }
 
   export const toRecord = (input: Value): ({ [k: string]: Value }) => {
-    if (isRecord(input)) return input
+    if (isRecord(input)) return { ...input }
     return {}
   }
 
   export const toTransformer = (input: Value): Transformer => {
-    return () => input
+    return () => ({
+      action: 'REPLACE',
+      value: input
+    })
   }
 }

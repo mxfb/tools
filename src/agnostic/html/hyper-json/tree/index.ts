@@ -1,4 +1,3 @@
-import { isInEnum } from '~/agnostic/objects/enums/is-in-enum'
 import { isRecord } from '~/agnostic/objects/is-record'
 import { Cast } from '../cast'
 import { Crossenv } from '../crossenv'
@@ -17,44 +16,58 @@ export class Tree<T extends Element | Text = Element | Text> {
   readonly name: string | null
   readonly parent: Tree | null
   readonly root: Tree
+  readonly isRoot: boolean
   readonly path: ReadonlyArray<string | number>
   readonly pathString: string
-  readonly pathFromParent: Tree['path'][number]
   readonly tagName: T extends Element ? Element['tagName'] : null
   readonly attributes: T extends Element ? ReadonlyArray<Readonly<Attr>> : null
   readonly subtrees: ReadonlyMap<string | number, Tree> = new Map()
   readonly children: ReadonlyArray<Tree>
   readonly type: 'element' | 'text' | 'null' | 'number' | 'string' | 'boolean' | 'nodelist' | 'array' | 'record' | 'transformer'
+  readonly generators: ReadonlyMap<string, Types.TransformerGenerator>
 
-  constructor (node: T)
-  constructor (node: T, parent: Tree, pathFromParent: number | string)
-  constructor (node: T, parent?: Tree, pathFromParent?: number | string) {
+  constructor (node: T, generatorsOrParent: Map<string, Types.TransformerGenerator>)
+  constructor (node: T, generatorsOrParent: Tree, pathFromParent: number | string)
+  constructor (
+    node: T,
+    generatorsOrParent: Map<string, Types.TransformerGenerator> | Tree,
+    pathFromParent?: number | string) {
 
     this.resolve = this.resolve.bind(this)
+    this.getGenerator = this.getGenerator.bind(this)
     this.initValue = this.initValue.bind(this)
     this.mergeValues = this.mergeValues.bind(this)
     this.getInnerValue = this.getInnerValue.bind(this)
     this.wrapInnerValue = this.wrapInnerValue.bind(this)
-    this.printEvaluationsCounters = this.printEvaluationsCounters.bind(this)
-    this.evaluate = this.evaluate.bind(this)
     this.setCache = this.setCache.bind(this)
+    this.getPerfCounters = this.getPerfCounters.bind(this)
+    this.printPerfCounters = this.printPerfCounters.bind(this)
+    this.pushToEvalCallStack = this.pushToEvalCallStack.bind(this)
+    this.flushEvalCallStack = this.flushEvalCallStack.bind(this)
+    this.evaluate = this.evaluate.bind(this)
 
-    // Node, parent, root
+    // Node, parent, root, generators
     this.node = node
     this.name = this.node instanceof getWindow().Element ? this.node.getAttribute('_name') : null
-    this.parent = parent ?? null
+    this.parent = generatorsOrParent instanceof Tree ? generatorsOrParent : null
     this.root = this.parent === null ? this : this.parent.root
+    this.isRoot = this.root === this
+    const generators = generatorsOrParent instanceof Tree
+      ? new Map()
+      : Transformers.defaultGeneratorsMap
+    this.generators = this.isRoot ? generators : this.root.generators
 
     // Path, pathString, pathFromParent
     if (this.parent === null) this.path = []
     else if (pathFromParent === undefined) { this.path = [...this.parent.path, 0] }
     else { this.path = [...this.parent.path, pathFromParent] }
     this.pathString = `/${this.path.join('/')}`
-    this.pathFromParent = pathFromParent ?? this.name ?? 0 // [WIP] not sure about these fallback values
 
     // Tagname, attributes
     this.tagName = (node instanceof getWindow().Element ? node.tagName.toLowerCase() : null) as T extends Element ? Element['tagName'] : null
-    this.attributes = (isElement(node) ? Array.from(node.attributes) : null) as T extends Element ? Attr[] : null
+    this.attributes = (isElement(node)
+      ? Array.from(node.attributes)
+      : null) as T extends Element ? Attr[] : null
 
     // Subtrees
     const { childNodes } = node
@@ -107,7 +120,7 @@ export class Tree<T extends Element | Text = Element | Text> {
     else if (this.tagName === Types.TyperTagName.NODELIST) { this.type = 'nodelist' }
     else if (this.tagName === Types.TyperTagName.ARRAY) { this.type = 'array' }
     else if (this.tagName === Types.TyperTagName.RECORD) { this.type = 'record' }
-    else if (isInEnum(Types.TransformerTagName, this.tagName as any)) { this.type = 'transformer' }
+    else if (this.generators.get(this.tagName) !== undefined) { this.type = 'transformer' }
     else { this.type = 'element' }
   }
 
@@ -120,6 +133,10 @@ export class Tree<T extends Element | Text = Element | Text> {
       currentTree = foundSubtree
     }
     return currentTree
+  }
+
+  getGenerator (this: Tree, name: string) {
+    return this.generators.get(name)
   }
 
   initValue (this: Tree<T>) {
@@ -149,10 +166,20 @@ export class Tree<T extends Element | Text = Element | Text> {
     const { Element, Text, NodeList, document } = getWindow()
 
     // incoming : transformer
-    if (typeof incomingValue === 'function') return incomingValue(currentValue, {
-      merger: this.mergeValues,
-      resolver: this.resolve
-    })
+    if (typeof incomingValue === 'function') {
+      const evaluated = incomingValue(currentValue, { resolver: this.resolve })
+      if (evaluated.action === null) return currentValue
+      if (evaluated.action === 'REPLACE') return evaluated.value
+      if (evaluated.action === 'ERROR') {
+        const errorMessage = 'Tranformer error:'
+          + `\nfrom: ${incomingValue.transformerName}`
+          + `\nat: ${this.pathString.slice(1)}/${mergeKey}`
+          + `\nmessage:`
+        console.warn(errorMessage, evaluated.value)
+        return currentValue
+      }
+      return this.mergeValues(currentValue, evaluated.value, mergeKey)
+    }
 
     // currentValue : Array
     if (Array.isArray(currentValue)) {
@@ -251,14 +278,15 @@ export class Tree<T extends Element | Text = Element | Text> {
   }
 
   wrapInnerValue (this: Tree<T>, innerValue: Types.Value): Types.Value | Types.Transformer {
-    const { type, pathFromParent } = this
+    const { type } = this
     if (type === 'transformer') {
       const transformerName = this.tagName
-      const generator = Transformers.get(transformerName)
+      if (transformerName === null) return innerValue
+      const generator = this.getGenerator(transformerName)
       if (generator === undefined) return innerValue
       const transformer = Array.isArray(innerValue)
-        ? generator(pathFromParent, ...innerValue)
-        : generator(pathFromParent, innerValue)
+        ? generator(transformerName, ...innerValue)
+        : generator(transformerName, innerValue)
       return transformer
     }
     if (type === 'null') return Cast.toNull()
@@ -273,33 +301,76 @@ export class Tree<T extends Element | Text = Element | Text> {
     return Cast.toNull()
   }
 
-  private evaluationsCounter = {
-    computed: 0,
-    cached: 0
-  }
-
-  printEvaluationsCounters () {
-    const { subtrees, evaluationsCounter } = this
-    const { computed, cached } = evaluationsCounter
-    console.log(this.pathString, `computed: ${computed}, cached: ${cached}`)
-    subtrees.forEach(subtree => subtree.printEvaluationsCounters())
-  }
-
   private cache: Types.Serialized | undefined = undefined
   private setCache (this: Tree, value: Types.Value): void {
     this.cache = Serialize.serialize(value)
   }
 
-  evaluate (this: Tree<T>): Types.Value | Types.Transformer {
-    if (this.cache !== undefined) {
-      this.evaluationsCounter.cached ++
-      return Serialize.deserialize(this.cache)
+  perfCounters = {
+    computed: 0,
+    computeTime: 0,
+    computeTimeAvg: 0,
+    cached: 0,
+    cacheTime: 0,
+    cacheTimeAvg: 0,
+    totalTime: 0
+  }
+
+  getPerfCounters () {
+    const { subtrees } = this
+    const subCounters: Array<[string, typeof this['perfCounters']]> = []
+    subCounters.push([this.pathString, this.perfCounters])
+    subtrees.forEach(subtree => subCounters.push(...subtree.getPerfCounters()))
+    return subCounters
+  }
+
+  printPerfCounters () {
+    const perfCounters = this.getPerfCounters()
+      .sort((a, b) => b[1].totalTime - a[1].totalTime)
+      .map(e => ({
+        path: e[0],
+        totalMs: e[1].totalTime,
+        computeMs: e[1].computeTime,
+        cacheMs: e[1].cacheTime,
+        ops: `${e[1].computed}/${e[1].cached}`
+      }))
+    console.table(perfCounters)
+  }
+
+  callstack: string[] = []
+  pushToEvalCallStack (path: string) {
+    this.callstack.push(path)
+    this.parent?.pushToEvalCallStack(path)
+  }
+  flushEvalCallStack () { this.callstack.length = 0 }
+
+  evaluate (this: Tree<T>): Types.Value {
+    const start = Date.now()
+    const circularPatternDetected = this.callstack.some(p => p.startsWith(this.pathString))
+    if (circularPatternDetected) throw new Error(`Circular reference pattern detected @ ${this.pathString}`)
+    this.pushToEvalCallStack(this.pathString)
+    const { perfCounters, cache } = this
+    if (cache !== undefined) {
+      const deserialized = Serialize.deserialize(cache)
+      const end = Date.now()
+      const time = end - start
+      perfCounters.cached ++
+      perfCounters.cacheTime += time
+      perfCounters.cacheTimeAvg = perfCounters.cacheTime / perfCounters.cached
+      perfCounters.totalTime = perfCounters.computeTime + perfCounters.cacheTime
+      return deserialized
     }
     const init = this.initValue()
     const inner = this.getInnerValue(init)
     const wrapped = this.wrapInnerValue(inner)
     this.setCache(wrapped)
-    this.evaluationsCounter.computed ++
+    const end = Date.now()
+    const time = end - start
+    perfCounters.computed ++
+    perfCounters.computeTime += time
+    perfCounters.computeTimeAvg = perfCounters.computeTime / perfCounters.computed
+    perfCounters.totalTime = perfCounters.computeTime + perfCounters.cacheTime
+    this.flushEvalCallStack()
     return wrapped
   }
 }

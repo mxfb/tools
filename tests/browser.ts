@@ -5,12 +5,10 @@ console.log(Logs.styles.title('Browser tests.'))
 
 const root = document.createElement('div')
 root.innerHTML = `<record>
-  <record _name="path-A">
-    <number _name="prop-1">8</number>
-  </record>
-  <record _name="path-B">
-    <ref _name="prop-zzzzz">/path-A/prop-1</ref>
-  </record>
+  <array _name="prop-1">
+    <string>/prop-2</string>
+  </array>
+  <ref _name="prop-2">/prop-1/0</ref>
 </record>`
 
 const elt = root.firstElementChild as Element
@@ -19,5 +17,5 @@ const val = tree.evaluate()
 
 console.log('=====')
 console.log(val)
-// tree.printEvaluationsCounters()
+tree.printPerfCounters()
 console.log('done.')

@@ -1,6 +1,7 @@
 import { Transformers } from '..'
 import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
+import { Utils } from '../../utils'
 
 export const length: Types.TransformerGenerator = (callerTagName): Types.Transformer => {
   return Transformers.toNamed(callerTagName, currentValue => {
@@ -19,9 +20,6 @@ export const length: Types.TransformerGenerator = (callerTagName): Types.Transfo
       action: 'REPLACE',
       value: currentValue.data.length
     }
-    return {
-      action: 'ERROR',
-      value: `Current value must be of type string, Array, NodeList, Element or Text`
-    }
+    return Utils.makeTransformerError(`Current value must be of type string, Array, NodeList, Element or Text`)
   })
 }

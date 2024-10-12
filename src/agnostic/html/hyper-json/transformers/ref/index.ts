@@ -1,26 +1,27 @@
 import { Transformers } from '..'
 import { Cast } from '../../cast'
+import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
+import { Utils } from '../../utils'
 
 export const ref: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, (_, { resolver }) => {
+  return Transformers.toNamed(callerTagName, (_, callerTree) => {
     const [refPathStrRaw] = args
-    let refPathStr = Cast.toString(refPathStrRaw ?? '')
-    while (refPathStr.startsWith('/')) { refPathStr = refPathStr.slice(1) }
-    while (refPathStr.endsWith('/')) { refPathStr = refPathStr.slice(0, -1) }
-    const refPath = refPathStr.split('/').map(e => {
-      const parsed = parseInt(e)
-      if (Number.isNaN(parsed)) return e
-      return parsed
+    const { Text } = Crossenv.getWindow()
+    if (typeof refPathStrRaw !== 'string'
+      && !(refPathStrRaw instanceof Text)) return Utils.makeTransformerError({
+      message: 'PathString must be of type string or Text',
+      input: refPathStrRaw !== undefined
+        ? refPathStrRaw
+        : '<undefined>'
     })
-    const foundTree = resolver(refPath)
-    if (foundTree === undefined) return {
-      action: 'ERROR',
-      value: {
-        message: 'Referenced value has not been found',
-        input: refPathStr
-      }
-    }
+    const refPathStr = Cast.toString(refPathStrRaw)
+    const refPath = Utils.pathStringToPath(Cast.toString(refPathStrRaw))
+    const foundTree = callerTree.resolve(refPath)
+    if (foundTree === undefined) return Utils.makeTransformerError({
+      message: 'Referenced value has not been found',
+      input: refPathStr
+    })
     const evaluated = foundTree.evaluate()
     return {
       action: 'MERGE',

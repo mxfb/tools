@@ -1,43 +1,28 @@
-import { Darkdouille } from '../..'
-import toString from '../toString'
+import { Transformers } from '..'
+import { Cast } from '../../cast'
+import { Crossenv } from '../../crossenv'
+import { Types } from '../../types'
+import { Utils } from '../../utils'
 
-let intermediatePaths: string[] = []
-
-const toRef = (resolve: Darkdouille.TreeResolver): Darkdouille.TransformerFunctionGenerator => () => {
-  const returned: Darkdouille.Transformer = (inputValue) => {
-    const strValue = toString()(inputValue).trim()
-    const resolvedInput = resolve(strValue)
-    /* Circular reference pattern detection */
-    const thisPath = resolve('.')?.path
-    const resolvedPath = resolvedInput?.path
-    if (resolvedInput === undefined
-      || thisPath === undefined
-      || resolvedPath === undefined) {
-      intermediatePaths = []
-      return undefined
-    }
-    intermediatePaths.push(thisPath)
-    const circularPattern = intermediatePaths.some(intermediatePath => {
-      const intermediatePathChunks = intermediatePath.split('/')
-      const resolvedPathChunks = resolvedPath.split('/')
-      const resolvedIsParent = resolvedPathChunks.every((pathChunk, pathChunkPos) => intermediatePathChunks[pathChunkPos] === pathChunk)
-      const resolvedIsChild = intermediatePathChunks.every((pathChunk, pathChunkPos) => resolvedPathChunks[pathChunkPos] === pathChunk)
-      return resolvedIsParent || resolvedIsChild
+export const toRef: Types.TransformerGenerator = (callerTagName): Types.Transformer => {
+  return Transformers.toNamed(callerTagName, (currentValue, callerTree) => {
+    const { Text } = Crossenv.getWindow()
+    if (typeof currentValue !== 'string'
+      && !(currentValue instanceof Text)) return Utils.makeTransformerError({
+      message: 'Current value must be string or Text',
+      input: currentValue
     })
-    if (circularPattern) {
-      console.error(
-        'Circular reference pattern detected:\n >',
-        [...intermediatePaths, resolvedPath].join('\n > ')
-      )
-      intermediatePaths = []
-      return undefined
+    const refPathStr = Cast.toString(currentValue)
+    const refPath = Utils.pathStringToPath(refPathStr)
+    const foundTree = callerTree.resolve(refPath)
+    if (foundTree === undefined) return Utils.makeTransformerError({
+      message: 'Referenced value has not been found',
+      input: refPathStr
+    })
+    const evaluated = foundTree.evaluate()
+    return {
+      action: 'REPLACE',
+      value: evaluated
     }
-    /* Possibly dive deep further */
-    const value = resolvedInput?.value
-    intermediatePaths = []
-    return value
-  }
-  return returned
+  })
 }
-
-export default toRef

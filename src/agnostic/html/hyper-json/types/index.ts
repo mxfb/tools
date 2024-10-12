@@ -14,14 +14,20 @@ export namespace Types {
   
   export type PrimitiveValue = null | string | number | boolean | Element | Text | NodeListOf<Text | Element> | Transformer
   export type Value = PrimitiveValue | Value[] | { [k: string]: Value }
-  export type TransformerHooks = { resolver: Tree['resolve'] }
-  export type TransformerReturnType = {
-    action: 'MERGE' | 'REPLACE' | 'ERROR'
-    value: Value
-  } | {
-    action: null
+  export type TransformerHooks = {
+    resolver: Tree['resolve']
+    getGenerator: Tree['getGenerator']
   }
-  export type AnonymousTransformer = (currentValue: Value, hooks: TransformerHooks) => TransformerReturnType
+  export type TransformerErrorReturnType = { action: 'ERROR', value: Value }
+  export type TransformerReplaceReturnType = { action: 'REPLACE', value: Value }
+  export type TransformerMergeReturnType = { action: 'MERGE', value: Value }
+  export type TransformerNullReturnType = { action: null }
+  export type TransformerReturnType = TransformerErrorReturnType
+    | TransformerReplaceReturnType
+    | TransformerMergeReturnType
+    | TransformerNullReturnType
+
+  export type AnonymousTransformer = (currentValue: Value, callerTree: Tree) => TransformerReturnType
   export type Transformer = AnonymousTransformer & { transformerName: string }
   export type TransformerGenerator = (name: string, ...args: Value[]) => Transformer
 

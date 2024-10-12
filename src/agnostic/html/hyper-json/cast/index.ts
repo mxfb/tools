@@ -2,6 +2,7 @@ import { isRecord } from '~/agnostic/objects/is-record'
 import { isFalsy } from '~/agnostic/booleans/is-falsy'
 import { Types } from '../types'
 import { Crossenv } from '../crossenv'
+import { Transformers } from '../transformers'
 
 type Value = Types.Value
 type Transformer = Types.Transformer
@@ -82,9 +83,9 @@ export namespace Cast {
   }
 
   export const toTransformer = (input: Value): Transformer => {
-    return () => ({
+    return Transformers.toNamed('utils/Cast.toTransformer', () => ({
       action: 'REPLACE',
       value: input
-    })
+    }))
   }
 }

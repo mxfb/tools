@@ -3,6 +3,7 @@ import { Transformers } from '..'
 import { Cast } from '../../cast'
 import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
+import { Utils } from '../../utils'
 
 export const replace: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
   return Transformers.toNamed(callerTagName, currentValue => {
@@ -10,22 +11,13 @@ export const replace: Types.TransformerGenerator = (callerTagName, ...args): Typ
     if (typeof currentValue !== 'string'
       && !(currentValue instanceof Text)
       && !(currentValue instanceof Element)
-      && !(currentValue instanceof NodeList)) return {
-      action: 'ERROR',
-      value: 'Current value must be string, Text, Element or NodeList'
-    }
+      && !(currentValue instanceof NodeList)) return Utils.makeTransformerError('Current value must be string, Text, Element or NodeList')
     if (args.some(arg => typeof arg !== 'string'
       && !(arg instanceof Text)
       && !(arg instanceof Element)
-      && !(arg instanceof NodeList))) return {
-      action: 'ERROR',
-      value: 'Arguments must be of type string, Text, Element or NodeList'
-    }
+      && !(arg instanceof NodeList))) return Utils.makeTransformerError('Arguments must be of type string, Text, Element or NodeList')
     const [first, second] = args as Array<string | Text | Element | NodeListOf<Element | Text>>
-    if (first === undefined || second === undefined) return {
-      action: 'ERROR',
-      value: `Expecting at least 2 arguments. Found only ${args.length}`
-    }
+    if (first === undefined || second === undefined) return Utils.makeTransformerError(`Expecting at least 2 arguments. Found only ${args.length}`)
     const replacer = args.at(-1) as string | Text | Element | NodeListOf<Element | Text>
     const strReplacer = Cast.toString(replacer)
     const toReplace = args.slice(0, -1)

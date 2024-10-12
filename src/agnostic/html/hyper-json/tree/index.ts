@@ -36,7 +36,6 @@ export class Tree<T extends Element | Text = Element | Text> {
     this.resolve = this.resolve.bind(this)
     this.getGenerator = this.getGenerator.bind(this)
     this.initValue = this.initValue.bind(this)
-    this.mergeValues = this.mergeValues.bind(this)
     this.getInnerValue = this.getInnerValue.bind(this)
     this.wrapInnerValue = this.wrapInnerValue.bind(this)
     this.setCache = this.setCache.bind(this)
@@ -124,42 +123,11 @@ export class Tree<T extends Element | Text = Element | Text> {
     else { this.type = 'element' }
   }
 
-  resolve: Resolver = function (this: Tree, path): Tree | undefined {
-    let currentTree: Tree = this.root
-    for (const chunk of path) {
-      const { subtrees } = currentTree
-      const foundSubtree = subtrees.get(chunk)
-      if (foundSubtree === undefined) return undefined
-      currentTree = foundSubtree
-    }
-    return currentTree
-  }
-
-  getGenerator (this: Tree, name: string) {
-    return this.generators.get(name)
-  }
-
-  initValue (this: Tree<T>) {
-    const { type } = this
-    let currentValue: Types.Value
-    if (type === 'null') { currentValue = null }
-    else if (type === 'boolean') { currentValue = false }
-    else if (type === 'number') { currentValue = 0 }
-    else if (type === 'string') { currentValue = '' }
-    else if (type === 'text') { currentValue = this.node.textContent }
-    else if (type === 'element') { currentValue = getWindow().document.createDocumentFragment().childNodes as NodeListOf<Element | Text> }
-    else if (type === 'nodelist') { currentValue = getWindow().document.createDocumentFragment().childNodes as NodeListOf<Element | Text> }
-    else if (type === 'array') { currentValue = [] }
-    else if (type === 'record') { currentValue = {} }
-    else if (type === 'transformer') { currentValue = [] } // WIP assume array since we want to obtain an array of params ?
-    else { currentValue = null } // normally type: never here
-    return currentValue
-  }
-
-  mergeValues (
+  static mergeValues (
     currentValue: Types.Value,
     incomingValue: Types.Value,
-    mergeKey: string | number
+    mergeKey: string | number,
+    initiatorTree: Tree
   ): Types.Value {
     
     // [WIP] write something cleaner?
@@ -167,18 +135,23 @@ export class Tree<T extends Element | Text = Element | Text> {
 
     // incoming : transformer
     if (typeof incomingValue === 'function') {
-      const evaluated = incomingValue(currentValue, { resolver: this.resolve })
+      const evaluated = incomingValue(currentValue, initiatorTree)
       if (evaluated.action === null) return currentValue
       if (evaluated.action === 'REPLACE') return evaluated.value
       if (evaluated.action === 'ERROR') {
         const errorMessage = 'Tranformer error:'
           + `\nfrom: ${incomingValue.transformerName}`
-          + `\nat: ${this.pathString.slice(1)}/${mergeKey}`
+          + `\nat: ${initiatorTree.pathString.slice(1)}/${mergeKey}`
           + `\nmessage:`
         console.warn(errorMessage, evaluated.value)
         return currentValue
       }
-      return this.mergeValues(currentValue, evaluated.value, mergeKey)
+      return Tree.mergeValues(
+        currentValue,
+        evaluated.value,
+        mergeKey,
+        initiatorTree
+      )
     }
 
     // currentValue : Array
@@ -265,14 +238,95 @@ export class Tree<T extends Element | Text = Element | Text> {
     }
   }
 
+  static mergeRootElements (...rootElements: Element[]): Element {
+    const output = document.createElement('data')
+    rootElements.forEach(rootElement => {
+      const nodes = [...Array.from(rootElement.cloneNode(true).childNodes)]
+      output.append(...nodes)
+    })
+    return output
+  }
+
+  static reduceRootElement (rootElement: Element): Element {
+    const { Node, Element } = Crossenv.getWindow()
+    const childNodes = [...Array.from(rootElement.childNodes)]
+    let unnamedChildrenCnt = 0
+    const propertiesPathsMap = new Map<string, Element>()
+    childNodes.forEach(childNode => {
+      if (childNode.nodeType === Node.TEXT_NODE) return
+      if (childNode.nodeType !== Node.ELEMENT_NODE) return childNode.parentNode?.removeChild(childNode)
+      const childElement = childNode as Element
+      const isFunction = isFunctionElement(childElement)
+      const isTransformer = isTransformerElement(childElement)
+      if (isFunction || isTransformer) return rootElement.appendChild(childElement)
+      const isValue = isValueElement(childElement)
+      if (!isValue) return
+      const valueElement: Element = childElement
+      const type = getTypeFromElement(valueElement)
+      if (type === Type.TRANSFORMER) return rootElement.appendChild(valueElement)
+      const localPath = valueElement.getAttribute('class') ?? `${unnamedChildrenCnt ++}`
+      const existingElement = propertiesPathsMap.get(localPath)
+      if (existingElement === undefined) return propertiesPathsMap.set(localPath, valueElement)
+      valueElement.remove()
+      const actionAttr = valueElement.getAttribute('action')
+      if (actionAttr === Action.APPEND) return existingElement.append(...valueElement.childNodes)
+      if (actionAttr === Action.PREPEND) return existingElement.prepend(...valueElement.childNodes)
+      return existingElement.replaceChildren(...valueElement.childNodes)
+    })
+    const reducedChildNodes = [...rootElement.childNodes]
+    reducedChildNodes.forEach(valueElement => {
+      const isDarkdouilleElement = isValueOrTransformerElement(valueElement)
+      if (!isDarkdouilleElement) return;
+      const isElement = valueElement instanceof Element
+      if (!isElement) return;
+      const type = getTypeFromElement(valueElement)
+      if (type === Type.TRANSFORMER) return;
+      reduce(valueElement)
+    })
+    return rootElement
+  }
+
+  resolve: Resolver = function (this: Tree, path): Tree | undefined {
+    let currentTree: Tree = this.root
+    for (const chunk of path) {
+      const { subtrees } = currentTree
+      const foundSubtree = subtrees.get(chunk)
+      if (foundSubtree === undefined) return undefined
+      currentTree = foundSubtree
+    }
+    return currentTree
+  }
+
+  getGenerator (this: Tree, name: string) {
+    return this.generators.get(name)
+  }
+
+  initValue (this: Tree<T>) {
+    const { type } = this
+    let currentValue: Types.Value
+    if (type === 'null') { currentValue = null }
+    else if (type === 'boolean') { currentValue = false }
+    else if (type === 'number') { currentValue = 0 }
+    else if (type === 'string') { currentValue = '' }
+    else if (type === 'text') { currentValue = this.node.textContent }
+    else if (type === 'element') { currentValue = getWindow().document.createDocumentFragment().childNodes as NodeListOf<Element | Text> }
+    else if (type === 'nodelist') { currentValue = getWindow().document.createDocumentFragment().childNodes as NodeListOf<Element | Text> }
+    else if (type === 'array') { currentValue = [] }
+    else if (type === 'record') { currentValue = {} }
+    else if (type === 'transformer') { currentValue = [] } // WIP assume array since we want to obtain an array of params ?
+    else { currentValue = null } // normally type: never here
+    return currentValue
+  }
+
   getInnerValue (this: Tree<T>, initialValue: ReturnType<typeof this.initValue>): Types.Value {
     const { subtrees } = this
     const innerValue = Array
       .from(subtrees.entries())
-      .reduce((currentValue, [subpath, subtree]) => this.mergeValues(
+      .reduce((currentValue, [subpath, subtree]) => Tree.mergeValues(
         currentValue,
         subtree.evaluate(),
-        subpath
+        subpath,
+        this
       ), initialValue as Types.Value)
     return innerValue
   }

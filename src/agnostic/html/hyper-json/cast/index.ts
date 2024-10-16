@@ -2,7 +2,7 @@ import { isRecord } from '~/agnostic/objects/is-record'
 import { isFalsy } from '~/agnostic/booleans/is-falsy'
 import { Types } from '../types'
 import { Crossenv } from '../crossenv'
-import { Transformers } from '../transformers'
+import { Utils } from '../utils'
 
 type Value = Types.Value
 type Transformer = Types.Transformer
@@ -12,9 +12,10 @@ export namespace Cast {
   export const toNull = (): null => null
   export const toBoolean = (input: Value): boolean => !isFalsy(input)
   export const toNumber = (input: Value): number => {
+    const { Text } = getWindow()
     if (typeof input === 'number') return input
     if (typeof input === 'string') return parseFloat(`${input}`)
-    if (input instanceof getWindow().Text) return parseFloat(`${input.textContent}`)
+    if (input instanceof Text) return parseFloat(`${input.textContent}`)
     return 0
   }
 
@@ -23,28 +24,31 @@ export namespace Cast {
     if (typeof input === 'number'
       || typeof input === 'boolean'
       || input === null) return `${input}`
-    if (input instanceof getWindow().Element) return input.outerHTML
-    if (input instanceof getWindow().Text) return input.textContent ?? ''
-    if (input instanceof getWindow().NodeList) return Array.from(input).map(e => {
-      if (e instanceof getWindow().Element) return e.outerHTML
+    const { Element, Text, NodeList } = getWindow()
+    if (input instanceof Element) return input.outerHTML
+    if (input instanceof Text) return input.textContent ?? ''
+    if (input instanceof NodeList) return Array.from(input).map(e => {
+      if (e instanceof Element) return e.outerHTML
       return e.textContent
     }).join('')
     return input.toString()
   }
   
   export const toText = (input: Value): Text => {
-    if (input instanceof getWindow().Text) return input.cloneNode(true) as Text
-    return getWindow().document.createTextNode(toString(input))
+    const { Text, document } = getWindow()
+    if (input instanceof Text) return input.cloneNode(true) as Text
+    return document.createTextNode(toString(input))
   }
   
   export const toElement = (input: Value): Element => {
-    if (input instanceof getWindow().Element) return input.cloneNode(true) as Element
-    const elt = getWindow().document.createElement('div')
-    if (input instanceof getWindow().Text) {
+    const { Element, Text, NodeList, document } = getWindow()
+    if (input instanceof Element) return input.cloneNode(true) as Element
+    const elt = document.createElement('div')
+    if (input instanceof Text) {
       elt.append(input.cloneNode(true))
       return elt
     }
-    if (input instanceof getWindow().NodeList) {
+    if (input instanceof NodeList) {
       elt.append(...Array.from(input).map(e => e.cloneNode(true)))
       return elt
     }
@@ -55,13 +59,14 @@ export namespace Cast {
   }
 
   export const toNodeList = (input: Value): NodeListOf<Element | Text> => {
-    const elt = getWindow().document.createElement('div')
-    if (input instanceof getWindow().NodeList) {
+    const { Element, Text, NodeList, document } = getWindow()
+    const elt = document.createElement('div')
+    if (input instanceof NodeList) {
       elt.append(...Array.from(input).map(i => i.cloneNode(true)))
       return elt.childNodes as NodeListOf<Element | Text>
     }
-    if (input instanceof getWindow().Element
-      || input instanceof getWindow().Text) {
+    if (input instanceof Element
+      || input instanceof Text) {
       elt.append(input.cloneNode(true) as Element | Text)
       return elt.childNodes as NodeListOf<Element | Text>
     }
@@ -72,8 +77,9 @@ export namespace Cast {
   }
 
   export const toArray = (input: Value): Value[] => {
+    const { NodeList } = getWindow()
     if (Array.isArray(input)) return [...input]
-    if (input instanceof getWindow().NodeList) return Array.from(input)
+    if (input instanceof NodeList) return Array.from(input)
     return [input]
   }
 
@@ -83,7 +89,7 @@ export namespace Cast {
   }
 
   export const toTransformer = (input: Value): Transformer => {
-    return Transformers.toNamed('utils/Cast.toTransformer', () => ({
+    return Utils.toNamedTransformer('utils/Cast.toTransformer', () => ({
       action: 'REPLACE',
       value: input
     }))

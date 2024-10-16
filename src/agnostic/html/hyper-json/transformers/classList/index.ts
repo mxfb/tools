@@ -1,4 +1,3 @@
-import { Transformers } from '..'
 import { Cast } from '../../cast'
 import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
@@ -11,7 +10,7 @@ enum Actions {
 }
 
 export const classList: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, currentValue => {
+  return Utils.toNamedTransformer(callerTagName, currentValue => {
     const { Element } = Crossenv.getWindow()
     if (!(currentValue instanceof Element)) return Utils.makeTransformerError('Current value must be an Element')
     const [actionArg, classNameArg] = args

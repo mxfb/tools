@@ -49,12 +49,4 @@ export namespace Transformers {
     ['transformSelected', transformSelected],
     ['trim', trim]
   ])
-
-  export const toNamed = (
-    name: string,
-    anonymous: Types.AnonymousTransformer): Types.Transformer => {
-    const named = anonymous as Types.Transformer
-    named.transformerName = name
-    return named
-  }
 }

@@ -1,11 +1,10 @@
-import { Transformers } from '..'
 import { Cast } from '../../cast'
 import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const toRef: Types.TransformerGenerator = (callerTagName): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, (currentValue, callerTree) => {
+  return Utils.toNamedTransformer(callerTagName, (currentValue, callerTree) => {
     const { Text } = Crossenv.getWindow()
     if (typeof currentValue !== 'string'
       && !(currentValue instanceof Text)) return Utils.makeTransformerError({

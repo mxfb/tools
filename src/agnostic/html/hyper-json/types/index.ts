@@ -15,8 +15,8 @@ export namespace Types {
   export type PrimitiveValue = null | string | number | boolean | Element | Text | NodeListOf<Text | Element> | Transformer
   export type Value = PrimitiveValue | Value[] | { [k: string]: Value }
   export type TransformerHooks = {
-    resolver: Tree['resolve']
-    getGenerator: Tree['getGenerator']
+    resolver: Tree.Tree['resolve']
+    getGenerator: Tree.Tree['getGenerator']
   }
   export type TransformerErrorReturnType = { action: 'ERROR', value: Value }
   export type TransformerReplaceReturnType = { action: 'REPLACE', value: Value }
@@ -27,9 +27,22 @@ export namespace Types {
     | TransformerMergeReturnType
     | TransformerNullReturnType
 
-  export type AnonymousTransformer = (currentValue: Value, callerTree: Tree) => TransformerReturnType
+  export type AnonymousTransformer = (currentValue: Value, callerTree: Tree.Tree) => TransformerReturnType
   export type Transformer = AnonymousTransformer & { transformerName: string }
   export type TransformerGenerator = (name: string, ...args: Value[]) => Transformer
+  export type Resolver = (path: Tree.Tree['path']) => Tree.Tree | undefined
+
+  export type TreeOptions = {
+    generatorsMap: Map<string, Types.TransformerGenerator>
+    keyAttribute: string
+    actionAttribute: string
+  }
+
+  export enum ReductionAction {
+    APPEND = 'append',
+    PREPEND = 'prepend',
+    REPLACE = 'replace'
+  }
 
   export type Serialized = { type: 'null', value: null }
     | { type: 'boolean', value: boolean }

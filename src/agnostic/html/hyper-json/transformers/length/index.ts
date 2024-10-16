@@ -1,10 +1,9 @@
-import { Transformers } from '..'
 import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const length: Types.TransformerGenerator = (callerTagName): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, currentValue => {
+  return Utils.toNamedTransformer(callerTagName, currentValue => {
     const { Element, NodeList, Text } = Crossenv.getWindow()
     if (typeof currentValue === 'string'
       || Array.isArray(currentValue)

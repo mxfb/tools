@@ -1,12 +1,11 @@
 import { replaceAll } from '~/agnostic/strings/replace-all'
-import { Transformers } from '..'
 import { Cast } from '../../cast'
 import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const replace: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, currentValue => {
+  return Utils.toNamedTransformer(callerTagName, currentValue => {
     const { Text, NodeList, Element } = Crossenv.getWindow()
     if (typeof currentValue !== 'string'
       && !(currentValue instanceof Text)

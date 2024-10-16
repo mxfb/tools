@@ -2,7 +2,7 @@ import { Tree } from '../tree'
 import { Types } from '../types'
 
 export namespace Utils {
-  export const pathStringToPath = (pathString: Tree['pathString']): Tree['path'] => {
+  export const pathStringToPath = (pathString: Tree.Tree['pathString']): Tree.Tree['path'] => {
     let cleanPathString = pathString
     while (cleanPathString.startsWith('/')) { cleanPathString = cleanPathString.slice(1) }
     while (cleanPathString.endsWith('/')) { cleanPathString = cleanPathString.slice(0, -1) }
@@ -13,11 +13,19 @@ export namespace Utils {
     })
   }
 
-  export const pathToPathString = (path: Tree['path']) => `/${path.map(e => `${e}`).join('/')}`
+  export const pathToPathString = (path: Tree.Tree['path']) => `/${path.map(e => `${e}`).join('/')}`
 
   type ErrReturn = Types.TransformerErrorReturnType
   export const makeTransformerError = (value: ErrReturn['value']): ErrReturn => ({
     action: 'ERROR',
     value
   })
+
+  export const toNamedTransformer = (
+    name: string,
+    anonymous: Types.AnonymousTransformer): Types.Transformer => {
+    const named = anonymous as Types.Transformer
+    named.transformerName = name
+    return named
+  }
 }

@@ -1,14 +1,13 @@
+import { replaceInElement } from '~/agnostic/html/replace-in-element'
 import { isRecord } from '~/agnostic/objects/is-record'
-import { Transformers } from '..'
 import { Cast } from '../../cast'
 import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
-import { Utils } from '../../utils'
 import { Tree } from '../../tree'
-import { replaceInElement } from '~/agnostic/html/replace-in-element'
+import { Utils } from '../../utils'
 
 export const transformSelected: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, (currentValue, callerTree) => {
+  return Utils.toNamedTransformer(callerTagName, (currentValue, callerTree) => {
     const { NodeList, Element, Text } = Crossenv.getWindow()
     if (!(currentValue instanceof Element)
       && !(currentValue instanceof NodeList)) return Utils.makeTransformerError({

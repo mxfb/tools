@@ -11,7 +11,7 @@ export namespace HyperJson {
   export import Crossenv = CrossenvNamespace
   export import Serialize = SerializeNamespace
   export import Transformers = TransformersNamespace
-  export const Tree = TreeClass  
+  export const Tree = TreeClass
   export import Types = TypesNamespace
   export import Utils = UtilsNamespace
 }

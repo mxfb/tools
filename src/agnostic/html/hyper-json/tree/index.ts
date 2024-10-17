@@ -127,13 +127,15 @@ export namespace Tree {
     }
   }
 
+  type MergeNodesOptions = {
+    actionAttribute?: string,
+    keyAttribute?: string,
+    rootKey?: string
+  }
+
   export function mergeNodes (
     nodes: Array<Element | Text>,
-    options: {
-      actionAttribute?: string,
-      keyAttribute?: string,
-      rootKey?: string
-    } = {}): Element | Text {
+    options: MergeNodesOptions = {}): Element | Text {
     const [first, ...rest] = nodes
     const actionAttribute  = options?.actionAttribute ?? defaultActionAttribute
     const keyAttribute  = options?.keyAttribute ?? defaultKeyAttribute
@@ -246,7 +248,7 @@ export namespace Tree {
 
   export function from (
     nodes: Array<Element | Text>,
-    options?: Partial<Types.TreeOptions>): Tree {
+    options?: Partial<Types.TreeOptions & MergeNodesOptions>): Tree {
     const merged = mergeRootNodes(nodes, options)
     return new Tree(merged, options)
   }

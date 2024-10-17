@@ -127,22 +127,6 @@ export namespace Tree {
     }
   }
 
-  export function mergeRootNodes (...args: Parameters<typeof mergeNodes>): Element | Text {
-    const [nodes, options] = args
-    const actionAttribute = options?.actionAttribute ?? defaultActionAttribute
-    const keyAttribute = options?.keyAttribute ?? defaultKeyAttribute
-    const rootKey = options?.rootKey ?? defaultRootKey
-    const { Element } = getWindow()
-    const elements = nodes.filter(e => e instanceof Element)
-    elements.forEach(element => {
-      element.setAttribute(keyAttribute, rootKey)
-      const elementAction = element.getAttribute(actionAttribute) ?? Types.ReductionAction.APPEND
-      element.setAttribute(actionAttribute, elementAction)
-    })
-    const merged = mergeNodes(elements, options)
-    return merged
-  }
-
   export function mergeNodes (
     nodes: Array<Element | Text>,
     options: {
@@ -244,16 +228,27 @@ export namespace Tree {
     return CURRENT
   }
 
-  function fillOptions (options: Partial<Types.TreeOptions>): Types.TreeOptions {
-    const defaultOptions: Types.TreeOptions = {
-      generatorsMap: Transformers.defaultGeneratorsMap,
-      keyAttribute: defaultKeyAttribute,
-      actionAttribute: defaultActionAttribute
-    }
-    return {
-      ...defaultOptions,
-      ...options
-    }
+  export function mergeRootNodes (...args: Parameters<typeof mergeNodes>): Element | Text {
+    const [nodes, options] = args
+    const actionAttribute = options?.actionAttribute ?? defaultActionAttribute
+    const keyAttribute = options?.keyAttribute ?? defaultKeyAttribute
+    const rootKey = options?.rootKey ?? defaultRootKey
+    const { Element } = getWindow()
+    const elements = nodes.filter(e => e instanceof Element)
+    elements.forEach(element => {
+      element.setAttribute(keyAttribute, rootKey)
+      const elementAction = element.getAttribute(actionAttribute) ?? Types.ReductionAction.APPEND
+      element.setAttribute(actionAttribute, elementAction)
+    })
+    const merged = mergeNodes(elements, options)
+    return merged
+  }
+
+  export function from (
+    nodes: Array<Element | Text>,
+    options?: Partial<Types.TreeOptions>): Tree {
+    const merged = mergeRootNodes(nodes, options)
+    return new Tree(merged, options)
   }
 
   export class Tree<T extends Element | Text = Element | Text> {
@@ -272,6 +267,18 @@ export namespace Tree {
     readonly generators: ReadonlyMap<string, Types.TransformerGenerator>
     keyAttribute: string
     actionAttribute: string
+
+    static fillOptions (options: Partial<Types.TreeOptions>): Types.TreeOptions {
+      const defaultOptions: Types.TreeOptions = {
+        generatorsMap: Transformers.defaultGeneratorsMap,
+        keyAttribute: defaultKeyAttribute,
+        actionAttribute: defaultActionAttribute
+      }
+      return {
+        ...defaultOptions,
+        ...options
+      }
+    }
   
     constructor (node: T, parentOrOptions?: Partial<Types.TreeOptions>)
     constructor (node: T, parentOrOptions: Tree, pathFromParent: number | string, options?: Partial<Types.TreeOptions>)
@@ -300,8 +307,8 @@ export namespace Tree {
   
       // Options
       const _options = options ?? parentOrOptions instanceof Tree
-        ? fillOptions({})
-        : fillOptions(parentOrOptions ?? {})
+        ? Tree.fillOptions({})
+        : Tree.fillOptions(parentOrOptions ?? {})
       this.keyAttribute = _options.keyAttribute
       this.actionAttribute = _options.actionAttribute
       this.generators = this.isRoot ? _options.generatorsMap : this.root.generators

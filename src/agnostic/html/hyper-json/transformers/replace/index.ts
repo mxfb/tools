@@ -5,7 +5,7 @@ import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const replace: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Utils.toNamedTransformer(callerTagName, currentValue => {
+  return Utils.toNamedTransformer(callerTagName, args, currentValue => {
     const { Text, NodeList, Element } = Crossenv.getWindow()
     if (typeof currentValue !== 'string'
       && !(currentValue instanceof Text)

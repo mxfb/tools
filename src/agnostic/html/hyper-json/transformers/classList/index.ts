@@ -10,7 +10,7 @@ enum Actions {
 }
 
 export const classList: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Utils.toNamedTransformer(callerTagName, currentValue => {
+  return Utils.toNamedTransformer(callerTagName, args, currentValue => {
     const { Element } = Crossenv.getWindow()
     if (!(currentValue instanceof Element)) return Utils.makeTransformerError('Current value must be an Element')
     const [actionArg, classNameArg] = args

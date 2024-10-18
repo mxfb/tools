@@ -4,7 +4,7 @@ import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
 
 export const append: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Utils.toNamedTransformer(callerTagName, currentValue => {
+  return Utils.toNamedTransformer(callerTagName, args, currentValue => {
     const { document, Element, Text, NodeList } = Crossenv.getWindow()
     const [...toAppend] = args
     const frag = document.createDocumentFragment()

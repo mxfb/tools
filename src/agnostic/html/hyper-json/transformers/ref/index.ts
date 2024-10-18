@@ -4,7 +4,7 @@ import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const ref: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Utils.toNamedTransformer(callerTagName, (_, callerTree) => {
+  return Utils.toNamedTransformer(callerTagName, args, (_, callerTree) => {
     const [refPathStrRaw] = args
     const { Text } = Crossenv.getWindow()
     if (typeof refPathStrRaw !== 'string'

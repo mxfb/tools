@@ -4,7 +4,7 @@ import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const querySelector: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Utils.toNamedTransformer(callerTagName, currentValue => {
+  return Utils.toNamedTransformer(callerTagName, args, currentValue => {
     const { document, Element, NodeList } = Crossenv.getWindow()
     const [selectorRaw] = args
     if (selectorRaw === undefined) return Utils.makeTransformerError('Selector argument expected.')

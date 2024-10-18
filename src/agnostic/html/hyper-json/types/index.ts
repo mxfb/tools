@@ -2,6 +2,7 @@ import { Tree } from '../tree'
 
 export namespace Types {
   export enum TyperTagName {
+    ANY = 'any',
     NULL = 'null',
     BOOLEAN = 'boolean',
     NUMBER = 'number',
@@ -9,7 +10,8 @@ export namespace Types {
     TEXT = 'text',
     NODELIST = 'nodelist',
     ARRAY = 'array',
-    RECORD = 'record'
+    RECORD = 'record',
+    LITERAL = 'literal'
   }
   
   export type PrimitiveValue = null | string | number | boolean | Element | Text | NodeListOf<Text | Element> | Transformer
@@ -28,7 +30,10 @@ export namespace Types {
     | TransformerNullReturnType
 
   export type AnonymousTransformer = (currentValue: Value, callerTree: Tree.Tree) => TransformerReturnType
-  export type Transformer = AnonymousTransformer & { transformerName: string }
+  export type Transformer = AnonymousTransformer & {
+    transformerName: string
+    args: Value[]
+  }
   export type TransformerGenerator = (name: string, ...args: Value[]) => Transformer
   export type Resolver = (path: Tree.Tree['path']) => Tree.Tree | undefined
 

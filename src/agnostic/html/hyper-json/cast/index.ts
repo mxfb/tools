@@ -89,7 +89,7 @@ export namespace Cast {
   }
 
   export const toTransformer = (input: Value): Transformer => {
-    return Utils.toNamedTransformer('utils/Cast.toTransformer', () => ({
+    return Utils.toNamedTransformer('utils/Cast.toTransformer', [], () => ({
       action: 'REPLACE',
       value: input
     }))

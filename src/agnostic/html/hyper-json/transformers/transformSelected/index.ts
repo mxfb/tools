@@ -7,7 +7,7 @@ import { Tree } from '../../tree'
 import { Utils } from '../../utils'
 
 export const transformSelected: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Utils.toNamedTransformer(callerTagName, (currentValue, callerTree) => {
+  return Utils.toNamedTransformer(callerTagName, args, (currentValue, callerTree) => {
     const { NodeList, Element, Text } = Crossenv.getWindow()
     if (!(currentValue instanceof Element)
       && !(currentValue instanceof NodeList)) return Utils.makeTransformerError({

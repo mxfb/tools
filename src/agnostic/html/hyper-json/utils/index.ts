@@ -1,4 +1,4 @@
-import { Crossenv } from '../crossenv'
+import { Window } from '~/agnostic/misc/crossenv/window'
 import { Tree } from '../tree'
 import { Types } from '../types'
 
@@ -35,7 +35,7 @@ export namespace Utils {
   export const toHyperJson = (
     value: Types.Value,
     keyAttribute: string = Tree.defaultKeyAttribute): Element => {
-    const { document, Element, Text, NodeList } = Crossenv.getWindow()
+    const { document, Element, Text, NodeList } = Window.get()
     if (value instanceof Text) {
       const elt = document.createElement('text')
       elt.innerHTML = value.textContent ?? ''

@@ -9,12 +9,6 @@
     "type": "git",
     "url": "https://github.com/lm-design-edito/lm-tools"
   },
-  "exports": {
-    "./agnostic/misc/crossenv/get-window": {
-      "browser": "./lib/agnostic/misc/crossenv/get-window/browser.js",
-      "default": "./lib/agnostic/misc/crossenv/get-window/index.js"
-    }
-  },
   "scripts": {
     "_remove:*//": "echo 'REMOVE DIRECTORY'",
     "_remove:scripts": "echo '[_remove:scripts] \\033[1mstarting...\\033[0m' && rm -rf .temp/scripts",

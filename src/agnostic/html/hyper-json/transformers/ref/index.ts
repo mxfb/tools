@@ -1,12 +1,12 @@
+import { Window } from '~/agnostic/misc/crossenv/window'
 import { Cast } from '../../cast'
-import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const ref: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
   return Utils.toNamedTransformer(callerTagName, args, (_, callerTree) => {
     const [refPathStrRaw] = args
-    const { Text } = Crossenv.getWindow()
+    const { Text } = Window.get()
     if (typeof refPathStrRaw !== 'string'
       && !(refPathStrRaw instanceof Text)) return Utils.makeTransformerError({
       message: 'PathString must be of type string or Text',

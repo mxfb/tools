@@ -1,12 +1,12 @@
 import { isRecord } from '~/agnostic/objects/is-record'
 import { isFalsy } from '~/agnostic/booleans/is-falsy'
 import { Types } from '../types'
-import { Crossenv } from '../crossenv'
 import { Utils } from '../utils'
+import { Window } from '~/agnostic/misc/crossenv/window'
 
 type Value = Types.Value
 type Transformer = Types.Transformer
-const getWindow = Crossenv.getWindow
+const getWindow = Window.get
 
 export namespace Cast {
   export const toNull = (): null => null

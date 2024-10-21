@@ -1,11 +1,11 @@
+import { Window } from '~/agnostic/misc/crossenv/window'
 import { Cast } from '../../cast'
-import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const querySelector: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
   return Utils.toNamedTransformer(callerTagName, args, currentValue => {
-    const { document, Element, NodeList } = Crossenv.getWindow()
+    const { document, Element, NodeList } = Window.get()
     const [selectorRaw] = args
     if (selectorRaw === undefined) return Utils.makeTransformerError('Selector argument expected.')
     const selector = Cast.toString(selectorRaw)

@@ -1,13 +1,13 @@
 import { isRecord } from '~/agnostic/objects/is-record'
 import { isInEnum } from '~/agnostic/objects/enums/is-in-enum'
+import { Window } from '~/agnostic/misc/crossenv/window'
 import { Cast } from '../cast'
-import { Crossenv } from '../crossenv'
 import { Serialize } from '../serialize'
 import { Transformers } from '../transformers'
 import { Types } from '../types'
 import { Utils } from '../utils'
 
-const getWindow = Crossenv.getWindow
+const getWindow = Window.get
 const isElement = (node: Node): node is Element => node.nodeType === getWindow().Node.ELEMENT_NODE
 const isText = (node: Node): node is Text => node.nodeType === getWindow().Node.TEXT_NODE
 

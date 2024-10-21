@@ -1,11 +1,11 @@
+import { Window } from '~/agnostic/misc/crossenv/window'
 import { Cast } from '../../cast'
-import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const trim: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
   return Utils.toNamedTransformer(callerTagName, args, currentValue => {
-    const { Text } = Crossenv.getWindow()
+    const { Text } = Window.get()
     if (typeof currentValue !== 'string'
       && !(currentValue instanceof Text)) return Utils.makeTransformerError({
       message: 'Current value must be of type string or Text',

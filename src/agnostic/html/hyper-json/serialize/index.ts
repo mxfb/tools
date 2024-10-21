@@ -1,9 +1,9 @@
-import { Crossenv } from '../crossenv'
+import { Window } from '~/agnostic/misc/crossenv/window'
 import { Types } from '../types'
 
 export namespace Serialize {
   export function serialize (value: Types.Value): Types.Serialized {
-    const { Text, Element, NodeList } = Crossenv.getWindow()
+    const { Text, Element, NodeList } = Window.get()
     if (value === null) return { type: 'null', value: null }
     if (typeof value === 'boolean'
       || typeof value === 'number'
@@ -31,7 +31,7 @@ export namespace Serialize {
   }
 
   export function deserialize (serialized: Types.Serialized): Types.Value {
-    const { document } = Crossenv.getWindow()
+    const { document } = Window.get()
     if (serialized.type === 'null') return null
     if (serialized.type === 'boolean') return serialized.value
     if (serialized.type === 'number') return serialized.value

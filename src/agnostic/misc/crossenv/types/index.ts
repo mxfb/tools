@@ -17,5 +17,4 @@ export namespace Types {
     Attr: typeof Attr
     document: Document
   }
-  
 }

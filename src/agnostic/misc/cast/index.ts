@@ -33,6 +33,7 @@ export namespace Cast {
     return [value]
   }
   
+  // [WIP] not so sure about this one
   export function toNumberArr (value: unknown) {
     const arrValue = toArray(value)
     return arrValue.map(val => toNumber(val))
@@ -48,5 +49,11 @@ export namespace Cast {
       return record
     }
     return record
+  }
+
+  export function toError (value: unknown) {
+    if (value instanceof Error) return value
+    if (typeof value === 'string') return new Error(value)
+    return new Error(toString(value))
   }
 }

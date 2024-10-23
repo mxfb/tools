@@ -6,6 +6,7 @@ import {
 } from './is-object'
 import { isRecord as isRecordFunc } from './is-record'
 import { recordFormat as recordFormatFunc } from './record-format'
+import { recordMap as recordMapFunc } from './record-map'
 import { Validation as ValidationNamespace } from './validation'
 
 export namespace Objects {
@@ -17,8 +18,11 @@ export namespace Objects {
   export const isObject = isObjectFunc
   export const isNonNullObject = isNonNullObjectFunc
   // Is record
-  export const recordFormat = recordFormatFunc
   export const isRecord = isRecordFunc
+  // Record format
+  export const recordFormat = recordFormatFunc
+  // Record map
+  export const recordMap = recordMapFunc
   // Validation
   export import Validation = ValidationNamespace
 }

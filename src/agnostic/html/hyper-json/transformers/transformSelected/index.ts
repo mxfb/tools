@@ -1,15 +1,14 @@
-import { isRecord } from '~/agnostic/objects/is-record'
-import { Transformers } from '..'
-import { Cast } from '../../cast'
-import { Crossenv } from '../../crossenv'
-import { Types } from '../../types'
-import { Utils } from '../../utils'
-import { Tree } from '../../tree'
 import { replaceInElement } from '~/agnostic/html/replace-in-element'
+import { isRecord } from '~/agnostic/objects/is-record'
+import { Window } from '~/agnostic/misc/crossenv/window'
+import { Cast } from '../../cast'
+import { Types } from '../../types'
+import { Tree } from '../../tree'
+import { Utils } from '../../utils'
 
 export const transformSelected: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, (currentValue, callerTree) => {
-    const { NodeList, Element, Text } = Crossenv.getWindow()
+  return Utils.toNamedTransformer(callerTagName, args, (currentValue, callerTree) => {
+    const { NodeList, Element, Text } = Window.get()
     if (!(currentValue instanceof Element)
       && !(currentValue instanceof NodeList)) return Utils.makeTransformerError({
       message: 'Current value must be Element or NodeList',

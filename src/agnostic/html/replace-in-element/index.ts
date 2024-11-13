@@ -1,16 +1,18 @@
-export function replaceInElement (inputElement: Element, replaceMap: Map<Element, Element>): Element {
-  const outputElement = inputElement.cloneNode(true) as Element
-  const inputChildren = Array.from(inputElement.childNodes)
-  inputChildren.forEach(inputChild => {
-    if (!(inputChild instanceof Element)) outputElement.appendChild(inputChild.cloneNode(true))
-    const inputChildElement = inputChild as Element
-    const replacedChildElement = replaceMap.get(inputChildElement)
-    const deepReplacedChildElement = replaceInElement(
-      replacedChildElement !== undefined
-        ? replacedChildElement
-        : inputChildElement,
-      replaceMap)
-    outputElement.appendChild(deepReplacedChildElement.cloneNode(true))
+import { getNodeAncestors } from '../get-node-ancestors'
+
+export function replaceInElement (inputElement: Element, replaceMap: Map<Node, Node | NodeListOf<Node>>): Element {
+  const actualReplaceMap = new Map(Array.from(replaceMap).filter(([toReplace]) => {
+    const toReplaceAncestors = getNodeAncestors(toReplace)
+    return toReplaceAncestors.includes(inputElement)
+  }))
+  actualReplaceMap.forEach((replacer, toReplace) => {
+    if ('nodeType' in replacer) {
+      toReplace.parentNode?.insertBefore(replacer, toReplace)
+    } else {
+      const replacerNodes = Array.from(replacer)
+      replacerNodes.forEach(rpl => toReplace.parentNode?.insertBefore(rpl, toReplace))
+    }
+    toReplace.parentNode?.removeChild(toReplace)
   })
-  return outputElement
+  return inputElement
 }

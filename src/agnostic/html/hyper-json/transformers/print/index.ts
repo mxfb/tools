@@ -1,8 +1,8 @@
-import { Transformers } from '..'
+import { Utils } from '../../utils'
 import { Types } from '../../types'
 
 export const print: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, currentValue => {
+  return Utils.toNamedTransformer(callerTagName, args, currentValue => {
     if (args.length === 0) console.log(currentValue)
     else console.log(...args)
     return { action: null }

@@ -1,9 +1,8 @@
-import { Transformers } from '..'
 import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const push: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, currentValue => {
+  return Utils.toNamedTransformer(callerTagName, args, currentValue => {
     if (!Array.isArray(currentValue)) return Utils.makeTransformerError({
       message: 'Current value must be an array',
       input: currentValue

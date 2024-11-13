@@ -1,12 +1,11 @@
-import { Transformers } from '..'
+import { Window } from '~/agnostic/misc/crossenv/window'
 import { Cast } from '../../cast'
-import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
 import { Utils } from '../../utils'
 
 export const split: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, currentValue => {
-    const { Text } = Crossenv.getWindow()
+  return Utils.toNamedTransformer(callerTagName, args, currentValue => {
+    const { Text } = Window.get()
     const [splitter] = args
     if (typeof currentValue !== 'string'
       && !(currentValue instanceof Text)) return Utils.makeTransformerError({

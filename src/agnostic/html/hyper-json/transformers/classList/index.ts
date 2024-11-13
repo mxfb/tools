@@ -1,6 +1,5 @@
-import { Transformers } from '..'
+import { Window } from '~/agnostic/misc/crossenv/window'
 import { Cast } from '../../cast'
-import { Crossenv } from '../../crossenv'
 import { Types } from '../../types'
 import { Utils } from '../../utils'
 
@@ -11,8 +10,8 @@ enum Actions {
 }
 
 export const classList: Types.TransformerGenerator = (callerTagName, ...args): Types.Transformer => {
-  return Transformers.toNamed(callerTagName, currentValue => {
-    const { Element } = Crossenv.getWindow()
+  return Utils.toNamedTransformer(callerTagName, args, currentValue => {
+    const { Element } = Window.get()
     if (!(currentValue instanceof Element)) return Utils.makeTransformerError('Current value must be an Element')
     const [actionArg, classNameArg] = args
     if (actionArg === undefined || classNameArg === undefined) return Utils.makeTransformerError(`Expecting 2 arguments: (action: 'add' | 'remove' | 'toggle', classList: string)`)

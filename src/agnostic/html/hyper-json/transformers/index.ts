@@ -25,36 +25,28 @@ import { trim } from './trim'
 
 export namespace Transformers {
   export const defaultGeneratorsMap = new Map<string, Types.TransformerGenerator>([
-    ['append', append],
-    ['classList', classList],
-    ['join', join],
-    ['length', length],
-    ['print', print],
-    ['push', push],
-    ['querySelector', querySelector],
-    ['ref', ref],
-    ['replace', replace],
-    ['split', split],
-    ['toArray', toArray],
-    ['toBoolean', toBoolean],
-    ['toElement', toElement],
-    ['toNodeList', toNodeList],
-    ['toNull', toNull],
-    ['toNumber', toNumber],
-    ['toRecord', toRecord],
-    ['toRef', toRef],
-    ['toString', toString],
-    ['toText', toText],
-    ['toTransformer', toTransformer],
-    ['transformSelected', transformSelected],
-    ['trim', trim]
+    ['append'.toLowerCase(), append],
+    ['classList'.toLowerCase(), classList],
+    ['join'.toLowerCase(), join],
+    ['length'.toLowerCase(), length],
+    ['print'.toLowerCase(), print],
+    ['push'.toLowerCase(), push],
+    ['querySelector'.toLowerCase(), querySelector],
+    ['ref'.toLowerCase(), ref],
+    ['replace'.toLowerCase(), replace],
+    ['split'.toLowerCase(), split],
+    ['toArray'.toLowerCase(), toArray],
+    ['toBoolean'.toLowerCase(), toBoolean],
+    ['toElement'.toLowerCase(), toElement],
+    ['toNodeList'.toLowerCase(), toNodeList],
+    ['toNull'.toLowerCase(), toNull],
+    ['toNumber'.toLowerCase(), toNumber],
+    ['toRecord'.toLowerCase(), toRecord],
+    ['toRef'.toLowerCase(), toRef],
+    ['toString'.toLowerCase(), toString],
+    ['toText'.toLowerCase(), toText],
+    ['toTransformer'.toLowerCase(), toTransformer],
+    ['transformSelected'.toLowerCase(), transformSelected],
+    ['trim'.toLowerCase(), trim]
   ])
-
-  export const toNamed = (
-    name: string,
-    anonymous: Types.AnonymousTransformer): Types.Transformer => {
-    const named = anonymous as Types.Transformer
-    named.transformerName = name
-    return named
-  }
 }

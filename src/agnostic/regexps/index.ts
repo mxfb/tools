@@ -67,7 +67,7 @@ export namespace Regexps {
     return regexp
   }
 
-  function escape (string: string) {
+  export function escape (string: string) {
     return string
       .replace(/\s/igm, '\\s')
       .replace(/\n/igm, '\\n')

@@ -38,10 +38,10 @@ export const transformselected = SmartTags.makeSmartTag<Main, Args, Output>({
     const { typeCheck } = Utils.Tree.TypeChecks
     const mainClone = Cast.toElement(main)
     const [selector, ...methods] = args
-    const selectedElements = [...mainClone.querySelectorAll(Cast.toString(selector))]
+    const selectedElements = Array.from(mainClone.querySelectorAll(Cast.toString(selector)))
     const transformationMap = new Map<Element, Types.Tree.RestingValue>(selectedElements.map(s => ([s, Utils.clone(s)])))
     for (const method of methods) {
-      for (const [selected, value] of transformationMap) {
+      for (const [selected, value] of Array.from(transformationMap)) {
         const transformer = method.transformer
         const applied = transformer.apply(value)
         if (!applied.success) return makeFailure(makeTransformationError({
@@ -56,7 +56,7 @@ export const transformselected = SmartTags.makeSmartTag<Main, Args, Output>({
         transformationMap.set(selected, applied.payload)
       }
     }
-    for (const [selected, transformed] of transformationMap) {
+    for (const [selected, transformed] of Array.from(transformationMap)) {
       const transformedChecked = typeCheck(transformed, 'element', 'nodelist', 'text', 'string', 'number', 'boolean', 'null')
       if (!transformedChecked.success) return makeFailure(makeTransformationError({
         // [WIP] maybe a custom makeBadTransformationOutputError ?

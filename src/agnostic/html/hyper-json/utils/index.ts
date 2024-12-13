@@ -74,7 +74,7 @@ export namespace Utils {
       }
       if (actualSubvalue instanceof NodeList) {
         const frag = document.createDocumentFragment()
-        frag.append(currentValue, ...Utils.clone(actualSubvalue))
+        frag.append(currentValue, ...Array.from(Utils.clone(actualSubvalue)))
         return frag.childNodes as NodeListOf<Element | Text>
       }
       return actualSubvalue
@@ -94,7 +94,7 @@ export namespace Utils {
       }
       if (actualSubvalue instanceof NodeList) {
         const frag = document.createDocumentFragment()
-        frag.append(clone(currentValue), ...clone(actualSubvalue))
+        frag.append(clone(currentValue), ...Array.from(clone(actualSubvalue)))
         return frag.childNodes as NodeListOf<Element | Text>
       }
       return actualSubvalue
@@ -117,7 +117,7 @@ export namespace Utils {
       }
       if (actualSubvalue instanceof NodeList) {
         const frag = document.createDocumentFragment()
-        frag.append(clone(currentValue), ...clone(actualSubvalue))
+        frag.append(clone(currentValue), ...Array.from(clone(actualSubvalue)))
         return frag.childNodes as NodeListOf<Element | Text>
       }
       return actualSubvalue
@@ -130,17 +130,17 @@ export namespace Utils {
         || typeof actualSubvalue === 'string'
       ) {
         const frag = document.createDocumentFragment()
-        frag.append(...clone(currentValue), `${actualSubvalue}`)
+        frag.append(...Array.from(clone(currentValue)), `${actualSubvalue}`)
         return frag.childNodes as NodeListOf<Element | Text>
       }
       if (actualSubvalue instanceof Text || actualSubvalue instanceof Element) {
         const frag = document.createDocumentFragment()
-        frag.append(...clone(currentValue), clone(actualSubvalue))
+        frag.append(...Array.from(clone(currentValue)), clone(actualSubvalue))
         return frag.childNodes as NodeListOf<Element | Text>
       }
       if (actualSubvalue instanceof NodeList) {
         const frag = document.createDocumentFragment()
-        frag.append(...clone(currentValue), ...clone(actualSubvalue))
+        frag.append(...Array.from(clone(currentValue)), ...Array.from(clone(actualSubvalue)))
         return frag.childNodes as NodeListOf<Element | Text>
       }
       return actualSubvalue
@@ -317,8 +317,8 @@ export namespace Utils {
         }
       })
       const allAttributes = clones.reduce((attributes, node) => ([
-        ...attributes,
-        ...node.attributes
+        ...Array.from(attributes),
+        ...Array.from(node.attributes)
       ]), [] as Attr[])
       const outWrapper = (clones[0]?.cloneNode() ?? document.createElement('div')) as Element
       allAttributes.forEach(attr => outWrapper.setAttribute(attr.name, attr.value))

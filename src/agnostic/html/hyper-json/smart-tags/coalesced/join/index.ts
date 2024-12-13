@@ -18,6 +18,6 @@ export const join = SmartTags.makeSmartTag<Main, Args, Output>({
     const { makeSuccess } = Outcome
     const joiner = Cast.toString(args)
     if (Array.isArray(main)) return makeSuccess(main.map(Cast.toString).join(joiner))
-    return makeSuccess([...main].map(Cast.toString).join(joiner))
+    return makeSuccess(Array.from(main).map(Cast.toString).join(joiner))
   }
 })

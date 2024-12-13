@@ -20,7 +20,7 @@ export const element = SmartTags.makeSmartTag<Main, Args, Output>({
     const { document, NodeList } = Window.get()
     const elt = document.createElement(tagName)
     for (const argVal of args) {
-      if (argVal instanceof NodeList) elt.append(...argVal)
+      if (argVal instanceof NodeList) elt.append(...Array.from(argVal))
       else if (argVal instanceof Element) elt.append(argVal)
       else elt.append(Cast.toText(argVal))
     }

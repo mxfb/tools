@@ -20,15 +20,15 @@ export const select = SmartTags.makeSmartTag<Main, Args, Output>({
       for (const arg of args) {
         const selector = Cast.toString(arg)
         const found = main.querySelectorAll(selector)
-        selectedFragment.append(...found)
+        selectedFragment.append(...Array.from(found))
       }
     } else {
       const divWrapper = Window.get().document.createElement('div')
-      divWrapper.append(...main)
+      divWrapper.append(...Array.from(main))
       for (const arg of args) {
         const selector = Cast.toString(arg)
         const found = divWrapper.querySelectorAll(selector)
-        selectedFragment.append(...found)
+        selectedFragment.append(...Array.from(found))
       }
     }
     const selected = selectedFragment.childNodes as NodeListOf<Element | Text>

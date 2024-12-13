@@ -87,8 +87,8 @@ export namespace Cast {
       input.forEach(item => {
         if (typeof item === 'number' || typeof item === 'boolean' || item === null) parentDiv.append(`${item}`)
         else if (typeof item === 'string' || item instanceof Text || item instanceof Element) parentDiv.append(item)
-        else if (item instanceof NodeList) parentDiv.append(...item)
-        else if (Array.isArray(item)) parentDiv.append(...toNodeList(item))
+        else if (item instanceof NodeList) parentDiv.append(...Array.from(item))
+        else if (Array.isArray(item)) parentDiv.append(...Array.from(toNodeList(item)))
         else parentDiv.append(toString(item))
       })
       return parentDiv.childNodes as NodeListOf<Element | Text>

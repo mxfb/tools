@@ -21,6 +21,7 @@ import { record } from '../smart-tags/isolated/record'
 import { ref } from '../smart-tags/isolated/ref'
 import { string } from '../smart-tags/isolated/string'
 import { text } from '../smart-tags/isolated/text'
+
 // Coalesced smart tags
 import { add } from '../smart-tags/coalesced/add'
 import { addclass } from '../smart-tags/coalesced/addclass'
@@ -367,7 +368,7 @@ export namespace Tree {
       if (smartTagData === null) {
         const nodelist = Cast.toNodeList(innerValue)
         const clone = node.cloneNode() as Element
-        clone.append(...nodelist)
+        clone.append(...Array.from(nodelist))
         return clone
       }
 
@@ -461,34 +462,13 @@ export namespace Tree {
     evaluate () {
       const start = Date.now()
       const {
-        smartTagName,
-        tagName,
-        pathString,
         getCachedValue,
         setCachedValue,
         enforceEvaluation,
-        perfCounters,
-        node,
-        isRoot,
-        isMethod,
-        isPreserved,
-        isLiteral,
-        mode,
-        subtrees
+        perfCounters
       } = this
-      // console.group(smartTagName ?? tagName ?? '#text', '@', pathString)
-      // console.log('NODE=', node)
-      // console.log('IS-ROOT=', isRoot)
-      // console.log('IS-METHOD=', isMethod)
-      // console.log('IS-PRESERVED=', isPreserved)
-      // console.log('IS-LITERAL', isLiteral)
-      // console.log('MODE=', mode)
-      // console.log('SUBTREES=', subtrees)
       const cached = getCachedValue()
-      // console.log('CACHED=', cached)
       if (cached !== undefined) {
-        // console.log('EVALUATED=', cached)
-        // console.groupEnd()
         const end = Date.now()
         const time = end - start
         perfCounters.cached ++
@@ -498,9 +478,7 @@ export namespace Tree {
         return cached
       }
       const evaluated = enforceEvaluation()
-      // console.log('EVALUATED=', evaluated)
       setCachedValue(evaluated)
-      // console.groupEnd()
       const end = Date.now()
       const time = end - start
       perfCounters.computed ++

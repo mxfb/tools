@@ -28,9 +28,11 @@ source3.innerHTML = `<div _key="prop-1" _action="prepend" attr2x="lol">
   Valeur de prop-1 appended 3 fois
 </div>`
 
-const merged = HyperJson.Tree.mergeRootNodes([source1, source2, source3])
+HyperJson.Tree
+
+const merged = HyperJson.Utils.Tree.mergeNodes([source1, source2, source3])
 console.log(merged)
-const tree = new HyperJson.Tree.Tree(merged)
+const tree = new HyperJson.Tree.Tree(merged, null, null)
 console.log(tree.evaluate())
 // const merged = HyperJson.Tree.mergeRootElements(source1, source2, source3)
 // const subpaths = HyperJson.Tree.getElementSubpaths(merged)

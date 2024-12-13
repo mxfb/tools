@@ -18,8 +18,8 @@ export const nodelist = SmartTags.makeSmartTag<Main, Args, Output>({
     const { document } = Window.get()
     const returnedParent = document.createDocumentFragment()
     returnedParent.append(
-      ...Cast.toNodeList(main),
-      ...Cast.toNodeList(args))
+      ...Array.from(Cast.toNodeList(main)),
+      ...Array.from(Cast.toNodeList(args)))
     const returned = returnedParent.childNodes as NodeListOf<Element | Text>
     return Outcome.makeSuccess(returned)
   }

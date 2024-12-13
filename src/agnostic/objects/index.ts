@@ -1,3 +1,4 @@
+import { deepGetProperty as deepGetPropertyFunc } from './deep-get-property'
 import { Enums as EnumsNamespace } from './enums'
 import { flattenGetters as flattenGettersFunc } from './flatten-getters'
 import {
@@ -10,6 +11,8 @@ import { recordMap as recordMapFunc } from './record-map'
 import { Validation as ValidationNamespace } from './validation'
 
 export namespace Objects {
+  // Deep get property
+  export const deepGetProperty = deepGetPropertyFunc
   // Enums
   export import Enums = EnumsNamespace
   // Flatten getters

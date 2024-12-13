@@ -145,8 +145,7 @@ export namespace Tree {
       this.enforceEvaluation = this.enforceEvaluation.bind(this)
       this.getCachedValue = this.getCachedValue.bind(this)
       this.setCachedValue = this.setCachedValue.bind(this)
-      this.getPerfCounters = this.getPerfCounters.bind(this)
-      this.printPerfCounters = this.printPerfCounters.bind(this)
+      this.getPerformanceData = this.getPerformanceData.bind(this)
       this.evaluate = this.evaluate.bind(this)
       
       // node
@@ -408,17 +407,17 @@ export namespace Tree {
     }
 
     perfCounters = {
-      computed: 0,
+      evaluations: 0,
       computeTime: 0,
       computeTimeAvg: 0,
       cached: 0,
       cacheTime: 0,
       cacheTimeAvg: 0,
-      totalTime: 0,
+      totalTime: 0
     }
 
     // [WIP] bind this
-    getPerfCounters () {
+    getPerformanceData () {
       const { subtrees, cachedValue, tagName, perfCounters } = this
       const subCounters: Array<[string, typeof perfCounters & {
         tagName: string,
@@ -429,29 +428,12 @@ export namespace Tree {
         tagName: tagName ?? '#text',
         evaluated: cachedValue
       }])
-      subtrees.forEach(subtree => subCounters.push(...subtree.getPerfCounters()))
-      return subCounters
-    }
-
-    // [WIP] bind this
-    printPerfCounters () {
-      const perfCounters = this.getPerfCounters()
-        .sort((a, b) => {
-          const aCalls = a[1].computed + a[1].cached
-          const bCalls = b[1].computed + b[1].cached
-          return bCalls - aCalls
-          // return b[1].totalTime - a[1].totalTime
-        })
-        .map(e => ({
-          tagName: e[1].tagName,
-          path: e[0],
-          totalMs: e[1].totalTime,
-          computeMs: e[1].computeTime,
-          cacheMs: e[1].cacheTime,
-          ops: `${e[1].computed}/${e[1].cached}`,
-          evaluated: e[1].evaluated
-        }))
-      console.table(perfCounters)
+      subtrees.forEach(subtree => subCounters.push(...subtree.getPerformanceData()))
+      return subCounters.sort((a, b) => {
+        const aCalls = a[1].evaluations + a[1].cached
+        const bCalls = b[1].evaluations + b[1].cached
+        return bCalls - aCalls
+      })
     }
 
     evaluate () {
@@ -476,9 +458,9 @@ export namespace Tree {
       setCachedValue(evaluated)
       const end = Date.now()
       const time = end - start
-      perfCounters.computed ++
+      perfCounters.evaluations ++
       perfCounters.computeTime += time
-      perfCounters.computeTimeAvg = perfCounters.computeTime / perfCounters.computed
+      perfCounters.computeTimeAvg = perfCounters.computeTime / perfCounters.evaluations
       perfCounters.totalTime = perfCounters.computeTime + perfCounters.cacheTime
       return evaluated
     }

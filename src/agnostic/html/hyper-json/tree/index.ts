@@ -74,16 +74,6 @@ import { totext } from '../smart-tags/coalesced/totext'
 import { transformselected } from '../smart-tags/coalesced/transformselected'
 import { trim } from '../smart-tags/coalesced/trim'
 
-// [WIP] find a better place for this
-export const SMART_TAGS_REGISTER: Types.SmartTags.Register = new Map<string, Types.SmartTags.SmartTag<any, any, any>>([
-  any, array, boolean, element, get, global, guess, nodelist, nullFunc, number, record, ref, string, text, add, addclass,
-  and, append, at, call, clone, deleteproperties, equals, getattribute, getproperties, getproperty, ifFunc,
-  initialize, join, length, map, negate, notrailing, or, pickrandom, print, populate, push, pusheach,
-  recordtoarray, removeattribute, removeclass, renameproperty, replace, select, set, setattribute, setproperties,
-  setproperty, sorton, split, toarray, toboolean, toelement, toggleclass, tonodelist, tonull, tonumber, toref,
-  torecord, tostring, totext, transformselected, trim
-])
-
 // [WIP] eventually just export the Tree class here
 export namespace Tree {
   export class Tree {
@@ -100,6 +90,7 @@ export namespace Tree {
     readonly isMethod: boolean
     readonly tagName: string | null
     readonly smartTagName: string | null
+    readonly smartTagsRegister: Map<string, Types.SmartTags.SmartTag<any, any, any>>
     readonly smartTagData: Types.SmartTags.SmartTag | null
     readonly mode: Types.Tree.Mode
     readonly isPreserved: boolean
@@ -205,9 +196,19 @@ export namespace Tree {
         this.smartTagName = null
       }
 
+      // smartTagsRegister
+      this.smartTagsRegister = new Map<string, Types.SmartTags.SmartTag<any, any, any>>([
+        any, array, boolean, element, get, global, guess, nodelist, nullFunc, number, record, ref, string, text, add, addclass,
+        and, append, at, call, clone, deleteproperties, equals, getattribute, getproperties, getproperty, ifFunc,
+        initialize, join, length, map, negate, notrailing, or, pickrandom, print, populate, push, pusheach,
+        recordtoarray, removeattribute, removeclass, renameproperty, replace, select, set, setattribute, setproperties,
+        setproperty, sorton, split, toarray, toboolean, toelement, toggleclass, tonodelist, tonull, tonumber, toref,
+        torecord, tostring, totext, transformselected, trim
+      ])
+
       // smartTagData
       if (this.smartTagName === null) { this.smartTagData = null }
-      else { this.smartTagData = SMART_TAGS_REGISTER.get(this.smartTagName) ?? null }
+      else { this.smartTagData = this.smartTagsRegister.get(this.smartTagName) ?? null }
 
       // mode
       const hasModeAttribute = this.attributes?.find(attr => {
@@ -339,7 +340,6 @@ export namespace Tree {
         isMethod,
         mode,
         performSafetyChecks,
-        options
       } = this
       
       // Looks for impossible attributes configurations
@@ -351,18 +351,13 @@ export namespace Tree {
 
       // Inner value calculation
       const initialInnerValue = Utils.Tree.getInitialValueFromTypeName(isolationInitType)
-      // console.log('INIT-INNER-TYPE=', isolationInitType)
-      // console.log('INIT-INNER=', initialInnerValue)
       const innerValue = Array
         .from(subtrees)
         .reduce((reduced, [subpath, subtree]) => {
           const subvalue = subtree.evaluate()
           const coalesced = Utils.coalesceValues(reduced, subpath, subvalue)
-          // console.log('COALESCING...', reduced, subvalue, 'on:', subpath)
-          // console.log('COALESCED=', coalesced)
           return coalesced
         }, initialInnerValue)
-      // console.log('INNER=', innerValue)
 
       // If no smartTagData, then treat it as an HTMLElement
       if (smartTagData === null) {

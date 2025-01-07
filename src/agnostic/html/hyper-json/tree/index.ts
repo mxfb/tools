@@ -56,10 +56,10 @@ import { replace } from '../smart-tags/coalesced/replace'
 import { select } from '../smart-tags/coalesced/select'
 import { set } from '../smart-tags/coalesced/set'
 import { setattribute } from '../smart-tags/coalesced/setattribute'
-import { setproperties } from '../smart-tags/coalesced/setproperties'
 import { setproperty } from '../smart-tags/coalesced/setproperty'
 import { sorton } from '../smart-tags/coalesced/sorton'
 import { split } from '../smart-tags/coalesced/split'
+import { spread } from '../smart-tags/coalesced/spread'
 import { toarray } from '../smart-tags/coalesced/toarray'
 import { toboolean } from '../smart-tags/coalesced/toboolean'
 import { toelement } from '../smart-tags/coalesced/toelement'
@@ -200,7 +200,7 @@ export namespace Tree {
         any, array, boolean, element, get, global, guess, nodelist, nullFunc, number, record, ref, string, text, add, addclass,
         and, append, at, call, clone, deleteproperties, equals, getattribute, getproperties, getproperty, ifFunc,
         initialize, join, length, map, negate, notrailing, or, pickrandom, print, populate, push, pusheach,
-        recordtoarray, removeattribute, removeclass, renameproperty, replace, select, set, setattribute, setproperties,
+        recordtoarray, removeattribute, removeclass, renameproperty, replace, select, set, setattribute, spread,
         setproperty, sorton, split, toarray, toboolean, toelement, toggleclass, tonodelist, tonull, tonumber, toref,
         torecord, tostring, totext, transformselected, trim
       ])

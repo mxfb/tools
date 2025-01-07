@@ -7,8 +7,8 @@ type Main = Types.Tree.RestingRecordValue
 type Args = [Types.Tree.RestingRecordValue]
 type Output = Types.Tree.RestingRecordValue
 
-export const setproperties = SmartTags.makeSmartTag<Main, Args, Output>({
-  name: 'setproperties',
+export const spread = SmartTags.makeSmartTag<Main, Args, Output>({
+  name: 'spread',
   defaultMode: 'coalescion',
   isolationInitType: 'array',
   mainValueCheck: m => Utils.Tree.TypeChecks.typeCheck(m, 'record'),

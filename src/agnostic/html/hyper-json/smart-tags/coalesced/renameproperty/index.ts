@@ -5,7 +5,10 @@ import { Types } from '../../../types'
 import { SmartTags } from '../..'
 
 type Main = Types.Tree.RestingRecordValue
-type Args = [string | Text, string | Text]
+type Args = [
+  prev: string | Text,
+  next: string | Text
+]
 type Output = Types.Tree.RestingRecordValue
 
 export const renameproperty = SmartTags.makeSmartTag<Main, Args, Output>({

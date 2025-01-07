@@ -4,7 +4,6 @@ import { Cast } from '../../../cast'
 import { Utils } from '../../../utils'
 import { SmartTags } from '../..'
 
-
 type Main = string | Text
 type Args = Array<null | boolean | number | string | Text | Element | NodeListOf<Element | Text>>
 type Output = Element

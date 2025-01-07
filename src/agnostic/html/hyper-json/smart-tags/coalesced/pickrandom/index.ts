@@ -3,7 +3,7 @@ import { Utils } from '../../../utils'
 import { Types } from '../../../types'
 import { SmartTags } from '../..'
 
-type Main = Types.Tree.RestingArrayValue
+type Main = Types.Tree.RestingArrayValue // [WIP] string, text, array, element, nodelist ?
 type Args = []
 type Output = Types.Tree.RestingValue
 

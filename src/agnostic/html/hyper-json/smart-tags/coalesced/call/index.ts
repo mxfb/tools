@@ -7,6 +7,8 @@ type Main = Types.Tree.MethodValue | Types.Tree.MethodValue[]
 type Args = Types.Tree.RestingArrayValue
 type Output = Types.Tree.RestingValue
 
+// [WIP] this is not useful as is, hyper-json cannot support
+// function defintion/calls logic
 export const call = SmartTags.makeSmartTag<Main, Args, Output>({
   name: 'call',
   defaultMode: 'coalescion',
@@ -29,20 +31,23 @@ export const call = SmartTags.makeSmartTag<Main, Args, Output>({
   func: (main, args) => {
     const { makeFailure, makeSuccess } = Outcome
     const { makeTransformationError } = Utils.SmartTags
-    const mainArr = Array.isArray(main) ? main : [main]
-    let reduced: Types.Tree.RestingValue = args
-    for (const method of mainArr) {
-      const { transformer } = method
-      const applied = transformer.apply(reduced)
-      if (applied.success) { reduced = applied.payload }
-      return makeFailure(makeTransformationError({
-        message: 'Subtransformation failure.',
-        onTransformed: reduced,
-        transformerAt: mainArr.indexOf(method),
-        transformerName: transformer.name,
-        transformerOutput: applied
-      }))
-    }
-    return makeSuccess(reduced)
+    return makeFailure(makeTransformationError({
+      message: 'This smart tag should not be used.'
+    }))
+    // const mainArr = Array.isArray(main) ? main : [main]
+    // let reduced: Types.Tree.RestingValue = args
+    // for (const method of mainArr) {
+    //   const { transformer } = method
+    //   const applied = transformer.apply(reduced)
+    //   if (applied.success) { reduced = applied.payload }
+    //   return makeFailure(makeTransformationError({
+    //     message: 'Subtransformation failure.',
+    //     onTransformed: reduced,
+    //     transformerAt: mainArr.indexOf(method),
+    //     transformerName: transformer.name,
+    //     transformerOutput: applied
+    //   }))
+    // }
+    // return makeSuccess(reduced)
   }
 })

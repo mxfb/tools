@@ -207,7 +207,7 @@ assert('Arrays.findDuplicates', new Map([
   ['Finding first', () => Arrays.findDuplicates([1, 1]).includes(1)],
   ['Finding second', () => Arrays.findDuplicates([1, 1, 2, 2]).includes(2)],
   ['Stopping at first', () => !Arrays.findDuplicates([1, 1, 2, 2], true).includes(2)],
-  ['Finds correct nb of dedupes', () => Arrays.findDuplicates([1, 1, 2, 2, 3, 3, 3]).length === 3],
+  ['Finds correct nb of duplicates', () => Arrays.findDuplicates([1, 1, 2, 2, 3, 3, 3]).length === 3],
 ]))
 
 assert('Arrays.isArrayOf', () => {

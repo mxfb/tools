@@ -5,11 +5,13 @@ export namespace Assert {
   type Assertion = (() => boolean) | (() => Promise<boolean>) | boolean
 
   function makeSuccess (label: string) {
-    console.info(`✅ SUCCESS: "${label}"`)
+    const formattedLabel = label.split('\n').join('\n  ')
+    console.info(`✅ SUCCESS:\n  ${formattedLabel}`)
   }
 
   function makeFailure (label: string) {
-    throw new Error(`🚫 FAILURE: "${label}""`)
+    const formattedLabel = label.split('\n').join('\n  ')
+    throw new Error(`🚫 FAILURE:\n  ${formattedLabel}`)
   }
 
   export async function assert (
@@ -40,11 +42,11 @@ export namespace Assert {
       if (Array.isArray(assertion)) { assertions = [...assertion].map((a, p) => [`${p}`, a] as [string, Assertion]) }
       else if (assertion instanceof Map) { assertions = Array.from(assertion) }
       else { assertions = Object.entries(assertion) }
-      const allAsserted = assertions.map(([innerLabel, innerAssertion]) => {
+      const allAsserted = await Promise.all(assertions.map(([innerLabel, innerAssertion]) => {
         const fullLabel = `${label} / ${innerLabel}`
         const asserted = assert(fullLabel, innerAssertion)
         return asserted
-      })
+      }))
       const allSuccess = allAsserted.every(asserted => asserted.success)
       if (allSuccess) return Outcome.makeSuccess(allAsserted.map(e => e.payload).join('\n'))
       const failures = allAsserted.filter(asserted => asserted.success === false)

@@ -1,5 +1,8 @@
+import { Errors } from '~/agnostic/errors'
+import { Outcome } from '../outcome'
+
 export namespace Assert {
-  type Assertion = (() => boolean) | boolean
+  type Assertion = (() => boolean) | (() => Promise<boolean>) | boolean
 
   function makeSuccess (label: string) {
     console.info(`✅ SUCCESS: "${label}"`)
@@ -9,19 +12,53 @@ export namespace Assert {
     throw new Error(`🚫 FAILURE: "${label}""`)
   }
 
-  export function assert (label: string, assertion: Assertion | Array<Assertion>) {
-    if (Array.isArray(assertion)) assertion.forEach((innerAssertion, pos) => assert(`${label} (${pos})`, innerAssertion))
+  export async function assert (
+    label: string,
+    assertion: Assertion | Array<Assertion> | Map<string, Assertion> | Record<string, Assertion>
+  ): Promise<Outcome.Either<string, string>> {
+
+    // Assertion is boolean ?
+    if (typeof assertion === 'boolean') return assertion
+      ? Outcome.makeSuccess(label)
+      : Outcome.makeFailure(label)
+
+    // Assertion is function ?
     else if (typeof assertion === 'function') {
       try {
-        const result = assertion()
-        if (result === false) makeFailure(label)
-        else makeSuccess(label)
+        const result = await assertion()
+        if (result === false) return Outcome.makeFailure(label)
+        else return Outcome.makeSuccess(label)
       } catch (err) {
-        makeFailure(`${err}`)
+        const errStr = Errors.unknownToString(err)
+        return Outcome.makeFailure(`${label} / ${errStr}`)
       }
     }
-    else if (assertion === false) makeFailure(label)
-    else makeSuccess(label)
+
+    // Then assertion is Array, Map or Record
+    else {
+      let assertions: [string, Assertion][]
+      if (Array.isArray(assertion)) { assertions = [...assertion].map((a, p) => [`${p}`, a] as [string, Assertion]) }
+      else if (assertion instanceof Map) { assertions = Array.from(assertion) }
+      else { assertions = Object.entries(assertion) }
+      const allAsserted = assertions.map(([innerLabel, innerAssertion]) => {
+        const fullLabel = `${label} / ${innerLabel}`
+        const asserted = assert(fullLabel, innerAssertion)
+        return asserted
+      })
+      const allSuccess = allAsserted.every(asserted => asserted.success)
+      if (allSuccess) return Outcome.makeSuccess(allAsserted.map(e => e.payload).join('\n'))
+      const failures = allAsserted.filter(asserted => asserted.success === false)
+      const failuresStr = failures.map(failure => failure.error).join('\n  ')
+      return Outcome.makeFailure(failuresStr)
+    }
   }
 
+  export async function assertVerbose (label: string, assertion: Assertion | Array<Assertion> | Map<string, Assertion>) {
+    const asserted = await assert(label, assertion)
+    if (asserted?.success) {
+      makeSuccess(asserted.payload)
+      return asserted
+    }
+    return makeFailure(asserted.error)
+  }
 }

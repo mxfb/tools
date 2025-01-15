@@ -9,7 +9,7 @@ import {
 } from './is-valid-css-class-name'
 import {
   StylesSetItem as StylesSetItemType,
-  StylesSet as StylesSetFunc,
+  StylesSet as StylesSetClass,
   StylesSetCompProps as StylesSetCompPropsFype,
   StylesSetComp as StylesSetCompFunc
 } from './styles-set'
@@ -25,7 +25,7 @@ export namespace Css {
   export const isValidClassName = isValidClassNameFunc
   // Styles set
   export type StylesSetItem = StylesSetItemType
-  export const StylesSet = StylesSetFunc
+  export const StylesSet = StylesSetClass
   export type StylesSetCompProps = StylesSetCompPropsFype
   export const StylesSetComp = StylesSetCompFunc
 }

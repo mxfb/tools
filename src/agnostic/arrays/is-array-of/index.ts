@@ -1,8 +1,14 @@
-import { ConstructorFunction, isConstructorFunction } from '~/agnostic/misc/is-constructor-function'
-type TypeCheckerFunction = (input: unknown) => boolean
-type TypeChecker = ConstructorFunction | TypeCheckerFunction
+import {
+  ConstructorFunction,
+  isConstructorFunction
+} from '~/agnostic/misc/is-constructor-function'
 
-export function isArrayOf<T extends unknown = unknown> (input: unknown, _types: TypeChecker | TypeChecker[] = []): input is T[] {
+type TypeCheckerFunction<T extends any> = (input: unknown) => input is T
+type TypeChecker<T extends any> = ConstructorFunction<T> | TypeCheckerFunction<T>
+
+export function isArrayOf<T extends unknown = unknown> (
+  input: unknown,
+  _types: TypeChecker<T> | TypeChecker<T>[] = []): input is T[] {
   if (!Array.isArray(input)) return false;
   const types = Array.isArray(_types) ? _types : [_types]
   if (types.length === 0) return true
@@ -10,9 +16,9 @@ export function isArrayOf<T extends unknown = unknown> (input: unknown, _types: 
     return types.some(typeChecker => {
       const isConstructor = isConstructorFunction(typeChecker)
       if (!isConstructor) return typeChecker(entry)
-      if (typeChecker === Number) return typeof entry === 'number'
-      if (typeChecker === String) return typeof entry === 'string'
-      if (typeChecker === Boolean) return typeof entry === 'boolean'
+      if (typeChecker === Number as ConstructorFunction<Number>) return typeof entry === 'number'
+      if (typeChecker === String as ConstructorFunction<String>) return typeof entry === 'string'
+      if (typeChecker === Boolean as ConstructorFunction<Boolean>) return typeof entry === 'boolean'
       if (isConstructor) return entry instanceof typeChecker
     })
   })

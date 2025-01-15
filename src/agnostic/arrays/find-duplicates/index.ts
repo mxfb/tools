@@ -8,3 +8,5 @@ export function findDuplicates<T> (arr: T[], stopAtFirst: boolean = false): T[] 
   }
   return Array.from(duplicates)
 }
+
+// [WIP] dedupe ?

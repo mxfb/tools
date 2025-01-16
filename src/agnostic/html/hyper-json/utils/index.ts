@@ -59,7 +59,7 @@ export namespace Utils {
     if (typeof currentValue === 'number') return actualSubvalue
     if (currentValue instanceof Transformer) return actualSubvalue
     if (currentValue instanceof Method) return actualSubvalue
-    
+
     if (typeof currentValue === 'string') {
       if (actualSubvalue === null
         || typeof actualSubvalue === 'boolean'

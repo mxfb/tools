@@ -1,4 +1,5 @@
 import { Window } from '~/agnostic/misc/crossenv/window'
+import { trimStart, trimEnd } from '~/agnostic/strings/trim'
 
 import { Serialize } from '../serialize'
 import { Transformer } from '../transformer'
@@ -134,7 +135,7 @@ export namespace Tree {
       parent: Tree | null,
       pathFromParent: string | number | null,
       options?: Types.Tree.Options) {
-      const { Element, Text } = Window.get()
+      const { Element, Text, document } = Window.get()
 
       // Bounds
       this.resolve = this.resolve.bind(this)
@@ -247,21 +248,44 @@ export namespace Tree {
       const mutableSubtrees = new Map<string | number, Tree>()
       Array
         .from(childNodes)
+        // Filter out non Text or Element children
         .filter((child, _, childNodes): child is Element | Text => {
           if (child instanceof Element) return true
-          if (!(child instanceof Text)) return false
-          const hasContent = (child.textContent ?? '').trim() !== ''
-          if (hasContent) return true
-          if (childNodes.some(n => n instanceof Element)) return false
-          return true
+          if (child instanceof Text) return true
+          return false
+        })
+        // Merge neighboring Text nodes
+        .reduce((reduced, child) => {
+          if (reduced.length === 0) return [child]
+          if (child instanceof Element) return [...reduced, child]
+          const lastReducedItem = reduced[reduced.length - 1]!
+          if (lastReducedItem instanceof Element) return [...reduced, child]
+          const lastReducedTrimmed = trimEnd(lastReducedItem.textContent ?? '')
+          const childTrimmed = trimStart(child.textContent ?? '')
+          const merged = document.createTextNode(`${lastReducedTrimmed}${childTrimmed}`)
+          const returned = [...reduced]
+          returned.pop()
+          returned.push(merged)
+          return returned
+        }, [] as Array<Element | Text>)
+        // Filter out empty Text nodes after merging neighbours
+        .filter(child => {
+          if (child instanceof Element) return true
+          const textContent = child.textContent ?? ''
+          return textContent.trim() !== ''
         })
         .forEach(childNode => {
           if (childNode instanceof Text) {
-            const hasContent = (childNode.textContent ?? '').trim() !== ''
-            if (hasContent) { childNode.textContent = childNode.textContent?.trim() ?? '' }
+            const rawTextContent = childNode.textContent ?? ''
+            // Strips padding whitespaces (before and after)
+            // if they contain at least one line return character
+            const textContent = rawTextContent
+              .replace(/^\s*\n+\s*/, '')
+              .replace(/\s*\n+\s*$/, '')
+            const returnedChildNode = document.createTextNode(textContent)
             mutableSubtrees.set(
               positionnedChildrenCount,
-              new Tree(childNode, this, positionnedChildrenCount, this.options)
+              new Tree(returnedChildNode, this, positionnedChildrenCount, this.options)
             )
             positionnedChildrenCount += 1
           } else {

@@ -163,6 +163,8 @@ import { Process } from '~/node/process'
  * Strings.normalizeIndent
  * Strings.replaceAll
  * Strings.toAlphanum
+ * Strings.trimStart
+ * Strings.trimEnd
 
  * Time.Duration.Duration
  * Time.Duration.milliseconds
@@ -203,14 +205,14 @@ const assert = Misc.Assert.assertVerbose
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-assert('Arrays.findDuplicates', new Map([
+await assert('Arrays.findDuplicates', new Map([
   ['Finding first', () => Arrays.findDuplicates([1, 1]).includes(1)],
   ['Finding second', () => Arrays.findDuplicates([1, 1, 2, 2]).includes(2)],
   ['Stopping at first', () => !Arrays.findDuplicates([1, 1, 2, 2], true).includes(2)],
   ['Finds correct nb of duplicates', () => Arrays.findDuplicates([1, 1, 2, 2, 3, 3, 3]).length === 3],
 ]))
 
-assert('Arrays.isArrayOf', () => {
+await assert('Arrays.isArrayOf', () => {
   const input = [true, 2, 'string']
   const firstIsASuccess = Arrays.isArrayOf<Boolean | Number | String>(input, [Boolean, Number, String])
   const secondIsAFailure = Arrays.isArrayOf<Number>(input, Number) === false
@@ -230,12 +232,12 @@ assert('Arrays.isArrayOf', () => {
     && fifthIsAFailure
 })
 
-assert('Arrays.make', new Map([
+await assert('Arrays.make', new Map([
   ['Correct filling', () => Arrays.make(Math.random, 100).every(item => typeof item === 'number')],
   ['Correct length', () => Arrays.make(Math.random, 100).length === 100]
 ]))
 
-assert('Arrays.randomPick', () => {
+await assert('Arrays.randomPick', () => {
   try {
     const picked = Arrays.randomPick([1, 'truc', false])
     return picked === 1
@@ -247,7 +249,7 @@ assert('Arrays.randomPick', () => {
   }
 })
 
-assert('Arrays.randomPickMany', () => {
+await assert('Arrays.randomPickMany', () => {
   try {
     const pickedSelection = Arrays.randomPickMany(3, [1, 'truc', false])
     return pickedSelection.includes(1)
@@ -265,14 +267,14 @@ assert('Arrays.randomPickMany', () => {
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-assert('Booleans.falsyValues', () => Booleans.falsyValues.every(val => val || 0 === 0))
+await assert('Booleans.falsyValues', () => Booleans.falsyValues.every(val => val || 0 === 0))
 
-assert('Booleans.isFalsy', () => {
+await assert('Booleans.isFalsy', () => {
   return Booleans.isFalsy('')
     && !Booleans.isFalsy('test')
 })
 
-assert('Booleans.isNotFalsy', () => {
+await assert('Booleans.isNotFalsy', () => {
   return Booleans.isNotFalsy('truc')
     && !Booleans.isNotFalsy(false)
 })
@@ -283,6 +285,18 @@ assert('Booleans.isNotFalsy', () => {
  * CSS
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+ *
+ * STRINGS
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+await assert('Strings.trimStart', () => Strings.trimStart('   test   ') === 'test   ')
+await assert('Strings.trimEnd', () => Strings.trimEnd('   test   ') === '   test')
 
 
 

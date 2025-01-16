@@ -7,6 +7,10 @@ import {
 import { replaceAll as replaceAllFunc } from './replace-all'
 import { normalizeIndent as normalizeIndentFunc } from './normalize-indent'
 import { toAlphanum as toAlphanumFunc } from './to-alphanum'
+import {
+  trimStart as trimStartFunc,
+  trimEnd as trimEndFunc
+} from './trim'
 
 export namespace Strings {
   // CharCodes
@@ -21,4 +25,7 @@ export namespace Strings {
   export const replaceAll = replaceAllFunc
   // To alphanum
   export const toAlphanum = toAlphanumFunc
+  // Trim
+  export const trimStart = trimStartFunc
+  export const trimEnd = trimEndFunc
 }

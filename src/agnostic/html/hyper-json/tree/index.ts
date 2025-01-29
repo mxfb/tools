@@ -146,7 +146,6 @@ export namespace Tree {
       this.enforceEvaluation = this.enforceEvaluation.bind(this)
       this.getCachedValue = this.getCachedValue.bind(this)
       this.setCachedValue = this.setCachedValue.bind(this)
-      this.getPerformanceData = this.getPerformanceData.bind(this)
       this.evaluate = this.evaluate.bind(this)
       
       // node
@@ -430,62 +429,20 @@ export namespace Tree {
       this.cachedValue = Serialize.serialize(evaluated)
     }
 
-    perfCounters = {
-      evaluations: 0,
-      computeTime: 0,
-      computeTimeAvg: 0,
-      cached: 0,
-      cacheTime: 0,
-      cacheTimeAvg: 0,
-      totalTime: 0
-    }
-
-    // [WIP] bind this
-    getPerformanceData () {
-      const { subtrees, cachedValue, tagName, perfCounters } = this
-      const subCounters: Array<[string, typeof perfCounters & {
-        tagName: string,
-        evaluated: typeof cachedValue
-      }]> = []
-      subCounters.push([this.pathString, {
-        ...perfCounters,
-        tagName: tagName ?? '#text',
-        evaluated: cachedValue
-      }])
-      subtrees.forEach(subtree => subCounters.push(...subtree.getPerformanceData()))
-      return subCounters.sort((a, b) => {
-        const aCalls = a[1].evaluations + a[1].cached
-        const bCalls = b[1].evaluations + b[1].cached
-        return bCalls - aCalls
-      })
-    }
-
     evaluate () {
       const start = Date.now()
       const {
         getCachedValue,
         setCachedValue,
-        enforceEvaluation,
-        perfCounters
+        enforceEvaluation
       } = this
       const cached = getCachedValue()
-      if (cached !== undefined) {
-        const end = Date.now()
-        const time = end - start
-        perfCounters.cached ++
-        perfCounters.cacheTime += time
-        perfCounters.cacheTimeAvg = perfCounters.cacheTime / perfCounters.cached
-        perfCounters.totalTime = perfCounters.computeTime + perfCounters.cacheTime
-        return cached
-      }
+      if (cached !== undefined) return cached
       const evaluated = enforceEvaluation()
       setCachedValue(evaluated)
       const end = Date.now()
       const time = end - start
-      perfCounters.evaluations ++
-      perfCounters.computeTime += time
-      perfCounters.computeTimeAvg = perfCounters.computeTime / perfCounters.evaluations
-      perfCounters.totalTime = perfCounters.computeTime + perfCounters.cacheTime
+      if (time > 20) console.warn(`${this.pathString} took ${time}ms to evaluate, maybe there's something wrong here`)
       return evaluated
     }
   }

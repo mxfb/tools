@@ -166,6 +166,8 @@ import { Process } from '~/node/process'
  * Strings.trimStart
  * Strings.trimEnd
 
+ * Time.Dates.formatDate
+
  * Time.Duration.Duration
  * Time.Duration.milliseconds
  * Time.Duration.seconds
@@ -298,6 +300,27 @@ await assert('Booleans.isNotFalsy', () => {
 await assert('Strings.trimStart', () => Strings.trimStart('   test   ') === 'test   ')
 await assert('Strings.trimEnd', () => Strings.trimEnd('   test   ') === '   test')
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+ *
+ * TIME
+ * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+await assert('Time.Dates.formatDate', new Map([
+  ['2023/01/01 - 22h00 (fr)', () => {
+    return Time.Dates.formatDate(
+      new Date(2023, 0, 1, 22),
+      '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{hh}} {{h}} {{HH}} {{H}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}}',
+      'fr'
+    ) === '01 1 dimanche dim. 01 1 janvier janv. 2023 23 10 10 22 22 00 0 00 0 PM pm'
+  }],
+  ['2023/01/01 - 22h00 (fr) - bis', () => {
+    return Time.Dates.formatDate(
+      new Date(2023, 0, 1, 22),
+      'Le {{d}} {{D}} {{MMM}} {{YYYY}}, à {{H}}h{{mm}}',
+      'fr'
+    ) === 'Le dim. 1 janv. 2023, à 22h00'
+  }],
+]))
 
 
 

@@ -1,4 +1,3 @@
-// [WIP] how to handle "1er", "1st", "2nd", etc... ?
 export function formatDate (date: Date, format: string, locale: string = 'en'): string {
   try { new Intl.DateTimeFormat(locale) }
   catch { locale = 'en' }
@@ -34,10 +33,51 @@ export function formatDate (date: Date, format: string, locale: string = 'en'): 
     'ss': () => String(seconds).padStart(2, '0'),
     's': () => String(seconds),
     'A': () => (isPM ? 'PM' : 'AM'),
-    'a': () => (isPM ? 'pm' : 'am')
+    'a': () => (isPM ? 'pm' : 'am'),
+    'th': () => {
+      if (locale.startsWith('fr') && day === 1) return 'er'
+      if (locale.startsWith('en')) {
+        const mod10 = day % 10
+        const mod100 = day % 100
+        if (mod10 === 1 && mod100 !== 11) return 'st'
+        if (mod10 === 2 && mod100 !== 12) return 'nd'
+        if (mod10 === 3 && mod100 !== 13) return 'rd'
+        return 'th'
+      }
+      return ''
+    },
   }
 
-  return format.replace(/{{(DD|D|dd|d|MM|M|MMMM|MMM|YYYY|YY|HH|H|hh|h|mm|m|ss|s|A|a)}}/g, (match, token) => {
-    return replacements[token]?.() || match
-  })
+  const regexp = /{{(DD|D|dd|d|MM|M|MMMM|MMM|YYYY|YY|HH|H|hh|h|mm|m|ss|s|A|a|th)}}/g
+  return format.replace(regexp, (match, token) => replacements[token]?.() ?? match)
 }
+
+// [WIP] this was removed since JavaScript's Date object don't hold timezone data
+// those templates would onli reflect the curent client's timezone, no matter what the input Date obj was
+
+// 'ZZ': () => {
+//   const timezoneOffset = date.getTimezoneOffset()
+//   const offsetHours = Math.floor(Math.abs(timezoneOffset) / 60)
+//   const offsetMinutes = Math.abs(timezoneOffset) % 60
+//   const sign = timezoneOffset > 0 ? '-' : '+'
+//   return `${sign}${String(offsetHours).padStart(2, '0')}:${String(offsetMinutes).padStart(2, '0')}`
+// },
+// 'Z': () => {
+//   const timezoneOffset = date.getTimezoneOffset()
+//   if (timezoneOffset === 0) return 'Z'
+//   const offsetHours = Math.floor(Math.abs(timezoneOffset) / 60)
+//   const offsetMinutes = Math.abs(timezoneOffset) % 60
+//   const sign = timezoneOffset > 0 ? '-' : '+'
+//   return `${sign}${String(offsetHours).padStart(2, '0')}:${String(offsetMinutes).padStart(2, '0')}`
+// },
+// 'z': () => {
+//   return Intl.DateTimeFormat(locale, { timeZoneName: 'short' })
+//     .formatToParts(date)
+//     .find(part => part.type === 'timeZoneName')?.value || ''
+// },
+// 'zz': () => {
+//   return Intl.DateTimeFormat(locale, { timeZoneName: 'long' })
+//     .formatToParts(date)
+//     .find(part => part.type === 'timeZoneName')?.value || ''
+// },
+// 'tz': () => Intl.DateTimeFormat().resolvedOptions().timeZone || ''

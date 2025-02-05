@@ -215,6 +215,7 @@ await assert('Arrays.findDuplicates', new Map([
 ]))
 
 await assert('Arrays.isArrayOf', () => {
+  // [WIP] split into multiple named assertions
   const input = [true, 2, 'string']
   const firstIsASuccess = Arrays.isArrayOf<Boolean | Number | String>(input, [Boolean, Number, String])
   const secondIsAFailure = Arrays.isArrayOf<Number>(input, Number) === false
@@ -305,27 +306,56 @@ await assert('Strings.trimEnd', () => Strings.trimEnd('   test   ') === '   test
  * TIME
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 await assert('Time.Dates.formatDate', new Map([
-  ['2023/01/01 - 22h00 (fr)', () => {
-    return Time.Dates.formatDate(
-      new Date(2023, 0, 1, 22),
-      '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{hh}} {{h}} {{HH}} {{H}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}}',
-      'fr'
-    ) === '01 1 dimanche dim. 01 1 janvier janv. 2023 23 10 10 22 22 00 0 00 0 PM pm'
-  }],
-  ['2023/01/01 - 22h00 (fr) - bis', () => {
-    return Time.Dates.formatDate(
-      new Date(2023, 0, 1, 22),
-      'Le {{d}} {{D}} {{MMM}} {{YYYY}}, à {{H}}h{{mm}}',
-      'fr'
-    ) === 'Le dim. 1 janv. 2023, à 22h00'
-  }],
+  ['Fr: 2023/01/01 - 21:12:16', () => Time.Dates.formatDate(
+    new Date(2023, 0, 1, 21, 12, 16),
+    '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{HH}} {{H}} {{hh}} {{h}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}} {{th}}',
+    'fr'
+  ) === '01 1 dimanche dim. 01 1 janvier janv. 2023 23 21 21 09 9 12 12 16 16 PM pm er'],
+
+  ['Fr: 2023/01/02 - 21:12:16', () => Time.Dates.formatDate(
+    new Date(2023, 0, 2, 21, 12, 16),
+    '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{HH}} {{H}} {{hh}} {{h}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}} {{th}}',
+    'fr'
+  ) === '02 2 lundi lun. 01 1 janvier janv. 2023 23 21 21 09 9 12 12 16 16 PM pm '],
+
+  ['En: 2023/01/01 - 21:12:16', () => Time.Dates.formatDate(
+    new Date(2023, 0, 1, 21, 12, 16),
+    '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{HH}} {{H}} {{hh}} {{h}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}} {{th}}',
+    'en'
+  ) === '01 1 Sunday Sun 01 1 January Jan 2023 23 21 21 09 9 12 12 16 16 PM pm st'],
+
+  ['En: 2023/01/02 - 21:12:16', () => Time.Dates.formatDate(
+    new Date(2023, 0, 2, 21, 12, 16),
+    '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{HH}} {{H}} {{hh}} {{h}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}} {{th}}',
+    'en'
+  ) === '02 2 Monday Mon 01 1 January Jan 2023 23 21 21 09 9 12 12 16 16 PM pm nd'],
+
+  ['En: 2023/01/03 - 21:12:16', () => Time.Dates.formatDate(
+    new Date(2023, 0, 3, 21, 12, 16),
+    '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{HH}} {{H}} {{hh}} {{h}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}} {{th}}',
+    'en'
+  ) === '03 3 Tuesday Tue 01 1 January Jan 2023 23 21 21 09 9 12 12 16 16 PM pm rd'],
+
+  ['En: 2023/01/04 - 21:12:16', () => Time.Dates.formatDate(
+    new Date(2023, 0, 4, 21, 12, 16),
+    '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{HH}} {{H}} {{hh}} {{h}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}} {{th}}',
+    'en'
+  ) === '04 4 Wednesday Wed 01 1 January Jan 2023 23 21 21 09 9 12 12 16 16 PM pm th'],
+
+  ['En: 2023/01/11 - 21:12:16', () => Time.Dates.formatDate(
+    new Date(2023, 0, 11, 21, 12, 16),
+    '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{HH}} {{H}} {{hh}} {{h}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}} {{th}}',
+    'en'
+  ) === '11 11 Wednesday Wed 01 1 January Jan 2023 23 21 21 09 9 12 12 16 16 PM pm th'],
+
+  ['En: 2023/01/31 - 21:12:16', () => Time.Dates.formatDate(
+    new Date(2023, 0, 31, 21, 12, 16),
+    '{{DD}} {{D}} {{dd}} {{d}} {{MM}} {{M}} {{MMMM}} {{MMM}} {{YYYY}} {{YY}} {{HH}} {{H}} {{hh}} {{h}} {{mm}} {{m}} {{ss}} {{s}} {{A}} {{a}} {{th}}',
+    'en'
+  ) === '31 31 Tuesday Tue 01 1 January Jan 2023 23 21 21 09 9 12 12 16 16 PM pm st']
 ]))
-
-
-
-
-
 
 
 

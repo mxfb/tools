@@ -23,10 +23,12 @@ const entryPoints = (await Promise.all(rootDirs.map(async dirPath => {
     returnRelative: false,
     filter: async (path: string) => {
       const children = await fs.readdir(path)
-      return children.includes('index.ts')
+      return children.some(path => path === 'index.ts' || path === 'index.tsx')
     }
   })
 }))).flat()
+
+console.log(entryPoints)
 
 await new Promise((resolve, reject) => {
   esbuild.build({

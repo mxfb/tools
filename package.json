@@ -80,18 +80,14 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@types/jsdom": "^21.1.7",
     "@types/node": "^22.13.9",
     "@types/prompts": "^2.4.9",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/semver": "^7.5.8",
-    "camelcase": "^8.0.0",
     "chokidar-cli": "^3.0.0",
     "concurrently": "^9.1.2",
     "esbuild": "^0.25.0",
-    "jsdom": "^26.0.0",
-    "node-fetch": "^3.3.2",
     "prompts": "^2.4.2",
     "puppeteer": "^23.6.0",
     "semver": "^7.7.1",

@@ -23,8 +23,7 @@
     }
   },
   "include": [
-    "../scripts/**/*",
-    "../src/**/*"
+    "../scripts/**/*"
   ],
   "exclude": [
     "../node_modules",

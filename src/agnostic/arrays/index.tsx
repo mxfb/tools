@@ -7,7 +7,6 @@ import {
 } from './random-pick'
 import { shuffle as shuffleFunc } from './shuffle'
 
-
 export namespace Arrays {
   export const findDuplicates = findDuplicatesFunc
   export const isArrayOf = isArrayOfFunc

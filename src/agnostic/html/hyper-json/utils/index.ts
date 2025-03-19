@@ -18,7 +18,7 @@ export namespace Utils {
     if (value instanceof Text) return value.cloneNode(true) as T
     if (value instanceof NodeList) {
       const frag = document.createDocumentFragment()
-      const nodes = Array.from(value).map(e => e.cloneNode(true) as Element | Text)
+      const nodes = Array.from(value).map(e => (e as Node).cloneNode(true) as Element | Text)
       frag.append(...nodes)
       return frag.childNodes as T
     }

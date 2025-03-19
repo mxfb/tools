@@ -62,7 +62,13 @@ await new Promise((resolve, reject) => {
  * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 await new Promise(resolve => {
-  exec('npx tsc --jsx react-jsx -p src/tsconfig.json --emitDeclarationOnly', (err, stdout, stderr) => {
+  const commands = [
+    'npx tsc --jsx react-jsx -p src/agnostic/tsconfig.json --emitDeclarationOnly',
+    'npx tsc --jsx react-jsx -p src/components/tsconfig.json --emitDeclarationOnly',
+    'npx tsc --jsx react-jsx -p src/node/tsconfig.json --emitDeclarationOnly',
+    'npx tsc --jsx react-jsx -p src/shared/tsconfig.json --emitDeclarationOnly'
+  ]
+  exec(commands.join(' && '), (err, stdout, stderr) => {
     if (err !== null) console.error(err)
     if (stdout !== '') console.log(stdout)
     if (stderr !== '') console.log(stderr)

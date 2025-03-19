@@ -128,18 +128,18 @@ export namespace DataSize {
     }
   }
 
-  export function bits (value: number): DataSize { return bytes(value, 'bit') }
-  export function bytes (value: number, unit: Unit | UnitShort): DataSize { return new DataSize(value, unit) }
-  export function kiloBytes (value: number): DataSize { return bytes(value, 'kilobyte') }
-  export function megaBytes (value: number): DataSize { return bytes(value, 'megabyte') }
-  export function gigabytes (value: number): DataSize { return bytes(value, 'gigabyte') }
-  export function terabytes (value: number): DataSize { return bytes(value, 'terabyte') }
-  export function petabytes (value: number): DataSize { return bytes(value, 'petabyte') }
-  export function exabytes (value: number): DataSize { return bytes(value, 'exabyte') }
-  export function kibibytes (value: number): DataSize { return bytes(value, 'kibibyte') }
-  export function mebibytes (value: number): DataSize { return bytes(value, 'mebibyte') }
-  export function gibibytes (value: number): DataSize { return bytes(value, 'gibibyte') }
-  export function tebibytes (value: number): DataSize { return bytes(value, 'tebibyte') }
-  export function pebibytes (value: number): DataSize { return bytes(value, 'pebibyte') }
-  export function exbibytes (value: number): DataSize { return bytes(value, 'exbibyte') }
+  export function toBits (value: number): DataSize { return toBytes(value, 'bit') }
+  export function toBytes (value: number, unit: Unit | UnitShort): DataSize { return new DataSize(value, unit) }
+  export function toKiloBytes (value: number): DataSize { return toBytes(value, 'kilobyte') }
+  export function toMegaBytes (value: number): DataSize { return toBytes(value, 'megabyte') }
+  export function toGigabytes (value: number): DataSize { return toBytes(value, 'gigabyte') }
+  export function toTerabytes (value: number): DataSize { return toBytes(value, 'terabyte') }
+  export function toPetabytes (value: number): DataSize { return toBytes(value, 'petabyte') }
+  export function toExabytes (value: number): DataSize { return toBytes(value, 'exabyte') }
+  export function toKibibytes (value: number): DataSize { return toBytes(value, 'kibibyte') }
+  export function toMebibytes (value: number): DataSize { return toBytes(value, 'mebibyte') }
+  export function toGibibytes (value: number): DataSize { return toBytes(value, 'gibibyte') }
+  export function toTebibytes (value: number): DataSize { return toBytes(value, 'tebibyte') }
+  export function toPebibytes (value: number): DataSize { return toBytes(value, 'pebibyte') }
+  export function toExbibytes (value: number): DataSize { return toBytes(value, 'exbibyte') }
 }

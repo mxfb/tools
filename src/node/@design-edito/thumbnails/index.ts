@@ -1,3 +1,3 @@
-export async function generateThumbnails () {
+// Exports individuels sans namespace 
 
-}
+export {}

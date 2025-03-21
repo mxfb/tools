@@ -1,3 +1,3 @@
-// Exports individuels, sans namespace 
+// Exports individuels sans namespace 
 
-export const thing = {}
+export {}

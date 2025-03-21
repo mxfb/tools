@@ -12,8 +12,8 @@ import { Regexps } from '~/agnostic/regexps'
 import { Strings } from '~/agnostic/strings'
 import { Time } from '~/agnostic/time'
 
-import { Files } from '~/node/files'
-import { Process } from '~/node/process'
+import * as Files from '~/node/files'
+import * as Process from '~/node/process'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
  *

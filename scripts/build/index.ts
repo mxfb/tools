@@ -3,7 +3,7 @@ import { promises as fs } from 'node:fs'
 import { exec } from 'node:child_process'
 import esbuild from 'esbuild'
 import { COMPONENTS, AGNOSTIC, NODE, LIB } from '../_config/index.js'
-import { Files } from '../../src/node/files/index'
+import * as Files from '../../src/node/files/index'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *

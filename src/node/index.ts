@@ -1,7 +1,11 @@
-import { Files as FilesNamespace } from './files'
-import { Process as ProcessNamespace } from './process'
+import * as DesignEdito from './@design-edito'
+import * as Files from './files'
+import * as Images from './images'
+import * as Process from './process'
 
-export namespace Node {
-  export import Files = FilesNamespace
-  export import Process = ProcessNamespace
+export {
+  DesignEdito,
+  Files,
+  Images,
+  Process
 }

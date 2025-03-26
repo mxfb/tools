@@ -44,7 +44,17 @@ await new Promise((resolve, reject) => {
     sourcemap: false,
     format: 'esm',
     target: ['esnext'],
-    external: ['chalk', 'jsdom', 'react', 'react-dom'],
+    external: [
+      "@google-cloud/storage",
+      "archiver",
+      "chalk",
+      "express",
+      "multer",
+      "quantize",
+      "react",
+      "react-dom",
+      "sharp"
+    ],
     logLevel: 'info'
   }).then(() => {
     resolve(true)

@@ -10,11 +10,11 @@ export type CopyOptions = {
 /**
  * Copies a file from one location to another within a Google Cloud Storage bucket.
  *
- * This function copies the file located at `sourcePath` to `destinationPath` in the same or a different Google Cloud Storage bucket. 
+ * This function copies the file located at `sourcePath` to `targetPath` in the same or a different Google Cloud Storage bucket. 
  * It can be customized using optional `fileOptions` and `copyOptions` to control the copying behavior.
  *
  * @param {string} sourcePath - The path of the source file to be copied.
- * @param {string} destinationPath - The destination path where the file will be copied to.
+ * @param {string} targetPath - The target path where the file will be copied to.
  * @param {Bucket} bucket - The Google Cloud Storage bucket object containing the file to be copied.
  * @param {CopyOptions} [options] - Optional configuration options for the file copy operation.
  * @returns {Promise<Outcome.Either<true, string>>} A promise that resolves to an `Outcome.Either`.
@@ -23,14 +23,14 @@ export type CopyOptions = {
  */
 export async function copy (
   sourcePath: string,
-  destinationPath: string,
+  targetPath: string,
   bucket: Bucket,
   options?: CopyOptions
 ): Promise<Outcome.Either<true, string>> {
   const { fileOptions, copyOptions } = options ?? {}
   try {
     const file = bucket.file(sourcePath, fileOptions)
-    await file.copy(destinationPath, copyOptions)
+    await file.copy(targetPath, copyOptions)
     return Outcome.makeSuccess(true)
   } catch (err) {
     const errStr = unknownToString(err)

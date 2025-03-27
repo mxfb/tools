@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { Readable } from 'node:stream'
 import { Outcome } from '~/agnostic/misc/outcome'
 import {
@@ -19,7 +20,7 @@ import {
  * 
  * @returns {Outcome.Either<Buffer, string>} The result of the encryption. Success returns the encrypted data as a `Buffer` (with IV prepended), or failure returns an error message.
  */
-export function encryptBuffer (
+export function encrypt (
   inputBuffer: Buffer,
   encryptionKey: string,
   algorithm: string = 'aes-256-gcm',
@@ -44,7 +45,7 @@ export function encryptBuffer (
  * @returns {Outcome.Either<Readable, string>} - An `Outcome` containing either the `Readable` stream on success, 
  * or an error message on failure.
  */
-export function encryptBufferWithStream (
+export function encryptWithStream (
   inputBuffer: Buffer,
   encryptionKey: string,
   algorithm: string = 'aes-256-gcm',
@@ -65,7 +66,7 @@ export function encryptBufferWithStream (
  * 
  * @returns {Outcome.Either<Buffer, string>} The result of the decryption. Success returns the decrypted data as a `Buffer`, or failure returns an error message.
  */
-export function decryptBuffer (
+export function decrypt (
   encryptedBuffer: Buffer,
   encryptionKey: string,
   algorithm: string = 'aes-256-gcm',
@@ -90,7 +91,7 @@ export function decryptBuffer (
  * @returns {Outcome.Either<Readable, string>} - An `Outcome` containing either the `Readable` stream on success, 
  * or an error message on failure.
  */
-export function decryptBufferWithStream (
+export function decryptWithStream (
   encryptedBuffer: Buffer,
   encryptionKey: string,
   algorithm: string = 'aes-256-gcm',

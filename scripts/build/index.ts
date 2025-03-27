@@ -47,13 +47,16 @@ await new Promise((resolve, reject) => {
     external: [
       "@google-cloud/storage",
       "archiver",
+      "aws-sdk",
+      "basic-ftp",
       "chalk",
       "express",
       "multer",
       "quantize",
       "react",
       "react-dom",
-      "sharp"
+      "sharp",
+      "ssh2-sftp-client"
     ],
     logLevel: 'info'
   }).then(() => {

@@ -1,7 +1,7 @@
 import { Component } from 'react'
 import { createRoot as reactCreateRoot, Root as ReactRoot } from 'react-dom/client'
-import { Random } from '~/agnostic/random'
-import * as ERR from '~/shared/errors'
+import { Random } from '../../random'
+import * as ERR from '../../../shared/errors'
 
 export type StylesSetItem = {
   type: 'string' | 'url'

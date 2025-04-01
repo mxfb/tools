@@ -1,5 +1,5 @@
-import { isRecord } from '~/agnostic/objects/is-record'
-import { Window } from '~/agnostic/misc/crossenv/window'
+import { isRecord } from '../../../objects/is-record'
+import { Window } from '../../../misc/crossenv/window'
 import { Types } from '../types'
 import { Utils } from '../utils'
 import { Method } from '../method'

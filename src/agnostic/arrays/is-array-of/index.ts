@@ -1,7 +1,7 @@
 import {
   ConstructorFunction,
   isConstructorFunction
-} from '~/agnostic/misc/is-constructor-function'
+} from '../../misc/is-constructor-function'
 
 type TypeCheckerFunction<T extends any> = (input: unknown) => input is T
 type TypeChecker<T extends any> = ConstructorFunction<T> | TypeCheckerFunction<T>

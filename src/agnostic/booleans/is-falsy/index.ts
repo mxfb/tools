@@ -1,4 +1,4 @@
-import { nullishValues, Nullish } from '~/agnostic/misc/is-nullish'
+import { nullishValues, Nullish } from '../../misc/is-nullish'
 
 export type Falsy = Nullish | false | '' | 0 | -0 | typeof NaN | 0n
 export type NotFalsy<T> = Exclude<T, Exclude<Falsy, number>>

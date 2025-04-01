@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
 import { Readable } from 'node:stream'
-import { Outcome } from '~/agnostic/misc/outcome'
+import { Outcome } from '../../../agnostic/misc/outcome'
 import {
   EncryptDecryptOptions,
   encryptUint8Array,

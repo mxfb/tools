@@ -1,5 +1,5 @@
-import { isValidClassName } from '~/agnostic/css/is-valid-css-class-name'
-import { isFalsy } from '~/agnostic/booleans/is-falsy'
+import { isValidClassName } from '../is-valid-css-class-name'
+import { isFalsy } from '../../booleans/is-falsy'
 
 function getNamesArr (arg: any): string[] {
   const returned: string[] = []

@@ -1,4 +1,4 @@
-import { Window } from '~/agnostic/misc/crossenv/window'
+import { Window } from '../../../misc/crossenv/window'
 import { Types } from '../types'
 import { Transformer } from '../transformer'
 import { Method } from '../method'

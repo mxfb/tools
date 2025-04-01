@@ -1,4 +1,4 @@
-import * as ERR from '~/shared/errors'
+import * as ERR from '../../../shared/errors'
 
 export function randomPick<T> (arr: T[], exclude: T[] = []): T {
   const filteredArr = [...arr].filter(elt => !exclude.includes(elt))

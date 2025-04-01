@@ -1,4 +1,4 @@
-import { wait } from '~/agnostic/time/wait'
+import { wait } from '../../time/wait'
 
 export namespace Crawler {
   export function create<T extends any> (

@@ -1,4 +1,4 @@
-import * as ERR from '~/shared/errors'
+import * as ERR from '../../../shared/errors'
 
 export namespace Sanitize {
   export type AttributeNameValPair = {

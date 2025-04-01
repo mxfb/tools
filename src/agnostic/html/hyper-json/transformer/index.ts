@@ -1,4 +1,4 @@
-import { Outcome } from '~/agnostic/misc/outcome'
+import { Outcome } from '../../../misc/outcome'
 import { Method } from '../method'
 import { Tree as TreeNamespace } from '../tree'
 import { Types } from '../types'

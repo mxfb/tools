@@ -1,4 +1,4 @@
-import { Errors } from '~/agnostic/errors'
+import { Errors } from '../../errors'
 import { Outcome } from '../outcome'
 
 export namespace Assert {

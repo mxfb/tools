@@ -1,5 +1,5 @@
-import { Outcome } from '~/agnostic/misc/outcome'
-import { Window } from '~/agnostic/misc/crossenv/window'
+import { Outcome } from '../../../../../misc/outcome'
+import { Window } from '../../../../../misc/crossenv/window'
 import { Cast } from '../../../cast'
 import { Utils } from '../../../utils'
 import { SmartTags } from '../..'

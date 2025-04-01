@@ -1,4 +1,4 @@
-import { Outcome } from '~/agnostic/misc/outcome'
+import { Outcome } from '../../../../../misc/outcome'
 import { Utils } from '../../../utils'
 import { Types } from '../../../types'
 import { SmartTags } from '../..'

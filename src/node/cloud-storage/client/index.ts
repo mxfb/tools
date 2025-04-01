@@ -2,8 +2,8 @@ import { Storage, Bucket } from '@google-cloud/storage'
 import { S3 } from 'aws-sdk'
 import { Client as FtpClient } from 'basic-ftp'
 import SftpClient from 'ssh2-sftp-client'
-import { Outcome } from '~/agnostic/misc/outcome'
-import { unknownToString } from '~/agnostic/errors/unknown-to-string'
+import { Outcome } from '../../../agnostic/misc/outcome'
+import { unknownToString } from '../../../agnostic/errors/unknown-to-string'
 import { GcsBucketCredentials, S3BucketCredentials, FtpCredentials, FtpsCredentials, SftpCredentials, Credentials } from '../credentials'
 import {
   Type,

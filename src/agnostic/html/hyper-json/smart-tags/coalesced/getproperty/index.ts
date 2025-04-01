@@ -1,5 +1,5 @@
-import { isRecord } from '~/agnostic/objects/is-record'
-import { Outcome } from '~/agnostic/misc/outcome'
+import { isRecord } from '../../../../../objects/is-record'
+import { Outcome } from '../../../../../misc/outcome'
 import { Cast } from '../../../cast'
 import { Utils } from '../../../utils'
 import { Types } from '../../../types'

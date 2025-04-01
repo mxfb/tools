@@ -1,5 +1,5 @@
-import { Window } from '~/agnostic/misc/crossenv/window'
-import { trimStart, trimEnd } from '~/agnostic/strings/trim'
+import { Window } from '../../../misc/crossenv/window'
+import { trimStart, trimEnd } from '../../../strings/trim'
 
 import { Serialize } from '../serialize'
 import { Transformer } from '../transformer'

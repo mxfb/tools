@@ -1,4 +1,4 @@
-import { wait } from '~/agnostic/time/wait'
+import { wait } from '../../time/wait'
 
 export namespace Transitions {
   export type Callback = (val: number, timeMs: number) => void

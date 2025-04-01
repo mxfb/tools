@@ -1,8 +1,8 @@
 import { Buffer } from 'node:buffer'
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
 import { Readable, Writable } from 'node:stream'
-import { unknownToString } from '~/agnostic/errors/unknown-to-string'
-import { Outcome } from '~/agnostic/misc/outcome'
+import { unknownToString } from '../../../agnostic/errors/unknown-to-string'
+import { Outcome } from '../../../agnostic/misc/outcome'
 
 export type EncryptDecryptOptions = {
   ivLength?: number

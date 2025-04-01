@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream'
 import { S3 } from 'aws-sdk'
-import { Outcome } from '~/agnostic/misc/outcome'
-import { unknownToString } from '~/agnostic/errors/unknown-to-string'
+import { Outcome } from '../../../../../agnostic/misc/outcome'
+import { unknownToString } from '../../../../../agnostic/errors/unknown-to-string'
 
 export type DownloadOptions = {
   downloadSettings?: S3.Types.GetObjectRequest

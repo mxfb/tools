@@ -1,5 +1,5 @@
-import { Errors } from '~/agnostic/errors'
-import { Crossenv } from '~/agnostic/misc/crossenv'
+import { Errors } from '../../agnostic/errors'
+import { Crossenv } from '../../agnostic/misc/crossenv'
 
 export enum Codes {
   NO_DOCUMENT = 'no-window-document-on-runtime',

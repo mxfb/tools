@@ -1,6 +1,5 @@
-import { Arrays } from '~/agnostic/arrays'
-import { Random } from '~/agnostic/random'
-import { Agnostic } from '~/agnostic/index'
+import { Arrays } from '../../arrays'
+import { Random } from '../../random'
 
 export namespace LoremIpsum {
   export const words = [

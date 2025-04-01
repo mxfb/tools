@@ -1,5 +1,5 @@
 import { Bucket } from '@google-cloud/storage'
-import { Outcome } from '~/agnostic/misc/outcome'
+import { Outcome } from '../../../../../agnostic/misc/outcome'
 import { download, DownloadOptions } from '../download'
 import { erase, EraseOptions } from '../erase'
 import { upload, UploadOptions } from '../upload'

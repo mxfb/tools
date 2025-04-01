@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream'
 import Client, { TransferOptions } from 'ssh2-sftp-client'
-import { unknownToString } from '~/agnostic/errors/unknown-to-string'
-import { Outcome } from '~/agnostic/misc/outcome'
+import { unknownToString } from '../../../../agnostic/errors/unknown-to-string'
+import { Outcome } from '../../../../agnostic/misc/outcome'
 
 export type UploadOptions = TransferOptions & {
   ensureDir?: boolean /* defaults to false */

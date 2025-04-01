@@ -1,5 +1,5 @@
-import { replaceAll } from '~/agnostic/strings/replace-all'
-import { Outcome } from '~/agnostic/misc/outcome'
+import { replaceAll } from '../../../../../strings/replace-all'
+import { Outcome } from '../../../../../misc/outcome'
 import { Cast } from '../../../cast'
 import { Utils } from '../../../utils'
 import { SmartTags } from '../..'

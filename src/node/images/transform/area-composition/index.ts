@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { Thumbnails } from "~/node/@design-edito";
+import { Thumbnails } from "../../../@design-edito";
 
 export type Dimensions = {
     w: number,

@@ -12,15 +12,7 @@
     "rootDir": "..",
     "jsx": "react-jsx",
     "noUncheckedIndexedAccess": true,
-    "declaration": true,
-    "paths": {
-      "~/agnostic/*": ["src/agnostic/*"],
-      "~/browser/*": ["src/browser/*"],
-      "~/node/*": ["src/node/*"],
-      "~/shared/*": ["src/shared/*"],
-      "~/src/*": ["src/*"],
-      "~/scripts/*": ["scripts/*"]
-    }
+    "declaration": true
   },
   "include": [
     "../scripts/**/*"

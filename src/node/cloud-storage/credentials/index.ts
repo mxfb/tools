@@ -1,5 +1,5 @@
 import { Type } from '../endpoint'
-import { isNonNullObject } from '~/agnostic/objects/is-object'
+import { isNonNullObject } from '../../../agnostic/objects/is-object'
 
 export type GcsBucketCredentials = {
   client_email: string

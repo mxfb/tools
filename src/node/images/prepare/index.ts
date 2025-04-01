@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { exportZipBuffer, ExportZipSources, OutputFormat, prepareExport } from "../exports";
 import { Operations, transformImage } from "../transform";
-import { Thumbnails } from "~/node/@design-edito";
+import { Thumbnails } from "../../@design-edito";
 
 export type Quality = number;
 export type Ratio = [number, number];

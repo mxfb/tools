@@ -111,3 +111,11 @@ export function isSftpCredentials (unknownObject: unknown): unknownObject is Sft
   }
   return false
 }
+
+export function isCredentials (unknownObject: unknown): unknownObject is Credentials<Type> {
+  return isGcsBucketCredentials(unknownObject)
+    || isS3BucketCredentials(unknownObject)
+    || isFtpCredentials(unknownObject)
+    || isFtpsCredentials(unknownObject)
+    || isSftpCredentials(unknownObject)
+}

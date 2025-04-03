@@ -1,22 +1,21 @@
 import { Request, Response, RequestHandler } from 'express'
-import multer, { Options, Field } from 'multer'
+import multer from 'multer'
 import { Outcome } from '../../../agnostic/misc/outcome'
-
-export type WithMulterSharedOptions = {
-  limits?: Options['limits']
-  fileFilter?: Options['fileFilter']
-}
 
 export type WithMulterModeOptions = { mode: 'none' | 'any' }
   | { mode: 'single', fieldName: string }
   | { mode: 'array', fieldName: string, maxCount?: number }
-  | { mode: 'fields', fields: Field[] }
+  | { mode: 'fields', fields: multer.Field[] }
 
-export type WithMulterOptions = WithMulterSharedOptions & WithMulterModeOptions
+export type WithMulterOptions = multer.Options & WithMulterModeOptions
 
 export async function useMulterMiddleware (req: Request, res: Response, options: WithMulterOptions): Promise<Outcome.Either<true, unknown>> {
-  const { limits, fileFilter } = options
-  const uploader = multer({ storage: multer.memoryStorage(), limits, fileFilter })
+  const { storage, limits, fileFilter } = options
+  const uploader = multer({
+    storage: storage ?? multer.memoryStorage(),
+    limits,
+    fileFilter
+  })
   let middleware: RequestHandler
   if (options.mode === 'none') { middleware = uploader.none() }
   else if (options.mode === 'single') { middleware = uploader.single(options.fieldName) }

@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream'
 import { Bucket } from '@google-cloud/storage'
 import { S3 } from 'aws-sdk'
 import { Client as FtpClient } from 'basic-ftp'
@@ -7,22 +8,15 @@ import { download as downloadGcs } from '../../../@google-cloud/storage/file/dow
 import { download as downloadS3 } from '../../../@aws-s3/storage/file/download'
 import { download as downloadFtp } from '../../../ftps/file/download'
 import { download as downloadSftp } from '../../../sftp/file/download'
-import { Client, makeClient } from '../../client'
-import { Credentials } from '../../credentials'
+import { Client } from '../../client'
 import { Type, Endpoint, s3IdentifierData } from '../../endpoint'
 
 export async function download<T extends Type> (
   targetPath: string,
   endpointType: T,
   endpointIdentifier: Endpoint<T>['identifier'],
-  credentials: Credentials<T>,
-  client?: Client<T>
-) {
-  if (client === undefined) {
-    const clientCreationOutcome = await makeClient(endpointType, endpointIdentifier, credentials)
-    if (!clientCreationOutcome.success) return Outcome.makeFailure(clientCreationOutcome.error)
-    client = clientCreationOutcome.payload
-  }
+  client: Client<T>
+): Promise<Outcome.Either<Readable, string>> {
   if (endpointType === Type.GCS && client instanceof Bucket) return await downloadGcs(targetPath, client as Bucket)
   if (endpointType === Type.S3 && client instanceof S3) {
     const { bucketName } = s3IdentifierData(endpointIdentifier)

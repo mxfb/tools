@@ -8,8 +8,7 @@ import { upload as uploadGcs } from '../../../@google-cloud/storage/file/upload'
 import { upload as uploadS3 } from '../../../@aws-s3/storage/file/upload'
 import { upload as uploadFtp } from '../../../ftps/file/upload'
 import { upload as uploadSftp } from '../../../sftp/file/upload'
-import { Client, makeClient } from '../../client'
-import { Credentials } from '../../credentials'
+import { Client } from '../../client'
 import { Type, Endpoint, s3IdentifierData } from '../../endpoint'
 
 export async function upload<T extends Type> (
@@ -17,14 +16,8 @@ export async function upload<T extends Type> (
   targetPath: string,
   endpointType: T,
   endpointIdentifier: Endpoint<T>['identifier'],
-  credentials: Credentials<T>,
-  client?: Client<T>
+  client: Client<T>
 ): Promise<Outcome.Either<true, string>> {
-  if (client === undefined) {
-    const clientCreationOutcome = await makeClient(endpointType, endpointIdentifier, credentials)
-    if (!clientCreationOutcome.success) return Outcome.makeFailure(clientCreationOutcome.error)
-    client = clientCreationOutcome.payload
-  }
   if (endpointType === Type.GCS && client instanceof Bucket) return await uploadGcs(fileReadable, targetPath, client as Bucket)
   if (endpointType === Type.S3 && client instanceof S3) {
     const { bucketName } = s3IdentifierData(endpointIdentifier)

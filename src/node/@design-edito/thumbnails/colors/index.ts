@@ -21,8 +21,8 @@ export function extractPaletteFromImage(data: Buffer<ArrayBufferLike>, imageDime
     extractPaletteDensity: number,
     lightenIntensity: number,
     saturateIntensity: number,
-}): PaletteExtract {
-    const pixels = getPixels(data, imageDimensions.w, imageDimensions.h);
+}, nbChannels: number = 3): PaletteExtract {
+    const pixels = getPixels(data, imageDimensions.w, imageDimensions.h, nbChannels);
     const palette = getPalette(pixels, options.extractPaletteDensity);
     const complementaryPalette = palette.map((color) => complementColor(color));
 

@@ -1,26 +1,21 @@
 import sharp from "sharp";
-import { Thumbnails } from "../../../@design-edito";
+import { Thumbnails } from "../../../../@design-edito";
 
 export type Dimensions = {
     w: number,
     h: number
 }
 
-export type Options = {
-    formats: string[];
-    nbOutputs: number,
-    dimensions: Dimensions,
-    imagePosition: 'top-left' | 'top-center' | 'top-right' | 'left-center' | 'center' | 'right-center' | 'bottom-left' | 'bottom-center' | 'bottom-right',
-    imageOccupation: number,
-
+type RequiredAreaCompositionParams = {
+    innerTransformation: { w: number, h: number, x: number, y: number }
+    
+    colors?: (string|{r: number, g: number, b: number})[]; // @todo
+    usePaletteFromInner: boolean;
     palette: ('default' | 'default-lighten' | 'default-saturate' | 'complementary' | 'complementary-lighten' | 'complementary-saturate')[],
-    colors?: (string|{r: number, g: number, b: number})[];
     maxPaletteDensity: number;
     extractPaletteDensity: number;
     lightenIntensity: number;
     saturateIntensity: number;
-    colorFilter?: string;
-    colorFilterApply?: 'all' | 'input-only' | 'shapes-only';
 
     tileCoverage: number;
     tileDensityA: { min: number, max: number }; 
@@ -28,7 +23,9 @@ export type Options = {
     tileFormat: 'random' | 'default' | 'portrait' | 'landscape' ;
     tileXEasing: string;
     tileYEasing: string;
-};
+}
+
+export type AreaCompositionParams = Partial<RequiredAreaCompositionParams> & { innerTransformation: RequiredAreaCompositionParams['innerTransformation']};
 
 export type SharpShape = { 
     width: number, 
@@ -39,18 +36,16 @@ export type SharpShape = {
 
 export type SharpInput = {top: number, left: number, input: sharp.Sharp };
 
-const DEFAULT_GENERATE_OPTIONS: Options = {
-    formats: ['jpeg'],
-    nbOutputs: 1,
-    imagePosition: 'center',
-    imageOccupation: 60,
-    dimensions: { w: 300, h: 500 },
+const DEFAULT_AREA_COMPOSITION_PARAMS: RequiredAreaCompositionParams = {
+    innerTransformation: { w: 0, h: 0, x: 0, y: 0 },
+
+    usePaletteFromInner: true,
     palette: ['default'],
     maxPaletteDensity: 100,
     extractPaletteDensity: 8,
     lightenIntensity: 20,
     saturateIntensity: 20,
-    colorFilterApply: 'all',
+
     tileDensityA: { min: 1, max: 1 },
     tileDensityB: { min: 1, max: 1 },
     tileCoverage: 50,
@@ -60,52 +55,45 @@ const DEFAULT_GENERATE_OPTIONS: Options = {
 }; 
 
 
-export async function areaCompose(inputSharp: sharp.Sharp, customOptions?: Partial<Options>) {
+/* Area composes creates areas & tiles aorund given innerTransformation */
+export async function areaCompose(inputSharp: sharp.Sharp, customParams?: Partial<AreaCompositionParams>) {
 
     /* Merge options with default options */
-    const options = getOptions(customOptions);
+    const options = getParams(customParams);
 
     /* Retrieving metadata we need */
     const inputMetadata = await inputSharp.metadata();
-    const initialDimensions = {
+    const outputDimensions = {
         w: inputMetadata.width || 0,
         h: inputMetadata.height || 0,
     };
     
+    
     /* Creating the palette from the pixels in our input */ 
-    const inputBufferData = await inputSharp.raw().toBuffer();
-    const imagePalette = Thumbnails.Colors.extractPaletteFromImage(inputBufferData, initialDimensions, options);
+    /* By default, we only use the given inner zone */
+    const inputSharpCopy = sharp(await (inputSharp.toBuffer()));
+    const innerExtractedSharp = await (inputSharpCopy.extract({ left: options.innerTransformation.x, top: options.innerTransformation.y, width: options.innerTransformation.w, height: options.innerTransformation.h }).resize({width: options.innerTransformation.w, height: options.innerTransformation.h}).png({ quality: 100 }));
+    const inputExtract = options.usePaletteFromInner ? innerExtractedSharp : inputSharp;
+    const inputExtractDimensions = options.usePaletteFromInner ? options.innerTransformation : outputDimensions;
+    
+    const inputExtractBufferData = await inputExtract.raw().toBuffer();
+
+    const imagePalette = Thumbnails.Colors.extractPaletteFromImage(
+        inputExtractBufferData, 
+        inputExtractDimensions, 
+        {
+            extractPaletteDensity: options.extractPaletteDensity,
+            lightenIntensity: options.lightenIntensity,
+            saturateIntensity: options.saturateIntensity,
+        }, (await inputExtract.metadata()).channels);
     const composedPalette = composePalette(imagePalette, options.palette, options.maxPaletteDensity);
 
     /* Start all our composition */
     inputSharp.png({ quality: 100 }); /* We must make sure we work with the best quality atm */
-    
-    const outputDimensions = {
-        w: options.dimensions.w,
-        h: options.dimensions.h,
-    }
-
-    /* Calculating our new dimensions as we want our dimensions to only occupy a zone (options.imageOccupation) in the new output dimensions */ 
-    const resizeInputDimensions = getNewInputImageDimensions(outputDimensions, options.imageOccupation);
-    
-    /* Resizing image with these new dimensions */ 
-    const resizedInput = inputSharp.resize({
-        width: resizeInputDimensions.w,
-        height: resizeInputDimensions.h,
-        fit: 'contain',
-        background: {r: 255, g: 255, b: 255, alpha: 0} // Add a transparent background
-    }).toFormat('png'); // Transform to PNG to make sure it uses transparency on composite
-    
-    /* Our image now have new dimensions */
-    /* We must calc where our image will be located in the new output */
-    const resizedInputPositions = getImagePositions(options.imagePosition, resizeInputDimensions, resizeInputDimensions, outputDimensions);
 
     // Calculating all areas and tiles dimensions + positions
     const shapesLayout = Thumbnails.Layout.packAreasAndTiles(
-        {
-            ...resizedInputPositions, 
-            ...resizeInputDimensions
-        }, 
+        options.innerTransformation, 
         outputDimensions,
         options.tileCoverage,
         { A: options.tileDensityA, B: options.tileDensityB },
@@ -125,14 +113,14 @@ export async function areaCompose(inputSharp: sharp.Sharp, customOptions?: Parti
 
     /* Creating our output with a background, with a given format to be able to be exported  */
     const background = composedPalette[0] || [255, 255, 255];
-    const outputSharp = await createSharpShape(outputDimensions, background).toFormat('webp');
+    const outputSharp = await createSharpShape(outputDimensions, background).png({ quality: 100 });
 
     /* Composing all inputs together in a single sharp */
     const composedSharp = outputSharp.composite([
         {
-            input: await resizedInput.toFormat('webp').toBuffer(), /* Converting to png to handle alpha */
-            left: Math.round(resizedInputPositions.x),
-            top: Math.round(resizedInputPositions.y),
+            input: await inputSharp.png({ quality: 100 }).toBuffer(), /* Converting to png to handle alpha */
+            left: 0,
+            top: 0,
         },
         ...sharpShapesForComposite,
     ])
@@ -141,25 +129,17 @@ export async function areaCompose(inputSharp: sharp.Sharp, customOptions?: Parti
     return await composedSharp.flatten();
 }
 
-function getOptions(customOptions?: Partial<Options>){
-    if (!customOptions) { return DEFAULT_GENERATE_OPTIONS };
+function getParams(customParams?: Partial<AreaCompositionParams>): RequiredAreaCompositionParams {
+    if (!customParams) { return DEFAULT_AREA_COMPOSITION_PARAMS };
     const options = {
-        ...DEFAULT_GENERATE_OPTIONS,
-        ...customOptions,
+        ...DEFAULT_AREA_COMPOSITION_PARAMS,
+        ...customParams,
     }
 
     return options;
 }
 
-function getNewInputImageDimensions(formatDimensions: Dimensions, imageOccupation: number) {
-    const placeRatio = imageOccupation / 100;
-    return { 
-        w: Math.round(formatDimensions.w * placeRatio), 
-        h: Math.round(formatDimensions.h * placeRatio) 
-    };
-}
-
-function composePalette(palette: Thumbnails.Colors.PaletteExtract, paletteOption: Options['palette'], maxPaletteDensity: number): Thumbnails.Colors.Palette {
+function composePalette(palette: Thumbnails.Colors.PaletteExtract, paletteOption: RequiredAreaCompositionParams['palette'], maxPaletteDensity: number): Thumbnails.Colors.Palette {
     let composedPalette: Thumbnails.Colors.Palette = [];
     
     if (paletteOption.includes('default-lighten')) {
@@ -185,32 +165,6 @@ function composePalette(palette: Thumbnails.Colors.PaletteExtract, paletteOption
     const shuffledPalette = Thumbnails.Common.shuffleArray(composedPalette);
     const outputPalette = composedPalette.length > maxPaletteDensity ? shuffledPalette.splice(0, maxPaletteDensity) : shuffledPalette
     return outputPalette;
-}
-
-
-function getImagePositions(position: Options['imagePosition'], resizedImageDimensions: Thumbnails.Layout.Dimensions, containedImageDimensions: Thumbnails.Layout.Dimensions, wrapperDimensions: Thumbnails.Layout.Dimensions) {
-    switch (position) {
-        case 'top-left':
-        return Thumbnails.Layout.alignTopLeft(resizedImageDimensions, containedImageDimensions, wrapperDimensions);
-        case 'top-center':
-        return Thumbnails.Layout.alignTopCenter(resizedImageDimensions, containedImageDimensions, wrapperDimensions);
-        case 'top-right':
-        return Thumbnails.Layout.alignTopRight(resizedImageDimensions, containedImageDimensions, wrapperDimensions);
-        case 'left-center':
-        return Thumbnails.Layout.alignLeftCenter(resizedImageDimensions, containedImageDimensions, wrapperDimensions);
-        case 'center':
-        return Thumbnails.Layout.alignCenter(resizedImageDimensions, containedImageDimensions, wrapperDimensions);
-        case 'right-center':
-        return Thumbnails.Layout.alignRightCenter(resizedImageDimensions, containedImageDimensions, wrapperDimensions);
-        case 'bottom-left':
-        return Thumbnails.Layout.alignBottomLeft(resizedImageDimensions, containedImageDimensions, wrapperDimensions);
-        case 'bottom-center':
-        return Thumbnails.Layout.alignBottomCenter(resizedImageDimensions, containedImageDimensions, wrapperDimensions);
-        case 'bottom-right':
-        return Thumbnails.Layout.alignBottomRight(resizedImageDimensions, containedImageDimensions, wrapperDimensions);
-        default:
-        return { x: 0, y: 0 };
-    }
 }
 
 function createSharpShape(dimensions: Dimensions, background: Thumbnails.Colors.Color) {

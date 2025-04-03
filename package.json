@@ -52,7 +52,7 @@
     "start": "npm run _serve:tests & serve_pid=$! && trap 'kill $serve_pid; npm run _remove:temp' EXIT && echo '[start] \\033[1mstarting...\\033[0m' && npm run build && npx concurrently -n '_bundle:watch:tests,_tests:watch' 'npm run _bundle:watch:tests' 'PORT=${PORT:-3000} npm run _tests:watch'"
   },
   "peerDependencies": {
-    "@google-cloud/storage": "^7.15.2",
+    "@google-cloud/storage": "^7.16.0",
     "archiver": "^7.0.1",
     "aws-sdk": "^2.1692.0",
     "basic-ftp": "^5.0.5",
@@ -70,11 +70,11 @@
     "@types/archiver": "^6.0.3",
     "@types/express": "^5.0.1",
     "@types/multer": "^1.4.12",
-    "@types/node": "^22.13.16",
+    "@types/node": "^22.14.0",
     "@types/prompts": "^2.4.9",
     "@types/quantize": "^1.0.2",
-    "@types/react": "^19.0.12",
-    "@types/react-dom": "^19.0.4",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
     "@types/semver": "^7.7.0",
     "@types/sharp": "^0.31.1",
     "@types/ssh2-sftp-client": "^9.0.4",

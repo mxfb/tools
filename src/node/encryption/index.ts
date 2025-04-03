@@ -1,9 +1,7 @@
-import * as Buffer from './buffer'
+import * as AES_256_GCM from './@aes-256-gcm'
 import * as Key from './key'
-import * as Uint8Array from './uint8-array'
 
 export {
-  Buffer,
-  Key,
-  Uint8Array
+  AES_256_GCM,
+  Key
 }

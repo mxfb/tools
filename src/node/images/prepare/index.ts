@@ -35,6 +35,12 @@ export async function prepareImage (imageBuffer: Buffer, customOptions?: Prepare
         format: sharpImageMetadata.format || 'png',
     }
     
+
+    /* Makes sure we work with the best output format (most useful for area-composition) */
+    const outputDimensions = {
+        widths: customOptions?.widths && customOptions?.widths.length ? customOptions?.widths : [imageBufferMetadata.width] ,
+        heights: customOptions?.heights && customOptions?.heights.length ? customOptions?.heights : [imageBufferMetadata.height] ,
+    };
     const options = getOptions(imageBufferMetadata, customOptions);
     
     /* Calc nbOutputs OR we could calc pixels instead ? */
@@ -47,8 +53,8 @@ export async function prepareImage (imageBuffer: Buffer, customOptions?: Prepare
     
     /* Apply all image operations */
     const transformedBuffer = await transformImage(imageBuffer, options.inputOperations, {
-        width: Thumbnails.Common.getArrayMax(options.widths) || 0,
-        height: Thumbnails.Common.getArrayMax(options.heights) || 0
+        width: Thumbnails.Common.getArrayMax(outputDimensions.widths) || 0,
+        height: Thumbnails.Common.getArrayMax(outputDimensions.heights) || 0
     });
     
     
@@ -84,7 +90,7 @@ export async function prepareImage (imageBuffer: Buffer, customOptions?: Prepare
         }
     }
     
-    const zipBuffer = exportZipBuffer(exportsBuffers, generateZipName())
+    const zipBuffer = exportZipBuffer(exportsBuffers, generateZipName(options.name))
     
     /* Zipping images and returning it (use for debug) */
     // const zip = Files.zip(OUTPUT_ZIP_FOLDER, generateZipName(), exportsBuffers);
@@ -107,14 +113,14 @@ function getOptions(imageBufferMetadata: { width: number, height: number, format
     }
 }
 
-function generateZipName() {
+function generateZipName(name?: string) {
     const date = new Date();
-    return `image-exports_${date.toLocaleDateString()}_${date.toLocaleTimeString()}_${date.getTime()}`.replace(/\/|:/g, '-').replace(/ /g, '').trim();
+    return `${name || ''}_image-exports_${date.toLocaleDateString()}_${date.toLocaleTimeString()}_${date.getTime()}`.replace(/\/|:/g, '-').replace(/ /g, '').trim();
 }
 
 function generateFileName({ width, height, quality, format, suffix, preffix }: { width: number, height: number, quality: Quality, format: string, suffix?: string, preffix?: string }) {
     const _preffix = preffix ? `${preffix}_` :  'image-formats_';
     const _suffix = `${suffix ? `_${suffix}` :  ''}.${format}`;
     
-    return `${_preffix}${width}${height}_Q${quality}${_suffix}`;
+    return `${_preffix}${width}x${height}_Q${quality}${_suffix}`;
 }

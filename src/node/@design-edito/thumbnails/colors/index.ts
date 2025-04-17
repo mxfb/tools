@@ -17,25 +17,26 @@ export type PaletteExtract = {
     }
 }
 
-export function extractPaletteFromImage(data: Buffer<ArrayBufferLike>, imageDimensions: { w: number, h: number }, options: {
-    extractPaletteDensity: number,
+export function extractPaletteFromImage(data: Buffer<ArrayBufferLike>, imageDimensions: { w: number, h: number }, additionalColors: Palette, options: {
+    useAdditionalColorsOnly: boolean,
+    extractDensity: number,
     lightenIntensity: number,
     saturateIntensity: number,
 }, nbChannels: number = 3): PaletteExtract {
     const pixels = getPixels(data, imageDimensions.w, imageDimensions.h, nbChannels);
-    const palette = getPalette(pixels, options.extractPaletteDensity);
+    const palette = additionalColors.length && options.useAdditionalColorsOnly ? additionalColors : getPalette(pixels, options.extractDensity);
     const complementaryPalette = palette.map((color) => complementColor(color));
 
     return {
         default: {
             default: palette,
             saturate: palette.map((color) => saturateColor(color, options.saturateIntensity)),
-            lighten: palette.map((color) => ligthenColor(color, options.lightenIntensity)),
+            lighten: palette.map((color) => lightenColor(color, options.lightenIntensity)),
         },
         complementary: {
             default: complementaryPalette,
             saturate: complementaryPalette.map((color) => saturateColor(color, options.saturateIntensity)),
-            lighten: complementaryPalette.map((color) => ligthenColor(color, options.lightenIntensity)),
+            lighten: complementaryPalette.map((color) => lightenColor(color, options.lightenIntensity)),
         }
     }
 }
@@ -72,7 +73,7 @@ export const getPixels = (data: Buffer<ArrayBufferLike>, width: number, height: 
 
 export const getPalette = (pixels: Color[], paletteDensity: number): Palette => {
     /* Uses quantization to calc palette */
-    const _paletteDensity = paletteDensity < 5 ? paletteDensity - 1 : paletteDensity;
+    const _paletteDensity = Math.max(1, paletteDensity < 5 ? paletteDensity - 1 : paletteDensity);
     const colorMap = quantize(pixels, _paletteDensity);
     const palette: Color[] = colorMap ? colorMap.palette() : [];
     return palette;
@@ -142,7 +143,7 @@ export const complementColor = (color: RGBColor): RGBColor => {
     return [m - r, m - g, m - b];
 }
 
-export const ligthenColor = (color: RGBColor, intensity: number = 20): RGBColor => {
+export const lightenColor = (color: RGBColor, intensity: number = 20): RGBColor => {
     /* To make it easier, we'll convert RGB to HSL so we just have to modify the L property */
     const [h, s, l] = RGBToHSL(color);
 
@@ -154,5 +155,19 @@ export const saturateColor = (color: RGBColor, intensity: number = 20): RGBColor
     /* To make it easier, we'll convert RGB to HSL so we just have to modify the S property */
     const [h, s, l] = RGBToHSL(color);
     const rgb = HSLToRGB([h, Math.min(100, s + intensity), l]);
+    return rgb;
+}
+
+export const setColorSaturation = (color: RGBColor, intensity: number = 20): RGBColor => {
+    /* To make it easier, we'll convert RGB to HSL so we just have to modify the S property */
+    const [h, s, l] = RGBToHSL(color);
+    const rgb = HSLToRGB([h, Math.min(100, intensity), l]);
+    return rgb;
+}
+
+export const setColorLuminance = (color: RGBColor, intensity: number = 20): RGBColor => {
+    /* To make it easier, we'll convert RGB to HSL so we just have to modify the S property */
+    const [h, s, l] = RGBToHSL(color);
+    const rgb = HSLToRGB([h, s, Math.min(100, intensity)]);
     return rgb;
 }

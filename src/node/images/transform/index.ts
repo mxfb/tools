@@ -3,7 +3,7 @@
 import sharp from "sharp"
 import { Operations, isOperation, applyOperation } from "./operations";
 
-export async function transformImage (imageBuffer: Buffer, operations: Operations, maxDimensions: { width: number, height: number}): Promise<Buffer<ArrayBufferLike>> {
+export async function transformImage (imageBuffer: Buffer, operations: Operations, maxOutputDimensions: { width: number, height: number}): Promise<Buffer<ArrayBufferLike>> {
     /* Creates a sharpImage */
     let imageSharp = sharp(imageBuffer);
     const imageMetadata = await imageSharp.metadata();
@@ -14,7 +14,7 @@ export async function transformImage (imageBuffer: Buffer, operations: Operation
         if (isOperation(operation)) {
             /* We use sharp result at each step */
             const appliedOperation = await applyOperation(imageSharp, operation, transformation);
-            imageSharp = appliedOperation.sharp;
+            imageSharp = sharp(await appliedOperation.sharp.toBuffer()); // Make sure to recreate sharp as it sometimes is buggy for chained operations 
 
             if (appliedOperation.transformation) {
                 transformation = { ...transformation, ...appliedOperation.transformation };

@@ -32,36 +32,39 @@ export async function innerResize(imageSharp: sharp.Sharp, params: InnerResizePa
 
     const ratio = (params.innerRatio || 100) / 100;
     const innerDimensions = {
-        width: Math.round(outputDimensions.width * ratio),
-        height: Math.round(outputDimensions.height * ratio)
+        width: Math.floor(outputDimensions.width * ratio),
+        height: Math.floor(outputDimensions.height * ratio)
     };
-    const innerContainedDimensions = Thumbnails.Layout.getContainedDimensions(innerDimensions.width, innerDimensions.height, outputDimensions.width, outputDimensions.height, true);
 
+    const innerContainedDimensions = Thumbnails.Layout.getContainedDimensions(innerDimensions.width, innerDimensions.height, outputDimensions.width, outputDimensions.height, true);
+    
     const innerPositions = getInnerPositions(params.innerGravity || 'center', { w: innerDimensions.width, h: innerDimensions.height }, innerContainedDimensions, { w: outputDimensions.width, h: outputDimensions.height });
 
-    const resizedSharp = imageSharp
-        .resize({
-            width: innerContainedDimensions.w,
-            height: innerContainedDimensions.h,
-            fit: 'cover',
-            background: {r: 255, g: 255, b: 255, alpha: 0}
-        }) /* Adds a transparent background (necessary for png) */
-   
+    // const background = params.background  && typeof params.background === 'object' ? { ...params.background, alpha: 0 } : { r: 255, g: 255, b: 255, alpha: 0 },
+    const background = { r: 255, g: 255, b: 255, alpha: 0 };
+    const resizedSharp = imageSharp.toFormat('png').resize({
+        width: innerDimensions.width,
+        height: innerDimensions.height,
+        fit: sharp.fit.contain,
+        background
+    });
+
     /* Adds image to new image with given background */
     const composedSharp = sharp({
             create: {
-                background: params.background  && typeof params.background === 'object' ? { ...params.background, alpha: 1 } : { r: 255, g: 255, b: 255, alpha: 0 },
+                background,
                 width: outputDimensions.width,
                 height: outputDimensions.height,
                 channels: 4,
+                
             }
-        }).composite([
+        }).ensureAlpha(0).composite([
             {
-                input:  await resizedSharp.toFormat('png').toBuffer(),
-                left: innerPositions.x,
-                top: innerPositions.y
+                input: await resizedSharp.toFormat('png').toBuffer(),
+                left: Math.floor(innerPositions.x),
+                top: Math.floor(innerPositions.y),
             }
-        ]).toFormat('png').flatten();
+        ]).toFormat('png');
 
 
     return {
@@ -69,8 +72,8 @@ export async function innerResize(imageSharp: sharp.Sharp, params: InnerResizePa
         transformation: {
             width: innerContainedDimensions.w,
             height: innerContainedDimensions.h,
-            x: innerPositions.x,
-            y: innerPositions.y
+            x: Math.ceil(innerPositions.x),
+            y: Math.ceil(innerPositions.y)
         }
     }
 }

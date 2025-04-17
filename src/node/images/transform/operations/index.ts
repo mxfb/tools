@@ -266,7 +266,51 @@ const operationsSchemas = {
     }),
     [OperationNames.AreaComposition]: z.object({
         name: z.literal(OperationNames.AreaComposition),
-        params: z.object({}) /* @todo */
+        params: z.object({
+            innerTransformation: z.optional(z.object({ w: z.number(), h: z.number(), x: z.number(), y: z.number() })),
+            palette: z.optional(z.object({
+                additionalColors: z.optional(z.array(z.array(z.number()).length(3))),
+                createFrom: z.optional(z.array(z.enum(['default', 'default-lighten', 'default-saturate', 'complementary', 'complementary-lighten', 'complementary-saturate']))),
+                maxDensity: z.optional(z.number()),
+                useAdditionalColorsOnly: z.optional(z.boolean()),
+                useExtractFromInner: z.optional(z.boolean()),
+                extractDensity: z.optional(z.number()),
+                lightenIntensity: z.optional(z.number()),
+                saturateIntensity: z.optional(z.number()),
+            })),
+            composition: z.union([
+                z.object({
+                    type: z.literal('tile'),
+                    params: z.optional(z.object({
+                        coverage: z.optional(z.number().min(0).max(100)),
+                        densityA: z.optional(z.object({min: z.number(), max: z.number()})),
+                        densityB: z.optional(z.object({min: z.number(), max: z.number()})),
+                        format: z.optional(z.enum(['random', 'default', 'portrait', 'landscape'])),
+                        xEasing: z.optional(z.string()),
+                        yEasing: z.optional(z.string()),
+                    }))
+                }),
+                z.object({
+                    type: z.literal('line'),
+                    params: z.optional(z.object({
+                        nbLines: z.optional(z.number().min(0).max(20)),
+                        colors: z.optional(z.object({
+                            base: z.enum(['first', 'last']).or(z.number()),
+                            primary: z.array(z.object({
+                                type: z.enum(['saturate', 'lighten', 'complement']),
+                                intensity: z.number(),
+                                intensityMode: z.enum(['add', 'set'])
+                            })),
+                            secondary: z.array(z.object({
+                                type: z.enum(['saturate', 'lighten', 'complement']),
+                                intensity: z.number(),
+                                intensityMode: z.enum(['add', 'set'])
+                            })),
+                        }))
+                    }))
+                }),
+            ])
+        })
     }),
     [OperationNames.Composite]: z.object({
         name: z.literal(OperationNames.Composite),
@@ -412,6 +456,10 @@ export type Transformation = { width: number, height: number, x: number, y: numb
 
 export async function applyOperation(imageSharp: sharp.Sharp, operation: Operation, transformation: Transformation): Promise<{sharp: sharp.Sharp, transformation?: Partial<Transformation>}> {
     const imageMetadata = await imageSharp.metadata();
+    const imageDimensions = {
+        width: imageMetadata.width || 0,
+        height: imageMetadata.height || 0,
+    }
 
     switch(operation.name) {
         case OperationNames.Rotate:
@@ -428,7 +476,6 @@ export async function applyOperation(imageSharp: sharp.Sharp, operation: Operati
                 })} /* Adds a transparent background (necessary for png) */
         case OperationNames.AreaComposition:
             const composedImage = await areaCompose(imageSharp, {
-                
                 innerTransformation: {
                     w: transformation.width,
                     h: transformation.height,
@@ -498,11 +545,11 @@ export async function applyOperation(imageSharp: sharp.Sharp, operation: Operati
              const newComposedSharp = sharp({
                 create: {
                     background: { r: 255, g: 255, b: 255, alpha: 0 },
-                    width: imageMetadata.width || 0,
-                    height:  imageMetadata.height || 0,
+                    width: imageDimensions.width,
+                    height:  imageDimensions.height,
                     channels: 4,
                 }
-            }).composite([
+            }).toFormat('png').composite([
                 {
                     input:  await imageSharp.toFormat('png').toBuffer(),
                     left: 0,
@@ -518,15 +565,17 @@ export async function applyOperation(imageSharp: sharp.Sharp, operation: Operati
                                         create: {
                                             background: image.input.overlay.background,
                                             channels: image.input.overlay.channels || 4,
-                                            width: image.input.overlay.width || imageMetadata.width || 0,
-                                            height: image.input.overlay.height || imageMetadata.height || 0,
+                                            width: image.input.overlay.width || imageDimensions.width,
+                                            height: image.input.overlay.height || imageDimensions.height,
                                         }
                                     }
                                 }
                             case 'gradient':
                                 return {
+                                    left: 0,
+                                    top: 0,
                                     ...image,
-                                    input: Buffer.from(`<svg viewBox="0 0 ${imageMetadata.width || 0} ${imageMetadata.height || 0}" xmlns="http://www.w3.org/2000/svg"  xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    input: Buffer.from(`<svg viewBox="0 0 ${imageDimensions.width} ${imageDimensions.height}" xmlns="http://www.w3.org/2000/svg"  xmlns:xlink="http://www.w3.org/1999/xlink" width="${imageDimensions.width}" height="${imageDimensions.height}">
                                         <defs>
                                             <linearGradient id="myGradient" gradientTransform="rotate(${image.input.overlay.angle})">
                                             ${image.input.overlay.stops.map((stop) => `<stop offset="${stop.offset}%" stop-color="${stop.color}" />`).join(' ')}
@@ -543,9 +592,18 @@ export async function applyOperation(imageSharp: sharp.Sharp, operation: Operati
                         input: image.input
                     }
                 })
-            ]).toFormat('png').flatten();
-            return { sharp: newComposedSharp }
+            ]).toFormat('png').flatten({ background: { r: 255, g: 255, b: 255, alpha: 0 } });
+            const imageMetadata = await newComposedSharp.metadata();
+            return { 
+                sharp: newComposedSharp, 
+                transformation: {
+                    width: imageMetadata.width || 0,
+                    height: imageMetadata.height || 0,
+                    x: 0,
+                    y: 0
+                },
+            }
         default:
-            return { sharp: imageSharp};
+            return { sharp: imageSharp };
     }
 }

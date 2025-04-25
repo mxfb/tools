@@ -1,0 +1,34 @@
+import sharp from 'sharp'
+import zod from 'zod'
+import { colorSchema, OperationNames } from '..'
+
+export type ExtendOperationParams = {
+  left: number,
+  right: number
+  top: number,
+  bottom: number,
+  extendWith?: sharp.ExtendWith,
+  background?: { r: number, g: number, b: number } | string
+}
+
+export type ExtendOperation = {
+  name: typeof OperationNames.Extend,
+  params: ExtendOperationParams
+}
+
+export const extendSchema: zod.ZodType<ExtendOperation> = zod.object({
+  name: zod.literal(OperationNames.Extend),
+  params: zod.object({
+    top: zod.number(),
+    left: zod.number(),
+    right: zod.number(),
+    bottom: zod.number(),
+    background: zod.optional(colorSchema),
+    extendWith: zod.optional(zod.enum([
+      'background',
+      'copy',
+      'repeat',
+      'mirror'
+    ]))
+  })
+})

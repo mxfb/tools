@@ -1,6 +1,6 @@
 import sharp from "sharp";
-import { Thumbnails } from "../../../../@design-edito";
-import { Palette } from "../../../../@design-edito/thumbnails/colors";
+import { Thumbnails } from "../../../../../@design-edito";
+import { Palette } from "../../../../../@design-edito/thumbnails/colors";
 import { areaLineCompose, DEFAULT_COMPOSITION_LINE_PARAMS, LineAreaComposition } from "./area-line-composition";
 import { areaTileCompose, TileAreaComposition } from "./area-tile-composition";
 

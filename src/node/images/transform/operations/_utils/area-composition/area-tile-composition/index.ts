@@ -1,4 +1,4 @@
-import { Thumbnails } from "../../../../../@design-edito";
+import { Thumbnails } from "../../../../../../@design-edito";
 import sharp from "sharp";
 
 export type TileAreaComposition = {

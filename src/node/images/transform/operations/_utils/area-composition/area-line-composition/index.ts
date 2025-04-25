@@ -1,4 +1,4 @@
-import { Colors } from "../../../../../@design-edito/thumbnails";
+import { Colors } from "../../../../../../@design-edito/thumbnails";
 import sharp from "sharp";
 
 export type ColorTransformation = {

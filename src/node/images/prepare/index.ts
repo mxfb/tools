@@ -68,7 +68,7 @@ export async function prepareImage (
   const transformedBuffer = await transform(imageBuffer, options.inputOperations, {
     width: Math.max(...outputDimensions.widths) ?? 0,
     height: Math.max(...outputDimensions.heights) ?? 0
-  })
+  } /* [WIP] j'ai supprimé le 3e argument de transform, qui n'était pas utilisé */)
   
   /* Create exports */
   const exportsBuffers: ExportZipSources = [{

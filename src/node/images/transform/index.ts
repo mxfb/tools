@@ -6,7 +6,7 @@ import { unknownToString } from '../../../agnostic/errors/unknown-to-string'
 import { areaComposeSchema, AreaComposeOperation } from './area-compose'
 import { blurSchema, BlurOperation } from './blur'
 import { brightnessSchema, BrightnessOperation } from './brighten'
-import { compositeSchema, CompositeOperation } from './composite' // [WIP] rename to a verb (or two verbs if split into 2 funcs ?)
+import { compositeSchema, CompositeOperation } from './composite'
 import { extendSchema, ExtendOperation } from './extend'
 import { extractSchema, ExtractOperation } from './extract'
 import { flattenSchema, FlattenOperation } from './flatten'
@@ -129,16 +129,19 @@ export async function apply (
     height: imageMetadata.height || 0,
   }
 
+  sharpInstance.modulate()
   switch(operation.name) {
     case OperationNames.Rotate: return sharpInstance.rotate(operation.params.angle)
     case OperationNames.InnerResize: return innerResize(sharpInstance, operation.params)
-    case OperationNames.Resize: sharpInstance.resize(operation.params)
+    case OperationNames.Resize: sharpInstance.resize({
+      background: 'rgba(0, 0, 0, 0)',
+      ...operation.params
+    })
     case OperationNames.AreaComposition: return await areaCompose(sharpInstance, {
       innerTransformation: {
         w: transformation.width,
         h: transformation.height,
         x: transformation.x,
-        y: transformation.y
       },
       ...operation.params
     })
@@ -156,6 +159,7 @@ export async function apply (
     case OperationNames.Modulate: return sharpInstance.modulate(operation.params)
     case OperationNames.Linear: return sharpInstance.linear(operation.params.multiplier, operation.params.offset)
     case OperationNames.Composite:
+       // [WIP] rename to a verb (or two verbs if split into 2 funcs ?)
        const newComposedSharp = sharp({
         create: {
           background: { r: 255, g: 255, b: 255, alpha: 0 },

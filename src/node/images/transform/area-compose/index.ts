@@ -2,15 +2,15 @@ import zod from 'zod'
 import { areaCompose, AreaCompositionParams } from '../_utils/area-composition'
 import { OperationNames } from '..'
 
-export type AreaCompositionOperationParams = Partial<AreaCompositionParams>
+export type AreaComposeOperationParams = Partial<AreaCompositionParams>
 
-export type AreaCompositionOperation = {
+export type AreaComposeOperation = {
   name: typeof OperationNames.AreaComposition,
-  params: AreaCompositionOperationParams
+  params: AreaComposeOperationParams
 }
 
 // [WIP] le schéma ne matche pas le type
-export const areaCompositionSchema: zod.ZodType<AreaCompositionOperation> = zod.object({
+export const areaComposeSchema: zod.ZodType<AreaComposeOperation> = zod.object({
   name: zod.literal(OperationNames.AreaComposition),
   params: zod.object({
     innerTransformation: zod.optional(zod.object({

@@ -1,25 +1,25 @@
 import zod from 'zod'
-import sharp from 'sharp'
+import sharp, { Color } from 'sharp'
 import { Outcome } from '../../../../agnostic/misc/outcome'
 import { unknownToString } from '../../../../agnostic/errors/unknown-to-string'
 
-import { areaCompositionSchema, AreaCompositionOperation } from './area-composition'
+import { areaComposeSchema, AreaComposeOperation } from './area-compose'
 import { blurSchema, BlurOperation } from './blur'
-import { brightnessSchema, BrightnessOperation } from './brightness'
-import { compositeSchema, CompositeOperation } from './composite'
+import { brightnessSchema, BrightnessOperation } from './brighten'
+import { compositeSchema, CompositeOperation } from '../composite' // [WIP] rename to a verb (or two verbs if split into 2 funcs)
 import { extendSchema, ExtendOperation } from './extend'
 import { extractSchema, ExtractOperation } from './extract'
 import { flattenSchema, FlattenOperation } from './flatten'
 import { flipSchema, FlipOperation } from './flip'
 import { flopSchema, FlopOperation } from './flop'
 import { hueSchema, HueOperation } from './hue'
-import { innerResizeSchema, InnerResizeOperation } from './inner-resize'
-import { lightnessSchema, LightnessOperation } from './lightness'
+import { innerResizeSchema, InnerResizeOperation } from '../inner-resize'
+import { lightnessSchema, LightnessOperation } from './lighten'
 import { linearSchema, LinearOperation } from './linear'
 import { modulateSchema, ModulateOperation } from './modulate'
 import { normalizeSchema, NormalizeOperation } from './normalize'
+import { resizeSchema, ResizeOperation } from '../resize'
 import { rotateSchema, RotateOperation } from './rotate'
-import { resizeSchema, ResizeOperation } from './resize'
 import { saturationSchema, SaturationOperation } from './saturation'
 
 import { areaCompose } from './_utils/area-composition'
@@ -27,16 +27,11 @@ import { innerResize } from './_utils/inner-resize'
 
 /* Utilities */
 
-export type Color = string | {
-  r: number
-  g: number
-  b: number
-}
-
-export const colorSchema: zod.ZodType<Color> =  (zod.string().min(7).max(7)).or(zod.object({
+export const colorSchema: zod.ZodType<Color> =  zod.string().min(7).max(7).or(zod.object({
   r: zod.number().min(0).max(255),
   g: zod.number().min(0).max(255),
   b: zod.number().min(0).max(255),
+  alpha: zod.number().min(0).max(1)
 }))
 
 /* Operations */
@@ -63,7 +58,7 @@ export const OperationNames = {
 } as const
 
 export type Operation =
-  AreaCompositionOperation
+  AreaComposeOperation
   | BlurOperation
   | BrightnessOperation
   | CompositeOperation
@@ -83,7 +78,7 @@ export type Operation =
   | RotateOperation
 
 const operationSchema = zod.union([
-  areaCompositionSchema,
+  areaComposeSchema,
   blurSchema,
   brightnessSchema,
   compositeSchema,
@@ -105,11 +100,9 @@ const operationSchema = zod.union([
 
 export function isOperation (operation: unknown): Outcome.Either<Operation, string> {
   try {
-    const parsed = operationSchema.parse(operation)
-    return Outcome.makeSuccess(parsed)
+    return Outcome.makeSuccess(operationSchema.parse(operation))
   } catch (err) {
-    const errStr = unknownToString(err)
-    return Outcome.makeFailure(errStr)
+    return Outcome.makeFailure(unknownToString(err))
   }
 }
 
@@ -120,14 +113,10 @@ export type Transformation = {
   y: number
 }
 
-export async function applyOperation (
+export async function apply (
   sharpInstance: sharp.Sharp,
-  operation: Operation,
-  transformation: Transformation
-): Promise<{
-  sharp: sharp.Sharp,
-  transformation?: Partial<Transformation>
-}> {
+  operation: Operation
+): Promise<sharp.Sharp> {
   const imageMetadata = await sharpInstance.metadata()
   const imageDimensions = {
     width: imageMetadata.width || 0,
@@ -135,85 +124,34 @@ export async function applyOperation (
   }
 
   switch(operation.name) {
-    case OperationNames.Rotate:
-      return { sharp: sharpInstance.rotate(operation.params.angle)}
-    case OperationNames.InnerResize:
-      return innerResize(sharpInstance, operation.params)
-    case OperationNames.Resize:
-      return { sharp: sharpInstance
-        .resize({
-          width: operation.params.width,
-          height: operation.params.height,
-          fit: operation.params.fit || 'cover',
-          background: {r: 255, g: 255, b: 255, alpha: 0}
-        })} /* Adds a transparent background (necessary for png) */
-    case OperationNames.AreaComposition:
-      const composedImage = await areaCompose(sharpInstance, {
-        innerTransformation: {
-          w: transformation.width,
-          h: transformation.height,
-          x: transformation.x,
-          y: transformation.y
-        },
-        ...operation.params,
-      })
-      return { sharp: composedImage }
-    case OperationNames.Extract:
-      return { sharp: sharp(await sharpInstance.extract({ 
-        left: operation.params.left,
-        top: operation.params.top, 
-        width: operation.params.width, 
-        height: operation.params.height,
-      }).toBuffer()) }
-    case OperationNames.Extend:
-      return { sharp: sharpInstance.extend({ 
-        left: operation.params.left,
-        top: operation.params.top, 
-        right: operation.params.right, 
-        bottom: operation.params.bottom,
-        background: operation.params.background,
-        extendWith: operation.params.extendWith || 'mirror'
-      }) }
-    case OperationNames.Flip:
-      return { sharp: sharpInstance.flip(operation.params.flip)}
-    case OperationNames.Flop:
-      return { sharp: sharpInstance.flop(operation.params.flop)}
-    case OperationNames.Blur:
-      return { sharp: sharpInstance.blur(operation.params.sigma)}
-    case OperationNames.Flatten:
-      return { sharp: sharpInstance.flatten({
-        background: operation.params.background
-      })}
-    case OperationNames.Normalize:
-      return { sharp: sharpInstance.normalize({
-        lower: operation.params.lower,
-        upper: operation.params.upper
-      })}
-    case OperationNames.Brightness:
-      return { sharp: sharpInstance.modulate({
-        brightness: operation.params.brightness
-      })}
-    case OperationNames.Saturation:
-      return { sharp: sharpInstance.modulate({
-        saturation: operation.params.saturation
-      })}
-    case OperationNames.Hue:
-      return { sharp: sharpInstance.modulate({
-        hue: operation.params.hue
-      })}
-    case OperationNames.Lightness:
-      return { sharp: sharpInstance.modulate({
-        lightness: operation.params.lightness
-      })}
-    case OperationNames.Modulate:
-      return { sharp: sharpInstance.modulate({
-        lightness: operation.params.lightness,
-        brightness: operation.params.brightness,
-        hue: operation.params.hue,
-        saturation: operation.params.saturation,
-      })}
-    case OperationNames.Linear:
-      return { sharp: sharpInstance.linear(operation.params.multiplier, operation.params.offset)}
+    case OperationNames.Rotate: return sharpInstance.rotate(operation.params.angle)
+    case OperationNames.InnerResize: return innerResize(sharpInstance, operation.params)
+    case OperationNames.Resize: sharpInstance.resize({
+      ...operation.params,
+      background: { r: 255, g: 255, b: 255, alpha: 0 } /* Adds a transparent background (necessary for png) */
+    })
+    case OperationNames.AreaComposition: return await areaCompose(sharpInstance, {
+      innerTransformation: {
+        w: transformation.width,
+        h: transformation.height,
+        x: transformation.x,
+        y: transformation.y
+      },
+      ...operation.params,
+    })
+    case OperationNames.Extract: return sharpInstance.extract(operation.params)
+    case OperationNames.Extend: return sharpInstance.extend(operation.params)
+    case OperationNames.Flip: return sharpInstance.flip(operation.params.flip)
+    case OperationNames.Flop: return sharpInstance.flop(operation.params.flop)
+    case OperationNames.Blur: return sharpInstance.blur(operation.params.sigma)
+    case OperationNames.Flatten: return sharpInstance.flatten(operation.params)
+    case OperationNames.Normalize: return sharpInstance.normalize(operation.params)
+    case OperationNames.Brightness: return sharpInstance.modulate(operation.params)
+    case OperationNames.Saturation: return sharpInstance.modulate(operation.params)
+    case OperationNames.Hue: return sharpInstance.modulate(operation.params)
+    case OperationNames.Lightness: return sharpInstance.modulate(operation.params)
+    case OperationNames.Modulate: return sharpInstance.modulate(operation.params)
+    case OperationNames.Linear: return sharpInstance.linear(operation.params.multiplier, operation.params.offset)
     case OperationNames.Composite:
        const newComposedSharp = sharp({
         create: {
@@ -265,18 +203,15 @@ export async function applyOperation (
             input: image.input
           }
         })
-      ]).toFormat('png').flatten({ background: { r: 255, g: 255, b: 255, alpha: 0 } })
-      const imageMetadata = await newComposedSharp.metadata()
-      return { 
-        sharp: newComposedSharp, 
-        transformation: {
-          width: imageMetadata.width || 0,
-          height: imageMetadata.height || 0,
-          x: 0,
-          y: 0
-        },
-      }
-    default:
-      return { sharp: sharpInstance }
+      ]).toFormat('png').flatten({
+        background: {
+          r: 255,
+          g: 255,
+          b: 255,
+          alpha: 0
+        }
+      })
+      return newComposedSharp
+    default: return sharpInstance 
   }
 }

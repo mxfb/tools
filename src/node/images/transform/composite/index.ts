@@ -1,6 +1,6 @@
 import zod from 'zod'
 import sharp from 'sharp'
-import { colorSchema, OperationNames } from '..'
+import { colorSchema, OperationNames } from '../operations'
 
 export type CompositeOverlayFillOperationParams = {
   mode: 'fill',

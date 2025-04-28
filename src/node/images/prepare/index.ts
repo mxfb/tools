@@ -3,7 +3,7 @@ import {
   exportZipBuffer,
   ExportZipSources,
   ImageFileType,
-  formatBuffer
+  prepareExport
 } from '../exports'
 import {
   Operation,
@@ -65,10 +65,7 @@ export async function prepareImage (
   if (nbOutputs > MAX_NB_OUTPUTS) throw Error('Nb output exceeds supported max nb output')
   
   /* Apply all image operations */
-  const transformedBuffer = await transform(imageBuffer, options.inputOperations, {
-    width: Math.max(...outputDimensions.widths) ?? 0,
-    height: Math.max(...outputDimensions.heights) ?? 0
-  } /* [WIP] j'ai supprimé le 3e argument de transform, qui n'était pas utilisé */)
+  const transformedBuffer = await transform(imageBuffer, options.inputOperations) /* [WIP] j'ai supprimé le 3e argument de transform, qui n'était pas utilisé */
   
   /* Create exports */
   const exportsBuffers: ExportZipSources = [{
@@ -85,7 +82,7 @@ export async function prepareImage (
     for (const height of options.heights) {
       for (const quality of options.qualities) {
         for (const format of options.formats) {
-          const exportBuffer = await formatBuffer(transformedBuffer, {
+          const exportBuffer = await prepareExport(transformedBuffer, {
             format,
             quality,
             width,

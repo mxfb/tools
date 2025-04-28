@@ -1,11 +1,12 @@
-import sharp from 'sharp'
+import sharp, { Color } from 'sharp'
 import zod from 'zod'
-import { OperationNames } from '..'
+import { colorSchema, OperationNames } from '../operations'
 
 export type ResizeOperationParams = {
   width: number
-  height: number,
-  fit?: keyof sharp.FitEnum,
+  height: number
+  background?: Color
+  fit?: keyof sharp.FitEnum
 }
 
 export type ResizeOperation = {
@@ -18,6 +19,7 @@ export const resizeSchema: zod.ZodType<ResizeOperation> = zod.object({
   params: zod.object({
     width: zod.number(),
     height: zod.number(),
+    background: zod.optional(colorSchema),
     fit: zod.enum([
       'contain',
       'cover',

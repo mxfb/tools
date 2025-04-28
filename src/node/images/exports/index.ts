@@ -4,6 +4,63 @@ import sharp from 'sharp'
 import { clamp } from '../../../agnostic/numbers/clamp'
 import { Outcome } from 'agnostic/misc/outcome'
 
+export type ImageFileType = 'jpg' | 'jpeg' | 'png' | 'webp' | 'avif' | 'tiff' | 'heif'
+
+export type OutputOptions = {
+  format: ImageFileType, 
+  width: number, 
+  height: number, 
+  quality: number
+}
+
+export type ExportZipSource = { buffer: Buffer, name: string }
+export type ExportZipSources = ExportZipSource[]
+
+export async function prepareExport (
+  imageBuffer: Buffer,
+  outputOptions: OutputOptions
+): Promise<Buffer> {
+  const { width, height, quality, format } = outputOptions
+  const sharpInstance = sharp(imageBuffer).resize({
+    width,
+    height,
+    fit: sharp.fit.cover
+  })
+  let withQuality = sharpInstance
+  if (format === 'png') { withQuality = withQuality.png({ quality }) }
+  else if (format === 'jpeg') { withQuality = withQuality.jpeg({ quality }) }
+  else if (format === 'webp') { withQuality = withQuality.webp({ quality }) }
+  else if (format === 'avif') { withQuality = withQuality.avif({ quality }) }
+  return await withQuality.toBuffer()
+}
+
+export function exportZipBuffer (
+  zipSources: ExportZipSources,
+  zipDirectoryName?: string
+): Promise<Buffer<ArrayBufferLike> | undefined> {
+  return new Promise(async resolve => {
+    const archive = archiver('zip', { zlib: { level: 9 } })
+    if (zipDirectoryName) { archive.directory(zipDirectoryName + '/', false) }
+    zipSources.forEach((zipSource) => {
+      const fileName = zipDirectoryName
+        ? `${zipDirectoryName}/${zipSource.name}`
+        : zipSource.name
+      archive.append(zipSource.buffer, { name: fileName })
+    })
+    const chunks: Uint8Array[] = []
+    const writable = new Writable()
+    writable._write = (chunk, _enc, callback) => {
+      chunks.push(chunk)
+      callback()
+    }
+    archive.pipe(writable)
+    await archive.finalize()
+    const bufferZip = Buffer.concat(chunks)
+    resolve(bufferZip)
+  })
+}
+
+
 export type FormatCommonOptions = {
   width?: number
   height?: number
@@ -24,14 +81,14 @@ export type FormatHeifOptions = FormatCommonOptions & { quality?: number }
 export type FormatKeepOptions = FormatCommonOptions
 export type FormatOptions = FormatJpgOptions | FormatPngOptions | FormatWebpOptions | FormatAvifOptions | FormatTiffOptions | FormatHeifOptions
 
-export async function ffformat (input: Buffer, type: 'jpg' | 'jpeg', options: FormatJpgOptions): Promise<Outcome.Either<Buffer, string>>
-export async function ffformat (input: Buffer, type: 'png', options: FormatPngOptions): Promise<Outcome.Either<Buffer, string>>
-export async function ffformat (input: Buffer, type: 'webp', options: FormatWebpOptions): Promise<Outcome.Either<Buffer, string>>
-export async function ffformat (input: Buffer, type: 'avif', options: FormatAvifOptions): Promise<Outcome.Either<Buffer, string>>
-export async function ffformat (input: Buffer, type: 'tiff', options: FormatTiffOptions): Promise<Outcome.Either<Buffer, string>>
-export async function ffformat (input: Buffer, type: 'heif', options: FormatHeifOptions): Promise<Outcome.Either<Buffer, string>>
-export async function ffformat (input: Buffer, options: FormatKeepOptions): Promise<Outcome.Either<Buffer, string>>
-export async function ffformat (
+export async function format (input: Buffer, type: 'jpg' | 'jpeg', options: FormatJpgOptions): Promise<Outcome.Either<Buffer, string>>
+export async function format (input: Buffer, type: 'png', options: FormatPngOptions): Promise<Outcome.Either<Buffer, string>>
+export async function format (input: Buffer, type: 'webp', options: FormatWebpOptions): Promise<Outcome.Either<Buffer, string>>
+export async function format (input: Buffer, type: 'avif', options: FormatAvifOptions): Promise<Outcome.Either<Buffer, string>>
+export async function format (input: Buffer, type: 'tiff', options: FormatTiffOptions): Promise<Outcome.Either<Buffer, string>>
+export async function format (input: Buffer, type: 'heif', options: FormatHeifOptions): Promise<Outcome.Either<Buffer, string>>
+export async function format (input: Buffer, options: FormatKeepOptions): Promise<Outcome.Either<Buffer, string>>
+export async function format (
   input: Buffer,
   typeOrOptions: ImageFileType | FormatKeepOptions,
   options?: FormatOptions
@@ -105,65 +162,3 @@ export const toHeif = async (
 ): Promise<Buffer> => sharp(input)
   .heif({ quality: clamp(quality ?? 100, 1, 100) })
   .toBuffer()
-
-
-
-
-
-
-
-export type ImageFileType = 'jpg' | 'jpeg' | 'png' | 'webp' | 'avif' | 'tiff' | 'heif'
-
-export type OutputOptions = {
-  format: ImageFileType, 
-  width: number, 
-  height: number, 
-  quality: number
-}
-
-export type ExportZipSource = { buffer: Buffer, name: string }
-export type ExportZipSources = ExportZipSource[]
-
-export async function formatBuffer (
-  imageBuffer: Buffer,
-  outputOptions: OutputOptions
-): Promise<Buffer> {
-  const { width, height, quality, format } = outputOptions
-  const sharpInstance = sharp(imageBuffer).resize({
-    width,
-    height,
-    fit: sharp.fit.cover
-  })
-  let withQuality = sharpInstance
-  if (format === 'png') { withQuality = withQuality.png({ quality }) }
-  else if (format === 'jpeg') { withQuality = withQuality.jpeg({ quality }) }
-  else if (format === 'webp') { withQuality = withQuality.webp({ quality }) }
-  else if (format === 'avif') { withQuality = withQuality.avif({ quality }) }
-  return await withQuality.toBuffer()
-}
-
-export function exportZipBuffer (
-  zipSources: ExportZipSources,
-  zipDirectoryName?: string
-): Promise<Buffer<ArrayBufferLike> | undefined> {
-  return new Promise(async resolve => {
-    const archive = archiver('zip', { zlib: { level: 9 } })
-    if (zipDirectoryName) { archive.directory(zipDirectoryName + '/', false) }
-    zipSources.forEach((zipSource) => {
-      const fileName = zipDirectoryName
-        ? `${zipDirectoryName}/${zipSource.name}`
-        : zipSource.name
-      archive.append(zipSource.buffer, { name: fileName })
-    })
-    const chunks: Uint8Array[] = []
-    const writable = new Writable()
-    writable._write = (chunk, _enc, callback) => {
-      chunks.push(chunk)
-      callback()
-    }
-    archive.pipe(writable)
-    await archive.finalize()
-    const bufferZip = Buffer.concat(chunks)
-    resolve(bufferZip)
-  })
-}

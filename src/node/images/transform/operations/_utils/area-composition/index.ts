@@ -4,13 +4,12 @@ import { Palette } from "../../../../../@design-edito/thumbnails/colors";
 import { areaLineCompose, DEFAULT_COMPOSITION_LINE_PARAMS, LineAreaComposition } from "./area-line-composition";
 import { areaTileCompose, TileAreaComposition } from "./area-tile-composition";
 
-
 type CompositionType = TileAreaComposition | LineAreaComposition;
 
 type RequiredAreaCompositionParams = {
     innerTransformation: { w: number, h: number, x: number, y: number }
     palette: {
-        additionalColors: Palette;
+        additionalColors?: Palette;
         createFrom: ('default' | 'default-lighten' | 'default-saturate' | 'complementary' | 'complementary-lighten' | 'complementary-saturate')[],
         maxDensity: number;
         useAdditionalColorsOnly: boolean;
@@ -19,14 +18,19 @@ type RequiredAreaCompositionParams = {
         lightenIntensity: number;
         saturateIntensity: number;
     }
-    composition: CompositionType | undefined
+    composition?: CompositionType | undefined
 }
 
 export type AreaCompositionParams = {
-    innerTransformation: RequiredAreaCompositionParams['innerTransformation'],
+    innerTransformation?: RequiredAreaCompositionParams['innerTransformation'],
     palette?: Partial<RequiredAreaCompositionParams['palette']>,
     composition?: Partial<RequiredAreaCompositionParams['composition']>,
 };
+
+export type _AreaCompositionParams = {
+    innerTransformation?: RequiredAreaCompositionParams['innerTransformation'],
+    composition?: Partial<RequiredAreaCompositionParams['composition']>,
+}
 
 const DEFAULT_AREA_COMPOSITION_PARAMS: RequiredAreaCompositionParams = {
     innerTransformation: { w: 0, h: 0, x: 0, y: 0 },
@@ -70,7 +74,7 @@ export async function areaCompose(inputSharp: sharp.Sharp, customParams?: Partia
     const imagePalette = Thumbnails.Colors.extractPaletteFromImage(
         inputExtractBufferData, 
         inputExtractDimensions, 
-        options.palette.additionalColors,
+        options.palette.additionalColors || [],
         {
             useAdditionalColorsOnly: options.palette.useAdditionalColorsOnly,
             extractDensity: options.palette.extractDensity,

@@ -110,12 +110,12 @@ export async function transform (
 
 /* Utilities */
 
-export const colorSchema: zod.ZodType<Color> =  zod.string().min(7).max(7).or(zod.object({
-  r: zod.number().min(0).max(255),
-  g: zod.number().min(0).max(255),
-  b: zod.number().min(0).max(255),
-  alpha: zod.number().min(0).max(1)
-}))
+export const colorSchema: zod.ZodType<Color> = zod.object({
+    r: zod.number().min(0).max(255),
+    g: zod.number().min(0).max(255),
+    b: zod.number().min(0).max(255),
+    alpha: zod.number().min(0).max(1),
+  }).or(zod.string().length(7))
 
 /* Operations */
 
@@ -134,14 +134,18 @@ export async function apply (
     case OperationNames.Rotate: return sharpInstance.rotate(operation.params.angle)
     case OperationNames.InnerResize: return innerResize(sharpInstance, operation.params)
     case OperationNames.Resize: sharpInstance.resize({
-      background: 'rgba(0, 0, 0, 0)',
-      ...operation.params
+      ...operation.params,
+      options: {
+        background: 'rgba(0, 0, 0, 0)',
+        ...operation.params.options,
+      }
     })
     case OperationNames.AreaComposition: return await areaCompose(sharpInstance, {
       innerTransformation: {
         w: transformation.width,
         h: transformation.height,
         x: transformation.x,
+        y: transformation.y,
       },
       ...operation.params
     })

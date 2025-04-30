@@ -1,12 +1,9 @@
 import zod from 'zod'
 import { colorSchema, OperationNames } from '..'
+import { Color } from 'sharp'
 
 export type FlattenOperationParams = {
-  background: string | {
-    r: number
-    g: number
-    b: number
-  }
+  background: Color
 }
 
 export type FlattenOperation = {

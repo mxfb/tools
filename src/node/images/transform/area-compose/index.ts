@@ -1,5 +1,5 @@
 import zod from 'zod'
-import { areaCompose, AreaCompositionParams } from '../_utils/area-composition'
+import { AreaCompositionParams, _AreaCompositionParams } from '../operations/_utils/area-composition'
 import { OperationNames } from '..'
 
 export type AreaComposeOperationParams = Partial<AreaCompositionParams>
@@ -9,7 +9,17 @@ export type AreaComposeOperation = {
   params: AreaComposeOperationParams
 }
 
-// [WIP] le schéma ne matche pas le type
+const colorTransformationSchema = zod.array(zod.object({
+  type: zod.enum([
+    'saturate',
+    'lighten',
+    'complement'
+  ]),
+  intensity: zod.number(),
+  intensityMode: zod.enum(['add', 'set'])
+}));
+
+// [WIP] le schéma ne matche pas le type (@todo: additionalColors avec [number, number, number])
 export const areaComposeSchema: zod.ZodType<AreaComposeOperation> = zod.object({
   name: zod.literal(OperationNames.AreaComposition),
   params: zod.object({
@@ -20,7 +30,7 @@ export const areaComposeSchema: zod.ZodType<AreaComposeOperation> = zod.object({
       y: zod.number()
     })),
     palette: zod.optional(zod.object({
-      additionalColors: zod.optional(zod.array(zod.array(zod.number()).length(3))),
+      additionalColors: zod.optional(zod.array(zod.number()).length(3).max(3)),
       createFrom: zod.optional(zod.array(zod.enum([
         'default',
         'default-lighten',
@@ -36,50 +46,35 @@ export const areaComposeSchema: zod.ZodType<AreaComposeOperation> = zod.object({
       lightenIntensity: zod.optional(zod.number()),
       saturateIntensity: zod.optional(zod.number()),
     })),
-    composition: zod.union([
+    composition: zod.optional(zod.union([
       zod.object({
         type: zod.literal('tile'),
         params: zod.optional(zod.object({
-          coverage: zod.optional(zod.number().min(0).max(100)),
-          densityA: zod.optional(zod.object({min: zod.number(), max: zod.number()})),
-          densityB: zod.optional(zod.object({min: zod.number(), max: zod.number()})),
-          format: zod.optional(zod.enum([
+          coverage: zod.number().min(0).max(100),
+          densityA: zod.object({min: zod.number(), max: zod.number()}),
+          densityB: zod.object({min: zod.number(), max: zod.number()}),
+          format: zod.enum([
             'random',
             'default',
             'portrait',
             'landscape'
-          ])),
-          xEasing: zod.optional(zod.string()),
-          yEasing: zod.optional(zod.string()),
+          ]),
+          xEasing: zod.string(),
+          yEasing: zod.string(),
         }))
       }),
       zod.object({
         type: zod.literal('line'),
         params: zod.optional(zod.object({
-          nbLines: zod.optional(zod.number().min(0).max(20)),
-          colors: zod.optional(zod.object({
+          nbLines: zod.number().min(0).max(20),
+          colors: zod.object({
             base: zod.enum(['first', 'last']).or(zod.number()),
-            primary: zod.array(zod.object({
-              type: zod.enum([
-                'saturate',
-                'lighten',
-                'complement'
-              ]),
-              intensity: zod.number(),
-              intensityMode: zod.enum(['add', 'set'])
-            })),
-            secondary: zod.array(zod.object({
-              type: zod.enum([
-                'saturate',
-                'lighten',
-                'complement'
-              ]),
-              intensity: zod.number(),
-              intensityMode: zod.enum(['add', 'set'])
-            }))
-          }))
+            primary: colorTransformationSchema,
+            secondary: colorTransformationSchema
+          })
         }))
-      })
-    ])
+      }),
+      zod.undefined()
+    ]))
   })
 })

@@ -24,10 +24,13 @@ import { saturationSchema, SaturationOperation } from './saturation'
 
 import { areaCompose } from './operations/_utils/area-composition'
 import { innerResize } from './operations/_utils/inner-resize'
+import { scaleSchema, ScaleOperation } from './scale'
+import { scale } from './operations/_utils/scale'
 
 export const OperationNames = {
   Rotate: 'rotate',
   Resize: 'resize',
+  Scale: 'scale',
   InnerResize: 'inner-resize',
   Extract: 'extract',
   Extend: 'extend',
@@ -65,6 +68,7 @@ export type Operation =
   | ResizeOperation
   | SaturationOperation
   | RotateOperation
+  | ScaleOperation
 
 const operationSchema = zod.union([
   areaComposeSchema,
@@ -84,7 +88,8 @@ const operationSchema = zod.union([
   normalizeSchema,
   resizeSchema,
   rotateSchema,
-  saturationSchema
+  saturationSchema,
+  scaleSchema
 ])
 
 export function isOperation (operation: unknown): Outcome.Either<Operation, string> {
@@ -129,7 +134,7 @@ export async function apply (
     height: imageMetadata.height || 0,
   }
 
-  sharpInstance.modulate()
+  // sharpInstance.modulate()
   switch(operation.name) {
     case OperationNames.Rotate: return sharpInstance.rotate(operation.params.angle)
     case OperationNames.InnerResize: return innerResize(sharpInstance, operation.params)
@@ -162,6 +167,7 @@ export async function apply (
     case OperationNames.Lightness: return sharpInstance.modulate(operation.params)
     case OperationNames.Modulate: return sharpInstance.modulate(operation.params)
     case OperationNames.Linear: return sharpInstance.linear(operation.params.multiplier, operation.params.offset)
+    case OperationNames.Scale: return await scale(sharpInstance, operation.params)
     case OperationNames.Composite:
        // [WIP] rename to a verb (or two verbs if split into 2 funcs ?)
        const newComposedSharp = sharp({

@@ -31,7 +31,8 @@ export const OperationNames = {
   Rotate: 'rotate',
   Resize: 'resize',
   Scale: 'scale',
-  InnerResize: 'inner-resize',
+  Frame: 'frame',
+  InnerResize: 'inner-resize', /*@todo: [WIP] deprecate */
   Extract: 'extract',
   Extend: 'extend',
   AreaComposition: 'area-compose',

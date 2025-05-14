@@ -1,7 +1,9 @@
 import { FrameOperationParams } from "node/images/transform/frame";
 import sharp from "sharp";
+import { createBackgroundLine } from "./backgrounds/create-line-background";
+import { createColorPalette } from "./create-color-palette";
 
-export async function frame (
+export async function frame(
   imageSharp: sharp.Sharp,
   params: FrameOperationParams
 ): Promise<sharp.Sharp> {
@@ -11,27 +13,90 @@ export async function frame (
       heightPx: imageMetadata.height ?? 0
     }
 
-    const background = params.background || { r: 255, g: 255, b: 255, alpha: 0 };
- 
+    const defaultBackgroundColorCreate = getDefaultBackgroundColor(params.background);
+    const backgroundOverlays = await getBackgroundOverlays(
+        {
+            sharp: imageSharp,
+            dimensions: imageDimensions
+        },
+        params.background, 
+        params.dimensions
+    );
+
     const innerPositions = await getInnerFramePositions(imageDimensions, params.dimensions, params.position);
 
     const frameSharpInstance =  sharp({
         create: {
-            background,
+            background: defaultBackgroundColorCreate,
             width: params.dimensions.widthPx,
             height: params.dimensions.heightPx,
             channels: 4 
         }
-    }).ensureAlpha(0).composite([{
-        input: await imageSharp.toFormat('png').toBuffer(),
-        left: innerPositions.x,
-        top: innerPositions.y,
-    }]);
+    }).ensureAlpha(0).composite([
+        ...backgroundOverlays,
+        {
+            input: await imageSharp.toFormat('png').toBuffer(),
+            left: innerPositions.x,
+            top: innerPositions.y,
+        }
+    ]);
 
     return frameSharpInstance;
 }
 
-/* @todo: [WIP] Will be used by area-compose too */
+const getDefaultBackgroundColor = (background: FrameOperationParams['background']) => {
+    if (background && (typeof background === 'object' && 'r' in background)) {
+        return {
+            r: background.r || 255,
+            g: background.g || 255,
+            b: background.b || 255,
+            alpha: background.alpha || 0    
+        };
+    }
+    return { r: 255, g: 255, b: 255, alpha: 0 }
+}
+
+const getBackgroundOverlays = (
+    imageInput: {
+        sharp: sharp.Sharp,
+        dimensions: {
+            widthPx: number,
+            heightPx: number
+        }
+    }, 
+    background: FrameOperationParams['background'], 
+    dimensions: FrameOperationParams['dimensions']
+): Promise<sharp.OverlayOptions[]> => {
+    const backgroundOverlays: sharp.OverlayOptions[] = [];
+    return new Promise(async () => {
+        if (!background || 
+            typeof background !== 'object' || 
+            typeof background === 'object' && !('type' in background)
+        ) {
+            return backgroundOverlays;
+        }
+
+        const imageBuffer = await imageInput.sharp.raw().toBuffer();
+        const nbImageChannels = (await imageInput.sharp.metadata()).channels || 3;
+        const colorPalette = createColorPalette(
+            {
+                buffer: imageBuffer,
+                nbChannels: nbImageChannels,
+                dimensions: imageInput.dimensions
+            },
+            background.colorPalette
+        );
+
+        switch (background.type) {
+            case 'line':
+                return createBackgroundLine(background, dimensions, colorPalette);
+            default:
+                return backgroundOverlays;
+        }
+    });
+}
+
+
 export async function getInnerFramePositions(innerDimensions: { widthPx: number, heightPx: number }, frameDimensions: { widthPx: number, heightPx: number }, position: FrameOperationParams['position']) {
     const innerPositions = {
         x: 0,

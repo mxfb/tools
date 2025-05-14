@@ -2,25 +2,26 @@ import zod from 'zod'
 import sharp from 'sharp'
 import { colorSchema, OperationNames } from '../index'
 
-export type CompositeOverlayFillOperationParams = {
+export type ComposeOverlayFillOperationParams = {
   mode: 'fill',
   channels?: sharp.Create['channels'],
   background: sharp.Create['background'] 
 }
 
-export type CompositeOverlayGradientOperationParams = {
+export type ComposeOverlayGradientOperationParams = {
   mode: 'gradient',
   angle: number,
   stops: { color: string, offset: number }[]
 }
 
-export type CompositeOperationParams = {
+export type ComposeOperationParams = {
+  background?: sharp.Color,
   images: {
-    input: Buffer | { 
+    input: { 
       overlay: {
         width?: sharp.Create['width'],
         height?: sharp.Create['height']
-      }  & (CompositeOverlayFillOperationParams | CompositeOverlayGradientOperationParams)
+      }  & (ComposeOverlayFillOperationParams | ComposeOverlayGradientOperationParams)
     }
     blend: sharp.Blend,
     gravity: sharp.Gravity,
@@ -30,17 +31,19 @@ export type CompositeOperationParams = {
   }[]
 }
 
-export type CompositeOperation = {
-  name: typeof OperationNames.Composite,
-  params: CompositeOperationParams
+export type ComposeOperation = {
+  name: typeof OperationNames.Compose,
+  params: ComposeOperationParams
 }
 
 // @todo: [WIP] + question : est-ce que c'est pas deux opérations différentes en fait ? Vraie question, j'ai pas investigué
-export const compositeSchema: zod.ZodType<CompositeOperation> = zod.object({
-  name: zod.literal(OperationNames.Composite),
+export const composeSchema: zod.ZodType<ComposeOperation> = zod.object({
+  name: zod.literal(OperationNames.Compose),
   params: zod.object({
+    background: zod.optional(zod.array(colorSchema)),
     images: zod.array(zod.object({
-      input: zod.custom<Buffer>(val => Buffer.isBuffer(val)).or(
+      input: 
+      zod.custom<Buffer>(val => Buffer.isBuffer(val)).or(
         zod.object({
           overlay: zod.union([
             zod.object({

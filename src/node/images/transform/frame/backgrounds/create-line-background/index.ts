@@ -1,5 +1,24 @@
 import zod from 'zod';
 
+export type ColorTransformation = {
+    type: 'saturate' | 'lighten' | 'complement',
+    intensity: number,
+    intensityMode: 'add' | 'set'
+}
+
+
+export type CreateLineBackground = {
+    type: 'line',
+    params: {
+        nbLines: number,
+        colors: {
+            basePaletteIndex: 'first' | 'last' | number,
+            primaryTransformations: ColorTransformation[],
+            secondaryTransformations: ColorTransformation[]
+        }
+    }
+}
+
 export const colorTransformationsSchema = zod.array(zod.object({
     type: zod.enum(['saturate', 'lighten', 'complement']),
     intensity: zod.number().min(0).max(100),

@@ -2,8 +2,8 @@ import zod from 'zod'
 import { OperationNames } from '../_utils/operation-names'
 import { colorSchema } from '../_utils/color-schema'
 import sharp from 'sharp'
-import { CreateBackgroundLine } from '../operations/_utils/frame/backgrounds/create-line-background';
-import { createLineBackgroundSchema } from './backgrounds/create-line-background';
+import { CreateLineBackground, createLineBackgroundSchema } from './backgrounds/create-line-background';
+import { CreateTileBackground, createTileBackgroundSchema } from './backgrounds/create-tile-background';
 
 export type FrameOperation = {
   name: typeof OperationNames.Frame,
@@ -32,7 +32,7 @@ export type FrameOperationParams = {
 
 type FramePosition = number | string;
 
-export type FrameCreateBackground = (CreateBackgroundLine) & FrameCreateBackgroundOptions;
+export type FrameCreateBackground = (CreateLineBackground | CreateTileBackground) & FrameCreateBackgroundOptions;
 
 type FrameCreateBackgroundOptions = {
     colorPalette?: {
@@ -107,7 +107,8 @@ export const frameSchema: zod.ZodType<FrameOperation> = zod.object({
     }),
     background: zod.union([
       colorSchema,
-      createLineBackgroundSchema.extend(createBackgroundOptionsSchema)
+      createLineBackgroundSchema.extend(createBackgroundOptionsSchema),
+      createTileBackgroundSchema.extend(createBackgroundOptionsSchema)
     ])
   })
 })

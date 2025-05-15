@@ -2,26 +2,9 @@ import sharp from "sharp"
 import { setColorSaturation, saturateColor } from '../../../../../../../../agnostic/colors/saturate-color'
 import { setColorLuminance, lightenColor } from '../../../../../../../../agnostic/colors/lighten-color'
 import { complementColor } from '../../../../../../../../agnostic/colors/complement-color'
+import { CreateLineBackground, ColorTransformation } from '../../../../../frame/backgrounds/create-line-background'
 
-export type ColorTransformation = {
-    type: 'saturate' | 'lighten' | 'complement',
-    intensity: number,
-    intensityMode: 'add' | 'set'
-}
-
-export type CreateBackgroundLine = {
-    type: 'line',
-    params: {
-        nbLines: number,
-        colors: {
-            basePaletteIndex: 'first' | 'last' | number,
-            primaryTransformations: ColorTransformation[],
-            secondaryTransformations: ColorTransformation[]
-        }
-    }
-}
-
-export const DEFAULT_CREATE_BACKGROUND_PARAMS: CreateBackgroundLine['params'] = {
+export const DEFAULT_CREATE_BACKGROUND_PARAMS: CreateLineBackground['params'] = {
     nbLines: 3,
     colors: {
         basePaletteIndex: 'first',
@@ -30,27 +13,21 @@ export const DEFAULT_CREATE_BACKGROUND_PARAMS: CreateBackgroundLine['params'] = 
     }
 }
 
-export async function createBackgroundLine(
-    background: CreateBackgroundLine, 
+export async function createLineBackground(
+    background: CreateLineBackground, 
     dimensions: { widthPx: number, heightPx: number },
     palette: [number, number, number][],
 ): Promise<sharp.OverlayOptions[]> {
-    console.log('createBackgroundLine', background, dimensions, palette)
     /* Dividing zones into N* Lines */
     const lineDimensions = {
         widthPx: dimensions.widthPx,
         heightPx: Math.round(dimensions.heightPx / background.params.nbLines) 
     }
-    console.log('createBackgroundLine:lineDimensions', lineDimensions)
     const sharpOverlays: sharp.OverlayOptions[] = []
 
     const maxPaletteLength = palette.length;
     const baseColorIndex = background.params.colors.basePaletteIndex === 'first' ? 0 : background.params.colors.basePaletteIndex === 'last' ? palette.length - 1 : background.params.colors.basePaletteIndex
 
-
-    console.log('createBackgroundLine:maxPaletteLength', maxPaletteLength)
-    console.log('createBackgroundLine:baseColorIndex', baseColorIndex)
-    console.log('createBackgroundLine:nbLines', background.params.nbLines)
     for (let i = 0; i < background.params.nbLines; i++) {
         const indexPalette = Math.min(Math.max(0, baseColorIndex), maxPaletteLength);
         const RGBColor = palette[indexPalette] || [0, 0, 0]
@@ -58,17 +35,11 @@ export async function createBackgroundLine(
         const primaryRGBColor = applyColorTransformations(RGBColor, background.params.colors.primaryTransformations)
         const secondaryRGBColor = applyColorTransformations(RGBColor, background.params.colors.secondaryTransformations)
 
-
-    console.log('createBackgroundLine:RGBColor', RGBColor)
-    console.log('createBackgroundLine:primaryRGBColor', primaryRGBColor)
-    console.log('createBackgroundLine:secondaryRGBColor', secondaryRGBColor)
         const outputRGBColor = i % 2 === 0 ? primaryRGBColor : secondaryRGBColor
 
-    console.log('createBackgroundLine:outputRGBColor', outputRGBColor)
     
-    const topPx = Math.min(lineDimensions.heightPx * i,  dimensions.heightPx)
-    console.log('createBackgroundLine:topPx', topPx)
-
+        const topPx = Math.min(lineDimensions.heightPx * i,  dimensions.heightPx)
+    
         sharpOverlays.push({
             input: {
                 create: {
@@ -83,7 +54,7 @@ export async function createBackgroundLine(
         })
     }
     
-    console.log('createBackgroundLine:sharpOverlays', sharpOverlays)
+    console.log('createLineBackground:sharpOverlays', sharpOverlays)
 
 
     return sharpOverlays

@@ -1,8 +1,9 @@
 import { FrameOperationParams } from "../../../frame";
 import sharp from "sharp";
-import { createBackgroundLine } from "./backgrounds/create-line-background";
+import { createLineBackground } from "./backgrounds/create-line-background";
 import { createColorPalette } from "./create-color-palette";
 import { clamp } from "../../../../../../agnostic/numbers/clamp";
+import { createTileBackground } from "./backgrounds/create-tile-background";
 
 export async function frame(
   imageSharp: sharp.Sharp,
@@ -35,7 +36,13 @@ export async function frame(
             dimensions: imageDimensions
         },
         params.background, 
-        params.dimensions
+        params.dimensions,
+        {
+            x: innerPositions.x,
+            y: innerPositions.y,
+            w: imageDimensions.widthPx,
+            h: imageDimensions.heightPx
+        }
     );
       
     const composition = [
@@ -127,7 +134,13 @@ const getBackgroundOverlays = (
         }
     }, 
     background: FrameOperationParams['background'], 
-    dimensions: FrameOperationParams['dimensions']
+    dimensions: FrameOperationParams['dimensions'],
+    imageCoordinates: {
+        x: number,
+        y: number,
+        w: number,
+        h: number
+    }
 ): Promise<sharp.OverlayOptions[]> => {
     const backgroundOverlays: sharp.OverlayOptions[] = [];
     return new Promise(async (resolve, reject) => {
@@ -150,9 +163,12 @@ const getBackgroundOverlays = (
             background.colorPalette
         );
 
+        console.log('Images:Transform:Frame:CreateBackground', background.type)
         switch (background.type) {
             case 'line':
-                resolve(createBackgroundLine(background, dimensions, colorPalette));
+                return resolve(createLineBackground(background, dimensions, colorPalette));
+            case 'tile':
+                return resolve(createTileBackground(background, dimensions, imageCoordinates, colorPalette));
             default:
                 resolve(backgroundOverlays);
         }

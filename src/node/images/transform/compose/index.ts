@@ -12,7 +12,7 @@ export type CreateCompositionFillOperationParams = {
 export type CreateCompositionGradientOperationParams = {
   mode: 'gradient',
   angleDeg: number,
-  colorStops: { color: string, offsetPercent: number }[]
+  colorStops: { color: sharp.Color, offsetPercent: number }[]
 }
 
 type CreateCompositionImage = {
@@ -51,13 +51,12 @@ export const composeSchema: zod.ZodType<ComposeOperation> = zod.object({
       zod.object({
         input: zod.union([
           zod.custom<Buffer>(val => Buffer.isBuffer(val)),
-
           zod.object({
             mode: zod.literal('fill'),
             nbChannels: zod.optional(zod.literal(3).or(zod.literal(4))),
             background: colorSchema,
-            widthPx: zod.number().min(1),
-            heightPx: zod.number().min(1)
+            widthPx: zod.number().min(1).optional(),
+            heightPx: zod.number().min(1).optional()
           }),
 
           zod.object({
@@ -65,12 +64,12 @@ export const composeSchema: zod.ZodType<ComposeOperation> = zod.object({
             angleDeg: zod.number(),
             colorStops: zod.array(
               zod.object({
-                color: zod.string(),
+                color: colorSchema,
                 offsetPercent: zod.number() 
               })
             ),
-            widthPx: zod.number().min(1),
-            heightPx: zod.number().min(1)
+            widthPx: zod.number().min(1).optional(),
+            heightPx: zod.number().min(1).optional()
           })
 
         ]),

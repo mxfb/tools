@@ -53,9 +53,6 @@ export async function createLineBackground(
             top: topPx
         })
     }
-    
-    console.log('createLineBackground:sharpOverlays', sharpOverlays)
-
 
     return sharpOverlays
 }

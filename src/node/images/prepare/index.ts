@@ -1,10 +1,10 @@
 import sharp from 'sharp'
+import { Writable } from 'node:stream'
+import archiver from 'archiver'
 import {
-  exportZipBuffer,
-  ExportZipSources,
   ImageFileType,
-  prepareExport
-} from '../exports'
+  formatImage
+} from '../format'
 import {
   Operation,
   transform
@@ -95,8 +95,8 @@ export async function prepareImage (
       for (const quality of options.qualities) {
         for (const format of options.formats) {
 
-        console.log('Images:Transform:Prepare:Export', `${width}x${height} Q:${quality} F:${format}`);
-          const exportBuffer = await prepareExport(transformedBuffer, {
+        console.log('Images:Transform:Prepare:FormatImage', `${width}x${height} Q:${quality} F:${format}`);
+          const exportBuffer = await formatImage(transformedBuffer, {
             format,
             quality,
             width,
@@ -116,10 +116,42 @@ export async function prepareImage (
       }
     }
   }
-  
+
+  /* Temporarily ZIPs buffer */
+  console.log('Images:Transform:Export:ZIP', generateZipName(options.name));      
   const zipBuffer = exportZipBuffer(exportsBuffers, generateZipName(options.name))  
   return zipBuffer
 }
+
+
+export type ExportZipSource = { buffer: Buffer, name: string }
+export type ExportZipSources = ExportZipSource[]
+export function exportZipBuffer (
+  zipSources: ExportZipSources,
+  zipDirectoryName?: string
+): Promise<Buffer<ArrayBufferLike> | undefined> {
+  return new Promise(async resolve => {
+    const archive = archiver('zip', { zlib: { level: 9 } })
+    if (zipDirectoryName) { archive.directory(zipDirectoryName + '/', false) }
+    zipSources.forEach((zipSource) => {
+      const fileName = zipDirectoryName
+        ? `${zipDirectoryName}/${zipSource.name}`
+        : zipSource.name
+      archive.append(zipSource.buffer, { name: fileName })
+    })
+    const chunks: Uint8Array[] = []
+    const writable = new Writable()
+    writable._write = (chunk, _enc, callback) => {
+      chunks.push(chunk)
+      callback()
+    }
+    archive.pipe(writable)
+    await archive.finalize()
+    const bufferZip = Buffer.concat(chunks)
+    resolve(bufferZip)
+  })
+}
+
 
 function getOptions(
   imageBufferMetadata: {

@@ -1,5 +1,3 @@
-import { Writable } from 'node:stream'
-import archiver from 'archiver'
 import sharp from 'sharp'
 import { clamp } from '../../../agnostic/numbers/clamp'
 import { Outcome } from '../../../agnostic/misc/outcome'
@@ -13,10 +11,7 @@ export type OutputOptions = {
   quality: number
 }
 
-export type ExportZipSource = { buffer: Buffer, name: string }
-export type ExportZipSources = ExportZipSource[]
-
-export async function prepareExport (
+export async function formatImage (
   imageBuffer: Buffer,
   outputOptions: OutputOptions
 ): Promise<Buffer> {
@@ -38,32 +33,6 @@ export async function prepareExport (
     console.log('Images:Exports:Error', { e })
   }
   return buffer
-}
-
-export function exportZipBuffer (
-  zipSources: ExportZipSources,
-  zipDirectoryName?: string
-): Promise<Buffer<ArrayBufferLike> | undefined> {
-  return new Promise(async resolve => {
-    const archive = archiver('zip', { zlib: { level: 9 } })
-    if (zipDirectoryName) { archive.directory(zipDirectoryName + '/', false) }
-    zipSources.forEach((zipSource) => {
-      const fileName = zipDirectoryName
-        ? `${zipDirectoryName}/${zipSource.name}`
-        : zipSource.name
-      archive.append(zipSource.buffer, { name: fileName })
-    })
-    const chunks: Uint8Array[] = []
-    const writable = new Writable()
-    writable._write = (chunk, _enc, callback) => {
-      chunks.push(chunk)
-      callback()
-    }
-    archive.pipe(writable)
-    await archive.finalize()
-    const bufferZip = Buffer.concat(chunks)
-    resolve(bufferZip)
-  })
 }
 
 

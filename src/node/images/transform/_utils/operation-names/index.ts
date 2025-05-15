@@ -10,7 +10,7 @@ export const OperationNames = {
   Frame: 'frame',
   HueRotate: 'hue-rotate',
   Lighten: 'lighten',
-  Linear: 'linear',
+  LineateLevels: 'lineate-levels',
   Modulate: 'modulate',
   Normalize: 'normalize',
   Resize: 'resize',

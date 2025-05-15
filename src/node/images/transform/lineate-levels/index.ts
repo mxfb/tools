@@ -1,18 +1,18 @@
 import zod from 'zod'
 import { OperationNames } from '../_utils/operation-names'
 
-export type LinearOperationParams = {
+export type LineateLevelsOperationParams = {
   multiplier: number | [number, number, number]
   offset?: number | [number, number, number]
 }
 
-export type LinearOperation = {
-  name: typeof OperationNames.Linear,
-  params: LinearOperationParams
+export type LineateLevelsOperation = {
+  name: typeof OperationNames.LineateLevels,
+  params: LineateLevelsOperationParams
 }
 
-export const linearSchema: zod.ZodType<LinearOperation> = zod.object({
-  name: zod.literal(OperationNames.Linear),
+export const lineateLevelsSchema: zod.ZodType<LineateLevelsOperation> = zod.object({
+  name: zod.literal(OperationNames.LineateLevels),
   params: zod.object({
     multiplier: zod.union([
       zod.number(),

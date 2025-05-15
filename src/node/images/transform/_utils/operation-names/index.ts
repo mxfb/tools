@@ -1,0 +1,21 @@
+export const OperationNames = {
+  Blur: 'blur',
+  Brightness: 'brighten',
+  Compose: 'compose',
+  Extract: 'extract',
+  Extend: 'extend',
+  Flatten: 'flatten',
+  Flip: 'flip',
+  Flop: 'flop',
+  Frame: 'frame',
+  Hue: 'hue',
+  Lightness: 'lighten',
+  Linear: 'linear',
+  Modulate: 'modulate',
+  Normalize: 'normalize',
+  Resize: 'resize',
+  Rotate: 'rotate',
+  Saturation: 'saturate',
+  Scale: 'scale'
+} as const
+

@@ -1,5 +1,6 @@
 import zod from 'zod'
-import { colorSchema, OperationNames } from '..'
+import { colorSchema } from '../_utils/color-schema'
+import { OperationNames } from '../_utils/operation-names'
 import { Color } from 'sharp'
 
 export type FlattenOperationParams = {

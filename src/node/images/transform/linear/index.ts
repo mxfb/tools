@@ -1,5 +1,5 @@
 import zod from 'zod'
-import { OperationNames } from '..'
+import { OperationNames } from '../_utils/operation-names'
 
 export type LinearOperationParams = {
   multiplier: number | [number, number, number]

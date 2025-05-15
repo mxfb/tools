@@ -16,6 +16,7 @@ export type Ratio = [number, number]
 export type PrepareImageOptions = {
   name?: string | undefined
   inputOperations?: Operation[]
+  checkValidOperations?: boolean; // TEMPORARY
   formats?: ImageFileType[]
   center?: [number, number] // default: [0.5, 0.5]
   qualities?: Quality[] // default: [100]
@@ -42,19 +43,10 @@ export async function prepareImage (
   const imageBufferMetadata = {
     width: sharpImageMetadata.width ?? 0,
     height: sharpImageMetadata.height ?? 0,
-    format: sharpImageMetadata.format ?? 'png'
+    format: sharpImageMetadata.format || 'png'
   }
-  
-  const outputDimensions = {
-    widths: customOptions?.widths
-      && customOptions?.widths.length
-      ? customOptions?.widths
-      : [imageBufferMetadata.width],
-    heights: customOptions?.heights
-      && customOptions?.heights.length
-      ? customOptions?.heights
-      : [imageBufferMetadata.height]
-  }
+
+
   const options = getOptions(imageBufferMetadata, customOptions)
 
   /* Calc nbOutputs OR we could calc pixels instead ? */
@@ -65,23 +57,45 @@ export async function prepareImage (
   if (nbOutputs > MAX_NB_OUTPUTS) throw Error('Nb output exceeds supported max nb output')
   
   /* Apply all image operations */
-  const transformedBuffer = await transform(imageBuffer, options.inputOperations) /* [WIP] j'ai supprimé le 3e argument de transform, qui n'était pas utilisé */
-  
+  let transformedBuffer = imageBuffer;
+  try {
+    transformedBuffer = await transform(imageBuffer, options.inputOperations, options.checkValidOperations);
+  } catch(e) {
+    console.log('Images:Prepare:Transform:Buffer:Error', { e })
+  }
+
+  const transformedBufferMetadata = await sharp(transformedBuffer).metadata();
+
   /* Create exports */
-  const exportsBuffers: ExportZipSources = [{
-    buffer: imageBuffer,
-    name: generateFileName({
-      ...imageBufferMetadata,
-      quality: 100,
-      suffix: 'original',
-      prefix: options.name
-    })
-  }] /* First add original to the export */
+  const exportsBuffers: ExportZipSources = [
+    {
+      buffer: imageBuffer,
+      name: generateFileName({
+        ...imageBufferMetadata,
+        quality: 100,
+        suffix: 'original',
+        prefix: options.name
+      })
+    },
+    {
+      buffer: transformedBuffer,
+      name: generateFileName({
+        width: transformedBufferMetadata.width || 0,
+        height: transformedBufferMetadata.height || 0,
+        format: transformedBufferMetadata.format || 'png',
+        quality: 100,
+        suffix: 'transformed-unresized',
+        prefix: options.name
+      })
+    }
+] /* First add original to the export */
 
   for (const width of options.widths) {
     for (const height of options.heights) {
       for (const quality of options.qualities) {
         for (const format of options.formats) {
+
+        console.log('Images:Transform:Prepare:Export', `${width}x${height} Q:${quality} F:${format}`);
           const exportBuffer = await prepareExport(transformedBuffer, {
             format,
             quality,
@@ -111,7 +125,7 @@ function getOptions(
   imageBufferMetadata: {
     width: number,
     height: number,
-    format: ImageFileType
+    format: keyof sharp.FormatEnum
   },
   options?: PrepareImageOptions
 ): RequiredPrepareImageOptions {
@@ -120,6 +134,7 @@ function getOptions(
     qualities: [100],
     inputOperations: [],
     ...options,
+    checkValidOperations: options?.checkValidOperations ?? false,
     name: options?.name ?? '',
     formats: [imageBufferMetadata.format, ...(options?.formats ? options.formats : []) ],
     ratios: [...(options?.ratios ? options.ratios : []) ],

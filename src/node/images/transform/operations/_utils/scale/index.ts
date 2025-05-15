@@ -1,4 +1,4 @@
-import { ScaleOperationParams } from "node/images/transform/scale";
+import { ScaleOperationParams } from "../../../scale";
 import sharp from "sharp";
 
 export async function scale (
@@ -15,9 +15,9 @@ export async function scale (
     const yRatio = 'yRatio' in params  && params.yRatio !== undefined ? params.yRatio : 1;
     const background = 'background' in params  && params.background !== undefined ? params.background : { r: 0, g: 0, b: 0, alpha: 0 };
     return imageSharp.resize({
-        width: Math.floor(imageDimensions.width * xRatio ),
-        height: Math.floor(imageDimensions.width * yRatio),
-        fit: sharp.fit.contain,
-        background
+      width: Math.floor(imageDimensions.width * xRatio ),
+      height: Math.floor(imageDimensions.width * yRatio),
+      fit: sharp.fit.contain,
+      background
     })
 }

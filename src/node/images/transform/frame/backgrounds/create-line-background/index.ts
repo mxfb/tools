@@ -11,13 +11,13 @@ export const createLineBackgroundSchema = zod.object({
     params: zod.object({
         nbLines: zod.number().min(1),
         colors: zod.object({
-        basePaletteIndex: zod.union([
-            zod.literal('first'),
-            zod.literal('last'),
-            zod.number().min(0)
-        ]),
-        primaryTransformations: colorTransformationsSchema,
-        secondaryTransformations: colorTransformationsSchema
+            basePaletteIndex: zod.union([
+                zod.literal('first'),
+                zod.literal('last'),
+                zod.number().min(0)
+            ]),
+            primaryTransformations: colorTransformationsSchema,
+            secondaryTransformations: colorTransformationsSchema
         })
     })
 })  

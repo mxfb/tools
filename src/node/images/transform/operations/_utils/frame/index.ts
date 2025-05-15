@@ -1,7 +1,8 @@
-import { FrameOperationParams } from "node/images/transform/frame";
+import { FrameOperationParams } from "../../../frame";
 import sharp from "sharp";
 import { createBackgroundLine } from "./backgrounds/create-line-background";
 import { createColorPalette } from "./create-color-palette";
+import { clamp } from "../../../../../../agnostic/numbers/clamp";
 
 export async function frame(
   imageSharp: sharp.Sharp,
@@ -13,7 +14,21 @@ export async function frame(
       heightPx: imageMetadata.height ?? 0
     }
 
+    /* Handles scale inside frame */
+    const scaledImage = scaleImageToFrame(
+        imageSharp,
+        imageDimensions,
+        params.dimensions,
+        params.imageScale
+    );
+    imageSharp = scaledImage.sharpInstance;
+    imageDimensions.widthPx = scaledImage.widthPx;
+    imageDimensions.heightPx = scaledImage.heightPx;
+
     const defaultBackgroundColorCreate = getDefaultBackgroundColor(params.background);
+
+    const innerPositions = getInnerFramePositions(imageDimensions, params.dimensions, params.position);
+
     const backgroundOverlays = await getBackgroundOverlays(
         {
             sharp: imageSharp,
@@ -22,9 +37,17 @@ export async function frame(
         params.background, 
         params.dimensions
     );
+      
+    const composition = [
+        ...backgroundOverlays,
+        {
+            input: await imageSharp.toFormat('png').png({ quality: 100 }).toBuffer(), /* Make sure we work with the best quality of our file */
+            left: innerPositions.x,
+            top: innerPositions.y,
+        }
+    ];
 
-    const innerPositions = await getInnerFramePositions(imageDimensions, params.dimensions, params.position);
-
+    /* To ensure that our new sharp composition has no format error later, we must set its format */
     const frameSharpInstance =  sharp({
         create: {
             background: defaultBackgroundColorCreate,
@@ -32,16 +55,55 @@ export async function frame(
             height: params.dimensions.heightPx,
             channels: 4 
         }
-    }).ensureAlpha(0).composite([
-        ...backgroundOverlays,
-        {
-            input: await imageSharp.toFormat('png').toBuffer(),
-            left: innerPositions.x,
-            top: innerPositions.y,
-        }
-    ]);
+    }).ensureAlpha(0).composite(composition).png({ quality: 100 }); /* Make sure we work with the best quality of our file */
 
     return frameSharpInstance;
+}
+
+const scaleImageToFrame = (imageSharp: sharp.Sharp, imageDimensions: { widthPx: number, heightPx: number }, frameDimensions: { widthPx: number, heightPx: number}, imageScale?: { xRatio?: number, yRatio?: number}) => {
+     const scale = {
+        xRatio: 1,
+        yRatio: 1
+    };
+    const frameZoneDimensions = {
+        widthPx: frameDimensions.widthPx,
+        heightPx: frameDimensions.heightPx,
+    }
+    
+    if (imageScale) {
+        frameZoneDimensions.widthPx = frameDimensions.widthPx * (imageScale.xRatio || 1);
+        frameZoneDimensions.heightPx = frameDimensions.heightPx * (imageScale.yRatio || 1);
+    } 
+
+    const containedRatiosPercents = getContainedRatios(
+        imageDimensions.widthPx,
+        imageDimensions.heightPx,
+        frameZoneDimensions.widthPx,
+        frameZoneDimensions.heightPx
+    );
+
+    if (imageScale || (!imageScale && imageDimensions.widthPx < frameDimensions.widthPx && imageDimensions.heightPx < frameDimensions.heightPx)) {
+        scale.xRatio = containedRatiosPercents.xPercent;
+        scale.yRatio = containedRatiosPercents.yPercent;
+    }
+
+    if (scale.xRatio !== 1 || scale.yRatio !== 1) {
+        imageDimensions.widthPx = clamp(Math.round(imageDimensions.widthPx * scale.xRatio), 0, frameDimensions.widthPx);
+        imageDimensions.heightPx = clamp(Math.round(imageDimensions.heightPx * scale.yRatio), 0, frameDimensions.heightPx);
+
+        imageSharp = imageSharp.resize({
+            width: imageDimensions.widthPx,
+            height: imageDimensions.heightPx,
+            fit: sharp.fit.inside,
+            position: 'center',
+            fastShrinkOnLoad: false
+        });
+    }
+    return {
+        sharpInstance: imageSharp,
+        widthPx: imageDimensions.widthPx,
+        heightPx: imageDimensions.heightPx
+    }
 }
 
 const getDefaultBackgroundColor = (background: FrameOperationParams['background']) => {
@@ -68,12 +130,13 @@ const getBackgroundOverlays = (
     dimensions: FrameOperationParams['dimensions']
 ): Promise<sharp.OverlayOptions[]> => {
     const backgroundOverlays: sharp.OverlayOptions[] = [];
-    return new Promise(async () => {
+    return new Promise(async (resolve, reject) => {
         if (!background || 
             typeof background !== 'object' || 
             typeof background === 'object' && !('type' in background)
         ) {
-            return backgroundOverlays;
+            resolve(backgroundOverlays);
+            return;
         }
 
         const imageBuffer = await imageInput.sharp.raw().toBuffer();
@@ -89,15 +152,20 @@ const getBackgroundOverlays = (
 
         switch (background.type) {
             case 'line':
-                return createBackgroundLine(background, dimensions, colorPalette);
+                resolve(createBackgroundLine(background, dimensions, colorPalette));
             default:
-                return backgroundOverlays;
+                resolve(backgroundOverlays);
         }
+        reject(new Error('Unknown background type'));
     });
 }
 
 
-export async function getInnerFramePositions(innerDimensions: { widthPx: number, heightPx: number }, frameDimensions: { widthPx: number, heightPx: number }, position: FrameOperationParams['position']) {
+export function getInnerFramePositions(
+    innerDimensions: { widthPx: number, heightPx: number }, 
+    frameDimensions: { widthPx: number, heightPx: number }, 
+    position: FrameOperationParams['position']
+) {
     const innerPositions = {
         x: 0,
         y: 0
@@ -117,6 +185,13 @@ export async function getInnerFramePositions(innerDimensions: { widthPx: number,
 
     if (position.right) {
         innerPositions.x = frameDimensions.widthPx - (calcPosition(position.right, frameDimensions.widthPx) + innerDimensions.widthPx);
+    }
+
+    if (position.translateX) {
+        innerPositions.x = innerPositions.x + calcPosition(position.translateX, innerDimensions.widthPx);
+    }
+    if (position.translateY) {
+        innerPositions.y = innerPositions.y + calcPosition(position.translateY, innerDimensions.heightPx);
     }
 
     /* This prevent input from going outside of output which would trigger a sharp error */
@@ -156,16 +231,31 @@ function interpretPosition(position: FrameOperationParams['position']['left']) {
     }
 
     if (typeof position === 'string') {
-        const matchedPosition = position.replace(/\s+/g, '').match(/(\d+)([%]|[px])?/);
+        const matchedPosition = position.replace(/\s+/g, '').match(/(-\d+|\d+)([%]|[px])?/);
         if (matchedPosition) {
-            if (matchedPosition[0]) {
-                interpretedPosition.value = Number(matchedPosition[0]);
-            }
             if (matchedPosition[1]) {
-                interpretedPosition.unit = matchedPosition[1];
+                interpretedPosition.value = Number(matchedPosition[1]);
+            }
+            if (matchedPosition[2]) {
+                interpretedPosition.unit = matchedPosition[2];
             }
         }
     }
 
     return interpretedPosition;
+}
+
+export function getContainedRatios(widthPx: number, heightPx: number, wrapperWidthPx: number, wrapperHeightPx: number, withoutReduction?: boolean) {
+    if (withoutReduction && widthPx <= wrapperWidthPx && heightPx <= wrapperHeightPx) {
+        return { xPercent: 100, yPercent: 100 };
+    }
+
+    const wrapperRatio = wrapperWidthPx / wrapperHeightPx;
+    const imgRatio = widthPx / heightPx;
+    const containRatio = clamp((imgRatio > wrapperRatio ? wrapperWidthPx / widthPx : wrapperHeightPx / heightPx), 0, 100);
+    
+    return {
+        xPercent: containRatio,
+        yPercent: containRatio
+    }
 }

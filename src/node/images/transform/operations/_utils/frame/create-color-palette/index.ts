@@ -1,10 +1,10 @@
-import { complementColor } from "agnostic/colors/complement-color";
-import { lightenColor } from "agnostic/colors/lighten-color";
-import { saturateColor } from "agnostic/colors/saturate-color";
-import { FrameCreateBackground, FrameOperationParams } from "node/images/transform/frame";
+import { complementColor } from "../../../../../../../agnostic/colors/complement-color";
+import { lightenColor } from "../../../../../../../agnostic/colors/lighten-color";
+import { saturateColor } from "../../../../../../../agnostic/colors/saturate-color";
+import { clamp } from "../../../../../../../agnostic/numbers/clamp";
+import { shuffle } from "../../../../../../../agnostic/arrays/shuffle";
+import { FrameCreateBackground } from "../../../../frame";
 import { extractColorsFromImage } from "../extract-colors-from-image";
-import { clamp } from "agnostic/numbers/clamp";
-import { shuffle } from "agnostic/arrays/shuffle";
 
 export type DensifyPaletteType = ('default' | 'default-lighten' | 'default-saturate' | 'complementary' | 'complementary-lighten' | 'complementary-saturate')[];
 

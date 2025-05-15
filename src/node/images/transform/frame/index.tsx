@@ -1,5 +1,6 @@
 import zod from 'zod'
-import { colorSchema, OperationNames } from '..'
+import { OperationNames } from '../_utils/operation-names'
+import { colorSchema } from '../_utils/color-schema'
 import sharp from 'sharp'
 import { CreateBackgroundLine } from '../operations/_utils/frame/backgrounds/create-line-background';
 import { createLineBackgroundSchema } from './backgrounds/create-line-background';
@@ -11,19 +12,25 @@ export type FrameOperation = {
 
 export type FrameOperationParams = {
     dimensions: {
-        widthPx: number,
-        heightPx: number
+      widthPx: number,
+      heightPx: number
+    },
+    imageScale?: {
+      xRatio?: number,
+      yRatio?: number
     },
     background: sharp.Color | FrameCreateBackground,
     position: {
-        top?: FramePosition,
-        left?: FramePosition,
-        right?:  number | string,
-        bottom?:  number | string,
+      top?: FramePosition,
+      left?: FramePosition,
+      right?:  FramePosition,
+      bottom?:  FramePosition,
+      translateX?: FramePosition,
+      translateY?: FramePosition,
     } 
 };
 
-type FramePosition = number | string | 'center';
+type FramePosition = number | string;
 
 export type FrameCreateBackground = (CreateBackgroundLine) & FrameCreateBackgroundOptions;
 
@@ -49,9 +56,8 @@ type FrameCreateBackgroundOptions = {
 
 const positionSchema = zod.union([
     zod.number().min(0),
-    zod.string(),
-    zod.literal('center')
-]);
+    zod.string()
+]).optional();
 
 const createBackgroundOptionsSchema = {
   colorPalette: zod.optional(zod.object({
@@ -87,11 +93,17 @@ export const frameSchema: zod.ZodType<FrameOperation> = zod.object({
         widthPx: zod.number().min(0),
         heightPx: zod.number().min(0),
     }),
+    imageScale: zod.object({
+        xRatio: zod.optional(zod.number().min(0).max(1)),
+        yRatio: zod.optional(zod.number().min(0).max(1)),
+    }).optional(),
     position: zod.object({
         top: positionSchema,
         left: positionSchema,
         bottom: positionSchema,
         right: positionSchema,
+        translateX: positionSchema,
+        translateY: positionSchema,
     }),
     background: zod.union([
       colorSchema,

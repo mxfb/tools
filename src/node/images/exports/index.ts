@@ -2,9 +2,9 @@ import { Writable } from 'node:stream'
 import archiver from 'archiver'
 import sharp from 'sharp'
 import { clamp } from '../../../agnostic/numbers/clamp'
-import { Outcome } from 'agnostic/misc/outcome'
+import { Outcome } from '../../../agnostic/misc/outcome'
 
-export type ImageFileType = 'jpg' | 'jpeg' | 'png' | 'webp' | 'avif' | 'tiff' | 'heif'
+export type ImageFileType = keyof sharp.FormatEnum
 
 export type OutputOptions = {
   format: ImageFileType, 
@@ -31,7 +31,13 @@ export async function prepareExport (
   else if (format === 'jpeg') { withQuality = withQuality.jpeg({ quality }) }
   else if (format === 'webp') { withQuality = withQuality.webp({ quality }) }
   else if (format === 'avif') { withQuality = withQuality.avif({ quality }) }
-  return await withQuality.toBuffer()
+  let buffer: Buffer<ArrayBufferLike> = Buffer.from([])
+  try {
+    buffer = await withQuality.toBuffer()
+  } catch(e) {
+    console.log('Images:Exports:Error', { e })
+  }
+  return buffer
 }
 
 export function exportZipBuffer (

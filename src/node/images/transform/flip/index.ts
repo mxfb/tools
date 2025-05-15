@@ -1,5 +1,6 @@
 import zod from 'zod'
-import { OperationNames } from '..'
+import { colorSchema } from '../_utils/color-schema'
+import { OperationNames } from '../_utils/operation-names'
 
 export type FlipOperationParams = {
   flip?: boolean

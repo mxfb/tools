@@ -13,7 +13,7 @@ import { flattenSchema, FlattenOperation } from './flatten'
 import { flipSchema, FlipOperation } from './flip'
 import { flopSchema, FlopOperation } from './flop'
 import { hueSchema, HueOperation } from './hue'
-import { lightnessSchema, LightnessOperation } from './lighten'
+import { lightenSchema, LightenOperation } from './lighten'
 import { linearSchema, LinearOperation } from './linear'
 import { modulateSchema, ModulateOperation } from './modulate'
 import { normalizeSchema, NormalizeOperation } from './normalize'
@@ -38,7 +38,7 @@ export type Operation =
   | FlopOperation
   | FrameOperation
   | HueOperation
-  | LightnessOperation
+  | LightenOperation
   | LinearOperation
   | ModulateOperation
   | NormalizeOperation
@@ -59,7 +59,7 @@ const operationSchema = zod.union([
   flopSchema,
   frameSchema,
   hueSchema,
-  lightnessSchema,
+  lightenSchema,
   linearSchema,
   modulateSchema,
   normalizeSchema,
@@ -118,7 +118,7 @@ export async function apply (
     case OperationNames.Frame: return frame(sharpInstance, operation.params);
     case OperationNames.Flatten: return sharpInstance.flatten(operation.params)
     case OperationNames.Hue: return sharpInstance.modulate(operation.params)
-    case OperationNames.Lightness: return sharpInstance.modulate(operation.params)
+    case OperationNames.Lighten: return sharpInstance.modulate({ lightness: operation.params })
     case OperationNames.Linear: return sharpInstance.linear(operation.params.multiplier, operation.params.offset)
     case OperationNames.Modulate: return sharpInstance.modulate(operation.params)
     case OperationNames.Normalize: return sharpInstance.normalize(operation.params)

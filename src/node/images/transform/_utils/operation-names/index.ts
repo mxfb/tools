@@ -9,7 +9,7 @@ export const OperationNames = {
   Flop: 'flop',
   Frame: 'frame',
   Hue: 'hue',
-  Lightness: 'lighten',
+  Lighten: 'lighten',
   Linear: 'linear',
   Modulate: 'modulate',
   Normalize: 'normalize',

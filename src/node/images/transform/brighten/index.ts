@@ -1,18 +1,14 @@
 import zod from 'zod'
 import { OperationNames } from '../_utils/operation-names'
 
-export type BrightnessOperationParams = {
-  brightness: number 
+export type BrightenOperationParams = number
+
+export type BrightenOperation = {
+  name: typeof OperationNames.Brighten,
+  params: BrightenOperationParams
 }
 
-export type BrightnessOperation = {
-  name: typeof OperationNames.Brightness,
-  params: BrightnessOperationParams
-}
-
-export const brightnessSchema: zod.ZodType<BrightnessOperation> = zod.object({
-  name: zod.literal(OperationNames.Brightness),
-  params: zod.object({
-    brightness: zod.number().min(0)
-  })
+export const brightenSchema: zod.ZodType<BrightenOperation> = zod.object({
+  name: zod.literal(OperationNames.Brighten),
+  params: zod.number().min(0)
 })

@@ -1,6 +1,6 @@
 export const OperationNames = {
   Blur: 'blur',
-  Brightness: 'brighten',
+  Brighten: 'brighten',
   Compose: 'compose',
   Extract: 'extract',
   Extend: 'extend',

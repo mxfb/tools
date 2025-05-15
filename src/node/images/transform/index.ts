@@ -1,11 +1,11 @@
 import zod from 'zod'
-import sharp, { Color } from 'sharp'
+import sharp from 'sharp'
 import { Outcome } from '../../../agnostic/misc/outcome'
 import { unknownToString } from '../../../agnostic/errors/unknown-to-string'
 import { OperationNames } from './_utils/operation-names'
 
 import { blurSchema, BlurOperation } from './blur'
-import { brightnessSchema, BrightnessOperation } from './brighten'
+import { brightenSchema, BrightenOperation } from './brighten'
 import { composeSchema, ComposeOperation } from './compose'
 import { extendSchema, ExtendOperation } from './extend'
 import { extractSchema, ExtractOperation } from './extract'
@@ -29,7 +29,7 @@ import { compose } from './operations/_utils/compose'
 
 export type Operation = 
   | BlurOperation
-  | BrightnessOperation
+  | BrightenOperation
   | ComposeOperation
   | ExtendOperation
   | ExtractOperation
@@ -50,7 +50,7 @@ export type Operation =
 const operationSchema = zod.union([
   // areaComposeSchema,
   blurSchema,
-  brightnessSchema,
+  brightenSchema,
   composeSchema,
   extendSchema,
   extractSchema,
@@ -109,7 +109,7 @@ export async function apply (
 ): Promise<sharp.Sharp> {
   switch(operation.name) {
     case OperationNames.Blur: return sharpInstance.blur(operation.params.sigma)
-    case OperationNames.Brightness: return sharpInstance.blur(operation.params.brightness)
+    case OperationNames.Brighten: return sharpInstance.blur(operation.params)
     case OperationNames.Compose: return compose(sharpInstance, operation.params)
     case OperationNames.Extend: return sharpInstance.extend(operation.params)
     case OperationNames.Extract: return sharpInstance.extract(operation.params)

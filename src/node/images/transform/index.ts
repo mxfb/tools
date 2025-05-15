@@ -86,10 +86,7 @@ export async function transform (
     console.log('Images:Transform:Operation:Try', operation.name, _isOperation);
     if (!needsValidation || _isOperation.success) {
       console.log('Images:Transform:Operation:Start', operation.name);
-        // [WIP] sharpInstance should be mutated on every stage
-        // so no real need to reassign, but just in case some
-        // operation function tries to clone the input and return
-        // an other instance...
+        // A new sharp Instance might be returned by some operations (most of the time composite) so we must reassign it
         sharpInstance = await apply(sharpInstance, operation)
   
       console.log('Images:Transform:Operation:Done', operation.name);

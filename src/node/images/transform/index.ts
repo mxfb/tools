@@ -19,7 +19,7 @@ import { modulateSchema, ModulateOperation } from './modulate'
 import { normalizeSchema, NormalizeOperation } from './normalize'
 import { resizeSchema, ResizeOperation } from './resize'
 import { rotateSchema, RotateOperation } from './rotate'
-import { saturationSchema, SaturationOperation } from './saturation'
+import { saturateSchema, SaturateOperation } from './saturate'
 import { scaleSchema, ScaleOperation } from './scale'
 import { frameSchema, FrameOperation } from './frame'
 
@@ -44,7 +44,7 @@ export type Operation =
   | NormalizeOperation
   | ResizeOperation
   | RotateOperation
-  | SaturationOperation
+  | SaturateOperation
   | ScaleOperation;
   
 const operationSchema = zod.union([
@@ -65,7 +65,7 @@ const operationSchema = zod.union([
   normalizeSchema,
   resizeSchema,
   rotateSchema,
-  saturationSchema,
+  saturateSchema,
   scaleSchema
 ])
 
@@ -124,7 +124,9 @@ export async function apply (
     case OperationNames.Normalize: return sharpInstance.normalize(operation.params)
     case OperationNames.Resize: return sharpInstance.resize(operation.params)
     case OperationNames.Rotate: return sharpInstance.rotate(operation.params.angle)
-    case OperationNames.Saturation: return sharpInstance.modulate(operation.params)
+    case OperationNames.Saturate: return sharpInstance.modulate({
+      saturation: operation.params
+    })
     case OperationNames.Scale: return scale(sharpInstance, operation.params)
     default: return sharpInstance 
   }

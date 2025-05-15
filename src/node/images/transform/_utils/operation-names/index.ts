@@ -15,7 +15,7 @@ export const OperationNames = {
   Normalize: 'normalize',
   Resize: 'resize',
   Rotate: 'rotate',
-  Saturation: 'saturate',
+  Saturate: 'saturate',
   Scale: 'scale'
 } as const
 

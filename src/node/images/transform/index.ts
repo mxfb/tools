@@ -12,7 +12,7 @@ import { extractSchema, ExtractOperation } from './extract'
 import { flattenSchema, FlattenOperation } from './flatten'
 import { flipSchema, FlipOperation } from './flip'
 import { flopSchema, FlopOperation } from './flop'
-import { hueSchema, HueOperation } from './hue'
+import { hueRotateSchema, HueRotateOperation } from './hue-rotate'
 import { lightenSchema, LightenOperation } from './lighten'
 import { linearSchema, LinearOperation } from './linear'
 import { modulateSchema, ModulateOperation } from './modulate'
@@ -37,7 +37,7 @@ export type Operation =
   | FlipOperation
   | FlopOperation
   | FrameOperation
-  | HueOperation
+  | HueRotateOperation
   | LightenOperation
   | LinearOperation
   | ModulateOperation
@@ -58,7 +58,7 @@ const operationSchema = zod.union([
   flipSchema,
   flopSchema,
   frameSchema,
-  hueSchema,
+  hueRotateSchema,
   lightenSchema,
   linearSchema,
   modulateSchema,
@@ -117,16 +117,14 @@ export async function apply (
     case OperationNames.Flop: return sharpInstance.flop(operation.params.flop)
     case OperationNames.Frame: return frame(sharpInstance, operation.params);
     case OperationNames.Flatten: return sharpInstance.flatten(operation.params)
-    case OperationNames.Hue: return sharpInstance.modulate(operation.params)
+    case OperationNames.HueRotate: return sharpInstance.modulate({ hue: operation.params })
     case OperationNames.Lighten: return sharpInstance.modulate({ lightness: operation.params })
     case OperationNames.Linear: return sharpInstance.linear(operation.params.multiplier, operation.params.offset)
     case OperationNames.Modulate: return sharpInstance.modulate(operation.params)
     case OperationNames.Normalize: return sharpInstance.normalize(operation.params)
     case OperationNames.Resize: return sharpInstance.resize(operation.params)
     case OperationNames.Rotate: return sharpInstance.rotate(operation.params.angle)
-    case OperationNames.Saturate: return sharpInstance.modulate({
-      saturation: operation.params
-    })
+    case OperationNames.Saturate: return sharpInstance.modulate({ saturation: operation.params})
     case OperationNames.Scale: return scale(sharpInstance, operation.params)
     default: return sharpInstance 
   }

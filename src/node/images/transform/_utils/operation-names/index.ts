@@ -8,7 +8,7 @@ export const OperationNames = {
   Flip: 'flip',
   Flop: 'flop',
   Frame: 'frame',
-  Hue: 'hue',
+  HueRotate: 'hue-rotate',
   Lighten: 'lighten',
   Linear: 'linear',
   Modulate: 'modulate',

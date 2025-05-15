@@ -1,9 +1,11 @@
 import zod from 'zod'
 import { OperationNames } from '../_utils/operation-names'
 import { colorSchema } from '../_utils/color-schema'
+import { Positions, positionsSchema } from '../_utils/positions';
 import sharp from 'sharp'
 import { CreateLineBackground, createLineBackgroundSchema } from './backgrounds/create-line-background';
 import { CreateTileBackground, createTileBackgroundSchema } from './backgrounds/create-tile-background';
+
 
 export type FrameOperation = {
   name: typeof OperationNames.Frame,
@@ -20,17 +22,8 @@ export type FrameOperationParams = {
       yRatio?: number
     },
     background: sharp.Color | FrameCreateBackground,
-    position: {
-      top?: FramePosition,
-      left?: FramePosition,
-      right?:  FramePosition,
-      bottom?:  FramePosition,
-      translateX?: FramePosition,
-      translateY?: FramePosition,
-    } 
+    positions: Positions
 };
-
-type FramePosition = number | string;
 
 export type FrameCreateBackground = (CreateLineBackground | CreateTileBackground) & FrameCreateBackgroundOptions;
 
@@ -54,10 +47,6 @@ type FrameCreateBackgroundOptions = {
     },
 }
 
-const positionSchema = zod.union([
-    zod.number().min(0),
-    zod.string()
-]).optional();
 
 const createBackgroundOptionsSchema = {
   colorPalette: zod.optional(zod.object({
@@ -97,14 +86,7 @@ export const frameSchema: zod.ZodType<FrameOperation> = zod.object({
         xRatio: zod.optional(zod.number().min(0).max(1)),
         yRatio: zod.optional(zod.number().min(0).max(1)),
     }).optional(),
-    position: zod.object({
-        top: positionSchema,
-        left: positionSchema,
-        bottom: positionSchema,
-        right: positionSchema,
-        translateX: positionSchema,
-        translateY: positionSchema,
-    }),
+    positions: positionsSchema,
     background: zod.union([
       colorSchema,
       createLineBackgroundSchema.extend(createBackgroundOptionsSchema),

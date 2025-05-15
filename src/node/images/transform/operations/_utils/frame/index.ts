@@ -4,6 +4,7 @@ import { createLineBackground } from "./backgrounds/create-line-background";
 import { createColorPalette } from "./create-color-palette";
 import { clamp } from "../../../../../../agnostic/numbers/clamp";
 import { createTileBackground } from "./backgrounds/create-tile-background";
+import { getNewPositions } from "../positions";
 
 export async function frame(
   imageSharp: sharp.Sharp,
@@ -28,7 +29,7 @@ export async function frame(
 
     const defaultBackgroundColorCreate = getDefaultBackgroundColor(params.background);
 
-    const innerPositions = getInnerFramePositions(imageDimensions, params.dimensions, params.position);
+    const innerPositions = getNewPositions(imageDimensions, params.dimensions, params.positions);
 
     const backgroundOverlays = await getBackgroundOverlays(
         {
@@ -176,90 +177,6 @@ const getBackgroundOverlays = (
     });
 }
 
-
-export function getInnerFramePositions(
-    innerDimensions: { widthPx: number, heightPx: number }, 
-    frameDimensions: { widthPx: number, heightPx: number }, 
-    position: FrameOperationParams['position']
-) {
-    const innerPositions = {
-        x: 0,
-        y: 0
-    };
-
-    if (position.top) {
-        innerPositions.y = calcPosition(position.top, frameDimensions.heightPx);
-    }
-
-    if (position.bottom) {
-        innerPositions.y = frameDimensions.heightPx - (calcPosition(position.bottom, frameDimensions.heightPx) + innerDimensions.heightPx);
-    }
-
-    if (position.left) {
-        innerPositions.x = calcPosition(position.left, frameDimensions.widthPx);
-    }
-
-    if (position.right) {
-        innerPositions.x = frameDimensions.widthPx - (calcPosition(position.right, frameDimensions.widthPx) + innerDimensions.widthPx);
-    }
-
-    if (position.translateX) {
-        innerPositions.x = innerPositions.x + calcPosition(position.translateX, innerDimensions.widthPx);
-    }
-    if (position.translateY) {
-        innerPositions.y = innerPositions.y + calcPosition(position.translateY, innerDimensions.heightPx);
-    }
-
-    /* This prevent input from going outside of output which would trigger a sharp error */
-
-    const boundX = innerPositions.x + innerDimensions.widthPx;
-    if (boundX > frameDimensions.widthPx) {
-        innerPositions.x = innerPositions.x - (boundX - frameDimensions.widthPx);
-    }
-
-    const boundY = innerPositions.y + innerDimensions.heightPx;
-    if (boundY > frameDimensions.heightPx) {
-        innerPositions.y = innerPositions.y - (boundY - frameDimensions.heightPx);
-    }
-
-    innerPositions.x = Math.max(innerPositions.x, 0);
-    innerPositions.y = Math.max(innerPositions.y, 0);
-
-    return innerPositions;
-}
-
-function calcPosition(position: FrameOperationParams['position']['left'], frameDimensionPx: number) {
-    const interpretedPosition = interpretPosition(position);
-    if (interpretedPosition.unit === '%') {
-        return Math.round(frameDimensionPx * (interpretedPosition.value / 100));
-    }
-    return interpretedPosition.value;
-}
-
-function interpretPosition(position: FrameOperationParams['position']['left']) {
-    const interpretedPosition = {
-        value: 0,
-        unit: 'px'
-    };
-
-    if (typeof position === 'number') {
-        interpretedPosition.value = position;
-    }
-
-    if (typeof position === 'string') {
-        const matchedPosition = position.replace(/\s+/g, '').match(/(-\d+|\d+)([%]|[px])?/);
-        if (matchedPosition) {
-            if (matchedPosition[1]) {
-                interpretedPosition.value = Number(matchedPosition[1]);
-            }
-            if (matchedPosition[2]) {
-                interpretedPosition.unit = matchedPosition[2];
-            }
-        }
-    }
-
-    return interpretedPosition;
-}
 
 export function getContainedRatios(widthPx: number, heightPx: number, wrapperWidthPx: number, wrapperHeightPx: number, withoutReduction?: boolean) {
     if (withoutReduction && widthPx <= wrapperWidthPx && heightPx <= wrapperHeightPx) {

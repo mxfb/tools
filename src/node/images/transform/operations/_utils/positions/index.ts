@@ -1,8 +1,8 @@
 import { Positions, Position } from "../../../_utils/positions";
 
-export function getNewPositions(
+export function getRelativePxPositionsInWrapperFor(
     inputDimensions: { widthPx: number, heightPx: number }, 
-    outputDimensions: { widthPx: number, heightPx: number }, 
+    wrapperDimensions: { widthPx: number, heightPx: number }, 
     positions?: Positions
 ) {
     const outputPositions = {
@@ -14,19 +14,19 @@ export function getNewPositions(
         return outputPositions;
     }
     if (positions.top) {
-        outputPositions.y = calcPosition(positions.top, outputDimensions.heightPx);
+        outputPositions.y = calcPosition(positions.top, wrapperDimensions.heightPx);
     }
 
     if (positions.bottom) {
-        outputPositions.y = outputDimensions.heightPx - (calcPosition(positions.bottom, outputDimensions.heightPx) + inputDimensions.heightPx);
+        outputPositions.y = wrapperDimensions.heightPx - (calcPosition(positions.bottom, wrapperDimensions.heightPx) + inputDimensions.heightPx);
     }
 
     if (positions.left) {
-        outputPositions.x = calcPosition(positions.left, outputDimensions.widthPx);
+        outputPositions.x = calcPosition(positions.left, wrapperDimensions.widthPx);
     }
 
     if (positions.right) {
-        outputPositions.x = outputDimensions.widthPx - (calcPosition(positions.right, outputDimensions.widthPx) + inputDimensions.widthPx);
+        outputPositions.x = wrapperDimensions.widthPx - (calcPosition(positions.right, wrapperDimensions.widthPx) + inputDimensions.widthPx);
     }
 
     if (positions.translateX) {
@@ -39,13 +39,13 @@ export function getNewPositions(
     /* This prevent input from going outside of output which would trigger a sharp error */
 
     const boundX = outputPositions.x + inputDimensions.widthPx;
-    if (boundX > outputDimensions.widthPx) {
-        outputPositions.x = outputPositions.x - (boundX - outputDimensions.widthPx);
+    if (boundX > wrapperDimensions.widthPx) {
+        outputPositions.x = outputPositions.x - (boundX - wrapperDimensions.widthPx);
     }
 
     const boundY = outputPositions.y + inputDimensions.heightPx;
-    if (boundY > outputDimensions.heightPx) {
-        outputPositions.y = outputPositions.y - (boundY - outputDimensions.heightPx);
+    if (boundY > wrapperDimensions.heightPx) {
+        outputPositions.y = outputPositions.y - (boundY - wrapperDimensions.heightPx);
     }
 
     outputPositions.x = Math.max(outputPositions.x, 0);
@@ -54,10 +54,10 @@ export function getNewPositions(
     return outputPositions;
 }
 
-export function calcPosition(position: Position, frameDimensionPx: number) {
+export function calcPosition(position: Position, wrapperDimensions: number) {
     const interpretedPosition = interpretPosition(position);
     if (interpretedPosition.unit === '%') {
-        return Math.round(frameDimensionPx * (interpretedPosition.value / 100));
+        return Math.round(wrapperDimensions * (interpretedPosition.value / 100));
     }
     return interpretedPosition.value;
 }

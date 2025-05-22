@@ -55,16 +55,15 @@ export async function createTileBackground(
         background.params.format
     );
 
-    const sharpOverlays = createSharpOverlaysFromCoordinatesList(
+    return createSharpOverlaysFromCoordinatesList(
         tileCoordinatesList,
         colorPalette
     );
-    return sharpOverlays;
 }
 
 
 function getPackedTilesCoordinatesList(
-    initialCoordinates: { x: number, y: number, w: number, h: number }, 
+    coordinatesToAvoid: { x: number, y: number, w: number, h: number }, 
     dimensions: { widthPx: number, heightPx: number }, 
     tileCoverageRatio: number, 
     tileDensity: { A: { min: number, max: number }, B:  { min: number, max: number } }, 
@@ -74,47 +73,57 @@ function getPackedTilesCoordinatesList(
     },  
     tileFormat?: string
 ): Coordinates[] {
-    // Considering our image as our first shape that we can't overlap
     const areaCoordinatesList: Coordinates[] = [];
-    
-    const basePositions = {
-        top: Math.ceil(initialCoordinates.y),
-        bottom: Math.ceil(initialCoordinates.y + initialCoordinates.h),
-        left:  Math.ceil(initialCoordinates.x),
-        right:  Math.ceil(initialCoordinates.x + initialCoordinates.w),
+
+    const baseFormat = {
+        nbCells: 9,
+        cellAvoidIndex: 4,
+        nbRows: 3,
+        nbColumns: 3,
     }
     
-    for (let i = 0; i < 9; i++) {
-        if ( i === 4 ) { continue; }
-        const middleColumn = i % 3 === 1;
-        const rightColumn = i % 3 === 2;
+    /* We'll create tiles all around this positions to avoid */
+    const positionsToAvoid = {
+        top: Math.ceil(coordinatesToAvoid.y),
+        bottom: Math.ceil(coordinatesToAvoid.y + coordinatesToAvoid.h),
+        left:  Math.ceil(coordinatesToAvoid.x),
+        right:  Math.ceil(coordinatesToAvoid.x + coordinatesToAvoid.w),
+    }
+    
+    /* Considering our basis is a 3x3 grid, we need to calculate the coordinates of each cell */
+    for (let i = 0; i < baseFormat.nbCells; i++) {
+        if ( i === baseFormat.cellAvoidIndex ) { continue; }
+        const middleColumn = i % baseFormat.nbColumns === 1;
+        const rightColumn = i % baseFormat.nbColumns === 2;
         
-        const topRow = i < 3;
-        const middleRow = !topRow && i < 6;
+        const topRow = i < baseFormat.nbRows;
+        const middleRow = !topRow && i < (baseFormat.nbRows * 2);
         const bottomRow = !topRow && !middleRow;
         
-        areaCoordinatesList[i] = { x: 0, y: 0, w: basePositions.left, h: basePositions.top};
+        areaCoordinatesList[i] = { x: 0, y: 0, w: positionsToAvoid.left, h: positionsToAvoid.top};
         
         if (middleColumn) {
-            areaCoordinatesList[i]!.x = basePositions.left;
-            areaCoordinatesList[i]!.w = initialCoordinates.w;
+            areaCoordinatesList[i]!.x = positionsToAvoid.left;
+            areaCoordinatesList[i]!.w = coordinatesToAvoid.w;
         } 
         
         if (rightColumn) {
-            areaCoordinatesList[i]!.x = basePositions.right;
+            areaCoordinatesList[i]!.x = positionsToAvoid.right;
         } 
         
         if (middleRow) {
-            areaCoordinatesList[i]!.y = basePositions.top;
-            areaCoordinatesList[i]!.h = initialCoordinates.h;
+            areaCoordinatesList[i]!.y = positionsToAvoid.top;
+            areaCoordinatesList[i]!.h = coordinatesToAvoid.h;
         }
         
         if (bottomRow) {
-            areaCoordinatesList[i]!.y = basePositions.bottom;
-            areaCoordinatesList[i]!.h = dimensions.heightPx - basePositions.bottom;
+            areaCoordinatesList[i]!.y = positionsToAvoid.bottom;
+            areaCoordinatesList[i]!.h = dimensions.heightPx - positionsToAvoid.bottom;
         }
     }
-    const filteredAreaCoordinatesList: Coordinates[] = shuffle(areaCoordinatesList.filter((areaCoordinate) => areaCoordinate.w !== 0 && areaCoordinate.h !== 0)); // We're shuffling to make sur we get different areas covered if necessary
+
+    /* We're shuffling to make sur we get different areas covered if necessary */
+    const filteredAreaCoordinatesList: Coordinates[] = shuffle(areaCoordinatesList.filter((areaCoordinate) => areaCoordinate.w !== 0 && areaCoordinate.h !== 0)); 
     const subTiles: Coordinates[] = [];
     
     const nbAreas = filteredAreaCoordinatesList.length;
@@ -173,6 +182,7 @@ function getPackedTilesCoordinatesList(
         });
     }
     
+    /* Returning the coordinates of the tiles and clearing them to make sure we get valid coordinates */
     return (subTiles.length ? subTiles : filteredAreaCoordinatesList).map((tile) => ({
         w: clamp(tile.w, 0, dimensions.widthPx),
         h: clamp(tile.h, 0, dimensions.heightPx),
@@ -216,34 +226,37 @@ function createSharpOverlaysFromCoordinatesList(
     let usedColorsIndexes: number[] = [];
     const colorPaletteLength = colorPalette.length;
 
-    const getUnusedColorIndex = () => {
-        const paletteIndex = randomInt(0, colorPaletteLength) || 0;
-        resetUnusedColorIndexesIfNeeded();
-
-        if (usedColorsIndexes.includes(paletteIndex)) {
-            return getUnusedColorIndex();
+    const getRGBColor = () => {
+        const getUnusedColorIndex = () => {
+            const paletteIndex = randomInt(0, colorPaletteLength) || 0;
+            resetUnusedColorIndexesIfNeeded();
+    
+            if (usedColorsIndexes.includes(paletteIndex)) {
+                return getUnusedColorIndex();
+            }
+    
+            usedColorsIndexes.push(paletteIndex);
+            return paletteIndex;
+        }
+    
+        const resetUnusedColorIndexesIfNeeded = () => {
+            if (usedColorsIndexes.length !== colorPaletteLength) {
+                return;
+            }
+            usedColorsIndexes = [];
         }
 
-        usedColorsIndexes.push(paletteIndex);
-        return paletteIndex;
-    }
-
-    const resetUnusedColorIndexesIfNeeded = () => {
-        if (usedColorsIndexes.length !== colorPaletteLength) {
-            return;
-        }
-        usedColorsIndexes = [];
-    }
-
-    const sharpOverlays: sharp.OverlayOptions[] = [];
-
-    tileCoordinatesList.forEach((tileCoordinates) => {
         const colorPaletteIndex = getUnusedColorIndex();
         const RGBColor = colorPalette[colorPaletteIndex];
         if (!RGBColor) {
-            return;
+            return [0, 0, 0]
         }
-        sharpOverlays.push({
+        return RGBColor;
+    }
+
+    return tileCoordinatesList.map((tileCoordinates) => {
+        const RGBColor = getRGBColor();
+        return {
             top: Math.floor(tileCoordinates.y),
             left: Math.floor(tileCoordinates.x),
             input: {
@@ -259,8 +272,6 @@ function createSharpOverlaysFromCoordinatesList(
                     }
                 }
             }
-        });
-    })
-
-    return sharpOverlays;
+        };
+    });
 }

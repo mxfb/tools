@@ -95,7 +95,6 @@ export async function prepareImage (
       for (const quality of options.qualities) {
         for (const format of options.formats) {
 
-        console.log('Images:Transform:Prepare:FormatImage', `${width}x${height} Q:${quality} F:${format}`);
           const exportBuffer = await formatImage(transformedBuffer, {
             format,
             quality,

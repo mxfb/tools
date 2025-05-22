@@ -4,7 +4,7 @@ import { createLineBackground } from "./backgrounds/create-line-background";
 import { createColorPalette } from "./create-color-palette";
 import { clamp } from "../../../../../../agnostic/numbers/clamp";
 import { createTileBackground } from "./backgrounds/create-tile-background";
-import { getNewPositions } from "../positions";
+import { getRelativePxPositionsInWrapperFor } from "../positions";
 
 export async function frame(
   imageSharp: sharp.Sharp,
@@ -29,7 +29,7 @@ export async function frame(
 
     const defaultBackgroundColorCreate = getDefaultBackgroundColor(params.background);
 
-    const innerPositions = getNewPositions(imageDimensions, params.dimensions, params.positions);
+    const imagePositions = getRelativePxPositionsInWrapperFor(imageDimensions, params.dimensions, params.positions);
 
     const backgroundOverlays = await getBackgroundOverlays(
         {
@@ -39,8 +39,8 @@ export async function frame(
         params.background, 
         params.dimensions,
         {
-            x: innerPositions.x,
-            y: innerPositions.y,
+            x: imagePositions.x,
+            y: imagePositions.y,
             w: imageDimensions.widthPx,
             h: imageDimensions.heightPx
         }
@@ -50,8 +50,8 @@ export async function frame(
         ...backgroundOverlays,
         {
             input: await imageSharp.toFormat('png').png({ quality: 100 }).toBuffer(), /* Make sure we work with the best quality of our file */
-            left: innerPositions.x,
-            top: innerPositions.y,
+            left: imagePositions.x,
+            top: imagePositions.y,
         }
     ];
 
@@ -164,7 +164,6 @@ const getBackgroundOverlays = (
             background.colorPalette
         );
 
-        console.log('Images:Transform:Frame:CreateBackground', background.type)
         switch (background.type) {
             case 'line':
                 return resolve(createLineBackground(background, dimensions, colorPalette));

@@ -4,15 +4,6 @@ import { setColorLuminance, lightenColor } from '../../../../../../../../agnosti
 import { complementColor } from '../../../../../../../../agnostic/colors/complement-color'
 import { CreateLineBackground, ColorTransformation } from '../../../../../frame/backgrounds/create-line-background'
 
-export const DEFAULT_CREATE_BACKGROUND_PARAMS: CreateLineBackground['params'] = {
-    nbLines: 3,
-    colors: {
-        basePaletteIndex: 'first',
-        primaryTransformations: [],
-        secondaryTransformations: []
-    }
-}
-
 export async function createLineBackground(
     background: CreateLineBackground, 
     dimensions: { widthPx: number, heightPx: number },
@@ -26,10 +17,10 @@ export async function createLineBackground(
     const sharpOverlays: sharp.OverlayOptions[] = []
 
     const maxPaletteLength = palette.length;
-    const baseColorIndex = background.params.colors.basePaletteIndex === 'first' ? 0 : background.params.colors.basePaletteIndex === 'last' ? palette.length - 1 : background.params.colors.basePaletteIndex
+    const selectedColorIndex = background.params.colors.selectColorPaletteIndex === 'first' ? 0 : background.params.colors.selectColorPaletteIndex === 'last' ? palette.length - 1 : background.params.colors.selectColorPaletteIndex
 
     for (let i = 0; i < background.params.nbLines; i++) {
-        const indexPalette = Math.min(Math.max(0, baseColorIndex), maxPaletteLength);
+        const indexPalette = Math.min(Math.max(0, selectedColorIndex), maxPaletteLength);
         const RGBColor = palette[indexPalette] || [0, 0, 0]
 
         const primaryRGBColor = applyColorTransformations(RGBColor, background.params.colors.primaryTransformations)
@@ -37,7 +28,6 @@ export async function createLineBackground(
 
         const outputRGBColor = i % 2 === 0 ? primaryRGBColor : secondaryRGBColor
 
-    
         const topPx = Math.min(lineDimensions.heightPx * i,  dimensions.heightPx)
     
         sharpOverlays.push({

@@ -1,6 +1,6 @@
 import { ComposeOperationParams } from "../../../../transform/compose";
 import sharp from "sharp";
-import { getNewPositions } from "../positions";
+import { getRelativePxPositionsInWrapperFor } from "../positions";
 
 export async function compose(
   imageSharp: sharp.Sharp,
@@ -46,7 +46,7 @@ export async function compose(
           : imageDimensions.heightPx,
     };
 
-    const overlayPositions = getNewPositions(
+    const overlayPositions = getRelativePxPositionsInWrapperFor(
       overlayDimensions,
       imageDimensions,
       image.positions

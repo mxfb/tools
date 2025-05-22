@@ -12,7 +12,7 @@ export type CreateLineBackground = {
     params: {
         nbLines: number,
         colors: {
-            basePaletteIndex: 'first' | 'last' | number,
+            selectColorPaletteIndex: 'first' | 'last' | number,
             primaryTransformations: ColorTransformation[],
             secondaryTransformations: ColorTransformation[]
         }
@@ -30,7 +30,7 @@ export const createLineBackgroundSchema = zod.object({
     params: zod.object({
         nbLines: zod.number().min(1),
         colors: zod.object({
-            basePaletteIndex: zod.union([
+            selectColorPaletteIndex: zod.union([
                 zod.literal('first'),
                 zod.literal('last'),
                 zod.number().min(0)

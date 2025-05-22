@@ -83,7 +83,6 @@ export async function transform (
   const needsValidation = checkValidOperations ?? false
   for (const operation of operations) {
     const _isOperation = isOperation(operation);
-    console.log('Images:Transform:Operation:Try', operation.name, _isOperation);
     if (!needsValidation || _isOperation.success) {
       console.log('Images:Transform:Operation:Start', operation.name);
         // A new sharp Instance might be returned by some operations (most of the time composite) so we must reassign it

@@ -58,7 +58,7 @@
     "basic-ftp": "^5.0.5",
     "chalk": "^5.4.1",
     "express": "^5.1.0",
-    "multer": "^1.4.5-lts.2",
+    "multer": "^2.0.0",
     "puppeteer": "^24.9.0",
     "quantize": "^1.0.2",
     "react": "^19.1.0",

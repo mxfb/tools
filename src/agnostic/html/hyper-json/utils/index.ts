@@ -417,6 +417,25 @@ export namespace Utils {
         }
         return Outcome.makeSuccess(values as Types.Tree.ValueTypeFromNames<K>[])
       }
+
+      export function typeCheckManyWithLength<K extends Array<Types.Tree.ValueTypeName>> (
+        values: unknown[],
+        minLength?: number,
+        maxLength?: number,
+        ...types: K
+      ): Outcome.Either<Types.Tree.ValueTypeFromNames<K>[], { position: number, expected: string, found: string }> {
+        if (minLength !== undefined && values.length < minLength) return Outcome.makeFailure({
+          position: values.length + 1,
+          expected: `min length: ${minLength}`,
+          found: `length: ${values.length}`
+        })
+        if (maxLength !== undefined && values.length > maxLength) return Outcome.makeFailure({
+          position: maxLength + 1,
+          expected: `max length: ${maxLength}`,
+          found: `length: ${values.length}`
+        })
+        return typeCheckMany(values, ...types)
+      }
   
       export const isTreeMode = (name: string): name is Types.Tree.Mode => name === 'isolation' || name === 'coalescion' 
   

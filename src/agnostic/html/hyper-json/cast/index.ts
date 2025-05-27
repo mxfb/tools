@@ -53,10 +53,10 @@ export namespace Cast {
     return document.createTextNode(toString(input))
   }
   
-  export const toElement = (input: Types.Tree.RestingValue): Element => {
+  export const toElement = (input: Types.Tree.RestingValue, tagName?: string): Element => {
     const { Element, Text, NodeList, document } = Window.get()
     if (input instanceof Element) return input.cloneNode(true) as Element
-    const returned = document.createElement('div')
+    const returned = document.createElement(tagName ?? 'div')
     if (input instanceof Text) {
       returned.append(input.cloneNode(true))
       return returned

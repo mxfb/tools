@@ -1,11 +1,12 @@
+import { Window } from '../../../../../misc/crossenv/window'
 import { Outcome } from '../../../../../misc/outcome'
 import { Cast } from '../../../cast'
 import { Utils } from '../../../utils'
 import { SmartTags } from '../..'
 
-type Main = Element | Array<Element>
+type Main = Element | Array<Element> | NodeListOf<Element | Text>
 type Args = [string | Text]
-type Output = Element | Array<Element>
+type Output = Element | Array<Element> | NodeListOf<Element | Text>
 
 export const removeattribute = SmartTags.makeSmartTag<Main, Args, Output>({
   name: 'removeattribute',
@@ -14,7 +15,7 @@ export const removeattribute = SmartTags.makeSmartTag<Main, Args, Output>({
   mainValueCheck: m => {
     const { typeCheck, typeCheckMany } = Utils.Tree.TypeChecks
     if (Array.isArray(m)) return typeCheckMany(m, 'element')
-    return typeCheck(m, 'element')
+    return typeCheck(m, 'element', 'nodelist')
   },
   argsValueCheck: a => {
     const { makeFailure, makeSuccess } = Outcome
@@ -27,12 +28,25 @@ export const removeattribute = SmartTags.makeSmartTag<Main, Args, Output>({
     return checked
   },
   func: (main, args) => {
-    const { makeSuccess } = Outcome
-    const mainArr = Array.isArray(main) ? main : [main]
-    const mainArrCloned = mainArr.map(e => Utils.clone(e))
-    const name = Cast.toString(args[0])
-    mainArrCloned.forEach(e => e.removeAttribute(name))
-    if (Array.isArray(main)) return makeSuccess(mainArrCloned)
-    return makeSuccess(mainArrCloned[0] as Element)
+    const argsStr = args.map(e => Cast.toString(e)) as [string, string?]
+    const [name] = argsStr
+    const { NodeList } = Window.get()
+    if (main instanceof NodeList) {
+      const children = Array.from(main).map(child => {
+        const cloned = Utils.clone(child)
+        if (cloned instanceof Element) cloned.removeAttribute(name)
+        return cloned
+      })
+      const frag = document.createDocumentFragment()
+      frag.append(...children)
+      const nodelist = frag.childNodes as NodeListOf<Element | Text>
+      return Outcome.makeSuccess(nodelist)
+    } else {
+      const mainArr = Array.isArray(main) ? main : [main]
+      const mainArrCloned = mainArr.map(e => Utils.clone(e))
+      mainArrCloned.forEach(e => e.removeAttribute(name))
+      if (Array.isArray(main)) return Outcome.makeSuccess(mainArrCloned)
+      return Outcome.makeSuccess(mainArrCloned[0] as Element)
+    }
   }
 })

@@ -5,3 +5,4 @@
   - Or maybe... get rid of reexports?
 - [ ] JSDOC everywhere
 - [ ] Write tests for everything
+- [ ] Really not sure about the centralized error codes

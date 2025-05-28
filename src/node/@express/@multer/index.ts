@@ -1,7 +1,7 @@
 import { Request, Response, RequestHandler } from 'express'
 import multer from 'multer'
 import { Outcome } from '../../../agnostic/misc/outcome'
-import { unknownToString } from 'agnostic/errors/unknown-to-string'
+import { unknownToString } from '../../../agnostic/errors/unknown-to-string'
 
 export type WithMulterModeOptions = { mode: 'none' | 'any' }
   | { mode: 'single', fieldName: string }

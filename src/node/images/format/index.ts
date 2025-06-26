@@ -1,4 +1,5 @@
 import sharp from 'sharp'
+import zod from 'zod'
 import { clamp } from '../../../agnostic/numbers/clamp'
 import { Outcome } from '../../../agnostic/misc/outcome'
 
@@ -35,7 +36,6 @@ export async function formatImage (
   return buffer
 }
 
-
 export type FormatCommonOptions = {
   width?: number
   height?: number
@@ -55,6 +55,44 @@ export type FormatTiffOptions = FormatCommonOptions & {
 export type FormatHeifOptions = FormatCommonOptions & { quality?: number }
 export type FormatKeepOptions = FormatCommonOptions
 export type FormatOptions = FormatJpgOptions | FormatPngOptions | FormatWebpOptions | FormatAvifOptions | FormatTiffOptions | FormatHeifOptions
+
+const formatCommonOptionsSchema = zod.object({
+  width: zod.number().optional(),
+  height: zod.number().optional(),
+  fit: zod.enum(['contain', 'cover', 'fill', 'inside', 'outside']).optional()
+})
+const formatJpgOptionsSchema = formatCommonOptionsSchema.extend({ quality: zod.number().optional() })
+const formatPngOptionsSchema = formatCommonOptionsSchema.extend({
+  quality: zod.number().optional(),
+  compressionLevel: zod.number().optional()
+})
+const formatWebpOptionsSchema = formatCommonOptionsSchema.extend({ quality: zod.number().optional() })
+const formatAvifOptionsSchema = formatCommonOptionsSchema.extend({ quality: zod.number().optional() })
+const formatTiffOptionsSchema = formatCommonOptionsSchema.extend({
+  quality: zod.number().optional(),
+  compression: zod.enum(['none', 'jpeg', 'deflate', 'packbits', 'ccittfax4', 'lzw', 'webp', 'zstd', 'jp2k']).optional()
+})
+const formatHeifOptionsSchema = formatCommonOptionsSchema.extend({ quality: zod.number().optional() })
+const formatKeepOptionsSchema = formatCommonOptionsSchema
+const formatOptionsSchema = zod.union([
+  formatJpgOptionsSchema,
+  formatPngOptionsSchema,
+  formatWebpOptionsSchema,
+  formatAvifOptionsSchema,
+  formatTiffOptionsSchema,
+  formatHeifOptionsSchema,
+  formatKeepOptionsSchema
+])
+
+export const isFormatCommonOptions = (options: unknown): options is FormatCommonOptions => formatCommonOptionsSchema.safeParse(options).success
+export const isFormatJpgOptions = (options: unknown): options is FormatJpgOptions => formatJpgOptionsSchema.safeParse(options).success
+export const isFormatPngOptions = (options: unknown): options is FormatPngOptions => formatPngOptionsSchema.safeParse(options).success
+export const isFormatWebpOptions = (options: unknown): options is FormatWebpOptions => formatWebpOptionsSchema.safeParse(options).success
+export const isFormatAvifOptions = (options: unknown): options is FormatAvifOptions => formatAvifOptionsSchema.safeParse(options).success
+export const isFormatTiffOptions = (options: unknown): options is FormatTiffOptions => formatTiffOptionsSchema.safeParse(options).success
+export const isFormatHeifOptions = (options: unknown): options is FormatHeifOptions => formatHeifOptionsSchema.safeParse(options).success
+export const isFormatKeepOptions = (options: unknown): options is FormatKeepOptions => formatKeepOptionsSchema.safeParse(options).success
+export const isFormatOptions = (options: unknown): options is FormatOptions => formatOptionsSchema.safeParse(options).success
 
 export async function format (input: Buffer, type: 'jpg' | 'jpeg', options: FormatJpgOptions): Promise<Outcome.Either<Buffer, string>>
 export async function format (input: Buffer, type: 'png', options: FormatPngOptions): Promise<Outcome.Either<Buffer, string>>

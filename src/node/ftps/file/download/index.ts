@@ -14,8 +14,8 @@ export type DownloadOptions = {
  * returning the file content as a Readable stream. The download process can be customized
  * using optional download options.
  *
- * @param {string} sourcePath - The path of the file to be downloaded from the FTP server.
  * @param {Client} ftpClient - The basic-ftp client instance used to interact with the FTP server.
+ * @param {string} sourcePath - The path of the file to be downloaded from the FTP server.
  * @param {DownloadOptions} [options] - Optional settings for configuring the download process.
  * @param {number} [options.startAt] - The byte offset at which to start downloading the file.
  * @returns {Promise<Outcome.Either<Readable, string>>} A promise that resolves to an Outcome.Either.
@@ -23,8 +23,8 @@ export type DownloadOptions = {
  * - On failure: Outcome.makeFailure(errStr) with an error message if the download fails.
  */
 export async function download (
-  sourcePath: string,
   ftpClient: Client,
+  sourcePath: string,
   options?: DownloadOptions 
 ): Promise<Outcome.Either<Readable, string>> {
   const { startAt } = options ?? {}

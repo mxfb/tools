@@ -16,10 +16,10 @@ export type UploadOptions = {
  * The upload can be customized using optional `fileMetadata` and `uploadSettings`.
  * If the `overwrite` option is false and a file already exists at the target path, the upload is aborted.
  *
- * @param {Readable} fileStream - The file content to be uploaded.
- * @param {string} targetPath - The target path where the file will be saved in the bucket.
- * @param {string} bucketName - The name of the S3 bucket.
  * @param {S3} s3 - The AWS S3 client instance.
+ * @param {string} bucketName - The name of the S3 bucket.
+ * @param {string} targetPath - The target path where the file will be saved in the bucket.
+ * @param {Readable} fileStream - The file content to be uploaded.
  * @param {UploadOptions} [options] - Optional options to configure the upload process.
  * @param {S3.Types.PutObjectRequest} [options.fileMetadata] - Additional metadata for the file being uploaded.
  * @param {S3.ManagedUpload.ManagedUploadOptions} [options.uploadSettings] - Settings for the managed upload process.
@@ -29,10 +29,10 @@ export type UploadOptions = {
  * - On failure: Outcome.makeFailure(errStr) with an error message if the upload fails.
  */
 export async function upload (
-  fileStream: Readable,
-  targetPath: string,
-  bucketName: string,
   s3: S3,
+  bucketName: string,
+  targetPath: string,
+  fileStream: Readable,
   options?: UploadOptions
 ): Promise<Outcome.Either<true, string>> {
   const {

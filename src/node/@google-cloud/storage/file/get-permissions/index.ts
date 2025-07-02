@@ -12,16 +12,16 @@ export type GetPermissionsOptions = {
  *
  * This function fetches the ACL settings of a given file to determine the permissions assigned to different users or roles.
  *
- * @param {string} sourcePath - The path of the file whose permissions need to be retrieved.
  * @param {Bucket} bucket - The Google Cloud Storage bucket containing the file.
+ * @param {string} sourcePath - The path of the file whose permissions need to be retrieved.
  * @param {GetPermissionsOptions} [options] - Optional configuration options for the file and ACL retrieval.
  * @returns {Promise<Outcome.Either<any, string>>} A promise that resolves to an `Outcome.Either`.
  * - On success: `Outcome.makeSuccess(acl)` containing the file's ACL settings.
  * - On failure: `Outcome.makeFailure(errStr)` with an error message if the ACL retrieval fails.
  */
 export async function getPermissions (
-  sourcePath: string,
   bucket: Bucket,
+  sourcePath: string,
   options?: GetPermissionsOptions
 ): Promise<Outcome.Either<any, string>> {
   const { fileOptions, getAclOptions } = options ?? {}

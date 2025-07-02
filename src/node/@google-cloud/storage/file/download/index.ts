@@ -14,16 +14,16 @@ export type DownloadOptions = {
  * This function downloads a file from the given bucket and path, returning the file content as a `Readable`.
  * The download process can be customized using optional `fileOptions` and `downloadOptions`.
  *
- * @param {string} sourcePath - The path of the file to be downloaded in the bucket.
  * @param {Bucket} bucket - The Google Cloud Storage bucket object from which to download the file.
+ * @param {string} sourcePath - The path of the file to be downloaded in the bucket.
  * @param {DownloadOptions} [options] - Optional configuration options for the download.
  * @returns {Promise<Outcome.Either<Readable, string>>} A promise that resolves to an `Outcome.Either`.
  * - On success: `Outcome.makeSuccess(stream)` containing the downloaded file's content as a `Readable`.
  * - On failure: `Outcome.makeFailure(errStr)` with an error message if the download fails.
  */
 export async function download (
-  sourcePath: string,
   bucket: Bucket,
+  sourcePath: string,
   options?: DownloadOptions 
 ): Promise<Outcome.Either<Readable, string>> {
   const { fileOptions, downloadOptions } = options ?? {}

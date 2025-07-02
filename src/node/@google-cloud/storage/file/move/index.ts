@@ -19,9 +19,9 @@ export type MoveOptions = {
  * This function first copies the file located at `sourcePath` to `targetPath`, then deletes the source file 
  * after the copy is successful. The process can be customized using optional `fileOptions`, `copyOptions`, and `deleteOptions`.
  *
+ * @param {Bucket} bucket - The Google Cloud Storage bucket object containing the file to be moved.
  * @param {string} sourcePath - The path of the source file to be moved.
  * @param {string} targetPath - The target path where the file will be moved to.
- * @param {Bucket} bucket - The Google Cloud Storage bucket object containing the file to be moved.
  * @param {MoveOptions} [options] - Optional configuration options for the file move operation.
  * @returns {Promise<Outcome.Either<true, string>>} A promise that resolves to an `Outcome.Either`.
  * - On success: `Outcome.makeSuccess(true)` indicating the file was successfully moved.
@@ -30,9 +30,9 @@ export type MoveOptions = {
  * @throws {Error} Throws an error if the move operation fails (e.g., source file not found, insufficient permissions, etc.).
  */
 export async function move (
+  bucket: Bucket,
   sourcePath: string,
   targetPath: string,
-  bucket: Bucket,
   options?: MoveOptions
 ): Promise<Outcome.Either<true, string>> {
   const { fileOptions, copyOptions, deleteOptions } = options ?? {}

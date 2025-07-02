@@ -16,18 +16,18 @@ export type UploadOptions = BasicFtpUploadOptions & {
  * If the `ensureDir` option is true, it ensures that the target directory exists before uploading.
  * If the `overwrite` option is false, it prevents overwriting an existing file.
  *
- * @param {Readable} fileStream - The file content to be uploaded.
- * @param {string} targetPath - The target path where the file will be stored on the FTP server.
  * @param {Client} ftpClient - The basic-ftp client instance used to interact with the FTP server.
+ * @param {string} targetPath - The target path where the file will be stored on the FTP server.
+ * @param {Readable} fileStream - The file content to be uploaded.
  * @param {UploadOptions} [options] - Optional settings for configuring the upload process.
  * @returns {Promise<Outcome.Either<true, string>>} A promise that resolves to an Outcome.Either.
  * - On success: Outcome.makeSuccess(true) indicating the upload was successful.
  * - On failure: Outcome.makeFailure(errStr) with an error message if the upload fails.
  */
 export async function upload (
-  fileStream: Readable,
-  targetPath: string,
   ftpClient: Client,
+  targetPath: string,
+  fileStream: Readable,
   options?: UploadOptions
 ): Promise<Outcome.Either<true, string>> {
   const {

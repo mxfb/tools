@@ -1,4 +1,4 @@
-import { Outcome } from 'agnostic/misc/outcome'
+import { Outcome } from '../../../../agnostic/misc/outcome'
 import {
   AnyClient,
   isFtpClient,

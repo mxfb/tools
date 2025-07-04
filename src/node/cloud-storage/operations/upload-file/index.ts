@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream'
-import { Outcome } from 'agnostic/misc/outcome'
+import { Outcome } from '../../../../agnostic/misc/outcome'
 import {
   AnyClient,
   isFtpClient,

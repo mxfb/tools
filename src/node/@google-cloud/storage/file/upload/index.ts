@@ -5,7 +5,8 @@ import { Outcome } from '../../../../../agnostic/misc/outcome'
 
 export type UploadOptions = {
   fileOptions?: FileOptions
-  saveOptions?: SaveOptions & { overwrite?: boolean }
+  saveOptions?: SaveOptions
+  overwrite?: boolean /* defaults to false */
 }
 
 /**
@@ -29,8 +30,7 @@ export async function upload (
   fileStream: Readable,
   options?: UploadOptions
 ): Promise<Outcome.Either<true, string>> {
-  const { fileOptions, saveOptions } = options ?? {}
-  const { overwrite = false } = saveOptions ?? {}
+  const { fileOptions, saveOptions, overwrite = false } = options ?? {}
   const file = bucket.file(targetPath, fileOptions)
   if (!overwrite) {
     try {

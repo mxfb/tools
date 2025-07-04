@@ -5,7 +5,7 @@ import { Outcome } from '../../../../../agnostic/misc/outcome'
 export type RemoveOptions = {
   fileOptions?: FileOptions
   deleteOptions?: GCSDeleteFileOptions
-  ignoreMissing?: boolean /* defaults to false */
+  ignoreMissing?: boolean /* defaults to true */
 }
 
 /**
@@ -29,7 +29,7 @@ export async function remove (
   targetPath: string,
   options?: RemoveOptions
 ): Promise<Outcome.Either<true, string>> {
-  const { fileOptions, deleteOptions, ignoreMissing = false } = options ?? {}
+  const { fileOptions, deleteOptions, ignoreMissing = true } = options ?? {}
   try {
     const file = bucket.file(targetPath, fileOptions)
     const [exists] = await file.exists()

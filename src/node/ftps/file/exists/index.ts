@@ -1,32 +1,44 @@
-import { Client } from 'basic-ftp'
+import { Client, FileType } from 'basic-ftp'
 import { unknownToString } from '../../../../agnostic/errors/unknown-to-string'
 import { Outcome } from '../../../../agnostic/misc/outcome'
 
 /**
- * Checks if a file exists on a specified FTP server.
+ * Checks if a *file* (not a directory) exists on a specified FTP server.
  *
- * This function verifies whether a file at the given `sourcePath` exists on the FTP server.
+ * `ftpClient.list(parentDir)` returns an array of `FileInfo` objects:
+ *   • `type === FileType.File`          → regular file  
+ *   • `type === FileType.Directory`     → directory  
+ *   • `type === FileType.SymbolicLink`  → symlink  
  *
- * @param {Client} ftpClient - The basic-ftp client instance used to interact with the FTP server.
- * @param {string} sourcePath - The path of the file to check on the FTP server.
- * @returns {Promise<Outcome.Either<boolean, string>>} A promise that resolves to an Outcome.Either.
- * - On success: Outcome.makeSuccess(true) if the file exists, or Outcome.makeSuccess(false) if it does not.
- * - On failure: Outcome.makeFailure(errStr) with an error message if the check fails.
+ * The function reports **true** only for `FileType.File` or
+ * `FileType.SymbolicLink`, mirroring the SFTP behaviour where `'-'` and `'l'`
+ * are considered files.
+ *
+ * @param {Client} ftpClient  - The basic‑ftp client instance.
+ * @param {string} sourcePath - The full path to check on the FTP server.
+ * @returns {Promise<Outcome.Either<boolean, string>>}
+ * - Success: `Outcome.makeSuccess(true | false)` – true only if a file exists.
+ * - Failure: `Outcome.makeFailure(errStr)` if an error occurs.
  */
 export async function exists (
   ftpClient: Client,
   sourcePath: string
 ): Promise<Outcome.Either<boolean, string>> {
   try {
-    await ftpClient.size(sourcePath)
-    return Outcome.makeSuccess(true)
+    // Split path into parent dir and base name
+    const lastSlash = sourcePath.lastIndexOf('/')
+    const parentDir = lastSlash === -1 ? '.' : sourcePath.slice(0, lastSlash) || '/'
+    const baseName  = lastSlash === -1 ? sourcePath : sourcePath.slice(lastSlash + 1)
+
+    const list = await ftpClient.list(parentDir)
+    const entry = list.find(e => e.name === baseName)
+
+    const isFile = entry
+      ? entry.type === FileType.File || entry.type === FileType.SymbolicLink
+      : false
+
+    return Outcome.makeSuccess(isFile)
   } catch (err) {
-    const code = (err as any)?.code
-    if (code === 550) {
-      // 550 indicates the file was not found
-      return Outcome.makeSuccess(false)
-    }
-    const errStr = unknownToString(err)
-    return Outcome.makeFailure(errStr)
+    return Outcome.makeFailure(unknownToString(err))
   }
 }

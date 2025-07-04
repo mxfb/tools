@@ -1,49 +1,60 @@
-import S3, { HeadObjectRequest } from 'aws-sdk/clients/s3'
+import {
+  S3Client,
+  HeadObjectCommand,
+  HeadObjectCommandInput
+} from '@aws-sdk/client-s3'
 import { Outcome } from '../../../../../agnostic/misc/outcome'
 import { unknownToString } from '../../../../../agnostic/errors/unknown-to-string'
 
 export type ExistsOptions = {
   /**
-   * Additional options to pass to `headObject`.
-   * `Bucket` and `Key` will be overridden by this function.
+   * Additional parameters forwarded to the underlying `HeadObjectCommand`.
+   * `Bucket` and `Key` are supplied by this utility.
    */
-  headObjectOptions?: Omit<HeadObjectRequest, 'Bucket' | 'Key'>
+  headObjectOptions?: Omit<HeadObjectCommandInput, 'Bucket' | 'Key'>
 }
 
 /**
- * Checks if a file exists in the specified S3 bucket.
- * 
- * This function verifies whether an object at the given `sourcePath` exists in the bucket. It can be configured with options to customize the behavior of the check.
- * 
- * @param {S3} client - The S3 client used to perform the check.
- * @param {string} bucketName - The name of the S3 bucket to inspect.
- * @param {string} sourcePath - The key of the object to check within the bucket.
- * @param {ExistsOptions} [options] - Optional configuration for the object existence check.
- * @param {HeadObjectRequest} [options.headObjectOptions] - Additional options for the `headObject` call, such as conditional headers.
- * @returns {Promise<Outcome.Either<boolean, string>>} - Returns either a success with `true` or `false` indicating whether the object exists, or a failure with an error message.
+ * Checks whether an object exists in a specified S3 bucket (AWS SDK v3).
+ *
+ * @param {S3Client} client          - The v3 S3 client instance.
+ * @param {string}   bucketName      - The name of the S3 bucket.
+ * @param {string}   sourcePath      - The key of the object to test.
+ * @param {ExistsOptions} [options]  - Optional configuration.
+ * @param {Omit<HeadObjectCommandInput,'Bucket'|'Key'>} [options.headObjectOptions] - Extra `HeadObject` params.
+ * @returns {Promise<Outcome.Either<boolean, string>>}
+ * - Success: `Outcome.makeSuccess(true)` if the object exists,
+ *            `Outcome.makeSuccess(false)` if it does not.
+ * - Failure: `Outcome.makeFailure(errStr)` for unexpected errors.
  */
 export async function exists (
-  client: S3,
+  client: S3Client,
   bucketName: string,
   sourcePath: string,
   options?: ExistsOptions
 ): Promise<Outcome.Either<boolean, string>> {
   const { headObjectOptions } = options ?? {}
+
   try {
-    const params: HeadObjectRequest = {
-      Bucket: bucketName,
-      Key: sourcePath,
-      ...(headObjectOptions ?? {})
-    }
-    await client.headObject(params).promise()
+    await client.send(
+      new HeadObjectCommand({
+        Bucket: bucketName,
+        Key: sourcePath,
+        ...headObjectOptions
+      })
+    )
     return Outcome.makeSuccess(true)
-  } catch (err) {
-    const code = (err as any)?.code
-    const status = (err as any)?.statusCode
-    if (code === 'NotFound' || code === 'NoSuchKey' || status === 404) {
+  } catch (err: any) {
+    const notFound =
+      err.$metadata?.httpStatusCode === 404 ||
+      err.name === 'NotFound' ||
+      err.Code === 'NotFound' ||           // some SDKs emit Code
+      err.Code === 'NoSuchKey'
+
+    if (notFound) {
       return Outcome.makeSuccess(false)
     }
-    const errStr = unknownToString(err)
-    return Outcome.makeFailure(errStr)
+
+    return Outcome.makeFailure(unknownToString(err))
   }
 }

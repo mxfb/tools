@@ -52,9 +52,10 @@
     "start": "npm run _serve:tests & serve_pid=$! && trap 'kill $serve_pid; npm run _remove:temp' EXIT && echo '[start] \\033[1mstarting...\\033[0m' && npm run build && npx concurrently -n '_bundle:watch:tests,_tests:watch' 'npm run _bundle:watch:tests' 'PORT=${PORT:-3000} npm run _tests:watch'"
   },
   "peerDependencies": {
+    "@aws-sdk/client-s3": "^3.842.0",
+    "@aws-sdk/lib-storage": "^3.842.0",
     "@google-cloud/storage": "^7.16.0",
     "archiver": "^7.0.1",
-    "aws-sdk": "^2.1692.0",
     "basic-ftp": "^5.0.5",
     "chalk": "^5.4.1",
     "express": "^5.1.0",

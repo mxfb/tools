@@ -8,26 +8,38 @@ import { unknownToString } from '../../../../../agnostic/errors/unknown-to-strin
 import { Outcome } from '../../../../../agnostic/misc/outcome'
 
 export type MoveOptions = {
+  /** Options applied when obtaining `bucket.file(...)` handles. */
   fileOptions?: FileOptions
+  /** Extra parameters forwarded to the internal `copy` call. */
   copyOptions?: CopyOptions
+  /** Extra parameters forwarded to the internal `delete` call. */
   deleteOptions?: GCSDeleteFileOptions
+  /**
+   * If **false** (default) and `targetPath` already exists, the move aborts
+   * with an error.
+   * @default false
+   */
+  overwrite?: boolean
 }
 
 /**
  * Moves a file from one location to another within a Google Cloud Storage bucket.
  *
- * This function first copies the file located at `sourcePath` to `targetPath`, then deletes the source file 
- * after the copy is successful. The process can be customized using optional `fileOptions`, `copyOptions`, and `deleteOptions`.
+ * The function copies the object at `sourcePath` to `targetPath` and, on
+ * successful copy, deletes the original. If `overwrite` is **false** and the
+ * destination already exists, the operation aborts.
  *
- * @param {Bucket} bucket - The Google Cloud Storage bucket object containing the file to be moved.
- * @param {string} sourcePath - The path of the source file to be moved.
- * @param {string} targetPath - The target path where the file will be moved to.
- * @param {MoveOptions} [options] - Optional configuration options for the file move operation.
- * @returns {Promise<Outcome.Either<true, string>>} A promise that resolves to an `Outcome.Either`.
- * - On success: `Outcome.makeSuccess(true)` indicating the file was successfully moved.
- * - On failure: `Outcome.makeFailure(errStr)` with an error message if the move operation fails.
- *
- * @throws {Error} Throws an error if the move operation fails (e.g., source file not found, insufficient permissions, etc.).
+ * @param {Bucket}   bucket      - The Google Cloud Storage bucket.
+ * @param {string}   sourcePath  - The path of the source object.
+ * @param {string}   targetPath  - The destination path.
+ * @param {MoveOptions} [options] - Optional configuration.
+ * @param {FileOptions}   [options.fileOptions]   - Options for file handles.
+ * @param {CopyOptions}   [options.copyOptions]   - Extra options for `copy`.
+ * @param {GCSDeleteFileOptions} [options.deleteOptions] - Extra options for `delete`.
+ * @param {boolean}      [options.overwrite=false] - Whether to overwrite an existing destination.
+ * @returns {Promise<Outcome.Either<true, string>>}
+ * - Success: `Outcome.makeSuccess(true)` if the move succeeds.
+ * - Failure: `Outcome.makeFailure(errStr)` if the move fails.
  */
 export async function move (
   bucket: Bucket,
@@ -35,14 +47,29 @@ export async function move (
   targetPath: string,
   options?: MoveOptions
 ): Promise<Outcome.Either<true, string>> {
-  const { fileOptions, copyOptions, deleteOptions } = options ?? {}
+  const {
+    fileOptions,
+    copyOptions,
+    deleteOptions,
+    overwrite = false
+  } = options ?? {}
+
   try {
-    const file = bucket.file(sourcePath, fileOptions)
-    await file.copy(targetPath, copyOptions)
-    await file.delete(deleteOptions)
+    const srcFile  = bucket.file(sourcePath, fileOptions)
+    const destFile = bucket.file(targetPath, fileOptions)
+
+    if (!overwrite) {
+      const [exists] = await destFile.exists()
+      if (exists) {
+        return Outcome.makeFailure(`Object already exists at ${targetPath}.`)
+      }
+    }
+
+    await srcFile.copy(destFile, copyOptions)
+    await srcFile.delete(deleteOptions)
+
     return Outcome.makeSuccess(true)
   } catch (err) {
-    const errStr = unknownToString(err)
-    return Outcome.makeFailure(errStr)
+    return Outcome.makeFailure(unknownToString(err))
   }
 }

@@ -1,67 +1,112 @@
-import S3 from 'aws-sdk/clients/s3'
+import {
+  S3Client,
+  ListObjectsV2Command,
+  ListObjectsV2CommandInput,
+  CopyObjectCommand,
+  CopyObjectCommandInput,
+  DeleteObjectCommand,
+  DeleteObjectCommandInput,
+  HeadObjectCommand
+} from '@aws-sdk/client-s3'
 import { Outcome } from '../../../../../agnostic/misc/outcome'
 import { unknownToString } from '../../../../../agnostic/errors/unknown-to-string'
 
 export type MoveDirOptions = {
-  listObjectsOptions?: Omit<S3.ListObjectsV2Request, 'Bucket' | 'Prefix'>
-  copyOptions?:       Omit<S3.CopyObjectRequest,  'Bucket' | 'Key' | 'CopySource'>
-  deleteOptions?:     Omit<S3.DeleteObjectRequest,'Bucket' | 'Key'>
+  /** Extra parameters forwarded to every `ListObjectsV2Command` call. */
+  listObjectsOptions?: Omit<ListObjectsV2CommandInput, 'Bucket' | 'Prefix'>
+  /** Extra parameters forwarded to every `CopyObjectCommand` (`Bucket`, `Key`, `CopySource` are supplied internally). */
+  copyOptions?:        Omit<CopyObjectCommandInput,  'Bucket' | 'Key' | 'CopySource'>
+  /** Extra parameters forwarded to every `DeleteObjectCommand` (`Bucket`, `Key` are supplied internally). */
+  deleteOptions?:      Omit<DeleteObjectCommandInput,'Bucket' | 'Key'>
+  /**
+   * If **false** (default) and *any* destination key already exists, the move
+   * operation aborts with an error.
+   * @default false
+   */
+  overwrite?: boolean
 }
 
 /**
  * Recursively moves every object under `sourceDir` to the corresponding path
- * under `targetDir` within the same S3 bucket.
- * @param {S3} client - The S3 client instance.
- * @param {string} bucketName - The name of the S3 bucket.
- * @param {string} sourceDir - The source directory path (prefix) to move from.
- * @param {string} targetDir - The target directory path (prefix) to move to.
- * @param {MoveDirOptions} [options] - Optional parameters for the operation.
- * @returns {Promise<Outcome.Either<true, string>>} A promise that resolves to an `Outcome.Either`:
- * - On success: `Outcome.makeSuccess(true)` indicating the move was successful.
- * - On failure: `Outcome.makeFailure(errStr)` with an error message if the move fails.
+ * under `targetDir` within the same S3 bucket (AWS SDK v3).
+ *
+ * Behaviour when `overwrite` is **false** (default): abort if *any* destination
+ * key already exists.
+ *
+ * @param {S3Client} client      - The v3 S3 client instance.
+ * @param {string}   bucketName  - The name of the S3 bucket.
+ * @param {string}   sourceDir   - The source directory prefix to move from.
+ * @param {string}   targetDir   - The target directory prefix to move to.
+ * @param {MoveDirOptions} [options] - Optional configuration.
+ * @returns {Promise<Outcome.Either<true, string>>}
+ * - On success: `Outcome.makeSuccess(true)`.
+ * - On failure: `Outcome.makeFailure(errStr)`.
  */
 export async function moveDir (
-  client: S3,
+  client: S3Client,
   bucketName: string,
   sourceDir: string,
   targetDir: string,
   options?: MoveDirOptions
 ): Promise<Outcome.Either<true, string>> {
-  const { listObjectsOptions, copyOptions, deleteOptions } = options ?? {}
+  const {
+    listObjectsOptions,
+    copyOptions,
+    deleteOptions,
+    overwrite = false
+  } = options ?? {}
+
   const from = sourceDir.endsWith('/') ? sourceDir : `${sourceDir}/`
   const to   = targetDir.endsWith('/') ? targetDir   : `${targetDir}/`
 
   try {
     let token: string | undefined
     do {
-      const list = await client.listObjectsV2({
-        Bucket: bucketName,
-        Prefix: from,
-        ContinuationToken: token,
-        ...listObjectsOptions
-      }).promise()
+      const listResp = await client.send(
+        new ListObjectsV2Command({
+          Bucket: bucketName,
+          Prefix: from,
+          ContinuationToken: token,
+          ...listObjectsOptions
+        })
+      )
 
-      const keys = (list.Contents ?? []).map(o => o.Key!).filter(Boolean)
-
-      for (const key of keys) {
-        const rel  = key.substring(from.length)
+      for (const obj of listResp.Contents ?? []) {
+        if (!obj.Key) continue
+        const rel  = obj.Key.substring(from.length)
         const dest = `${to}${rel}`
 
-        await client.copyObject({
-          Bucket: bucketName,
-          Key: dest,
-          CopySource: `${bucketName}/${key}`,
-          ...copyOptions
-        }).promise()
+        if (!overwrite) {
+          try {
+            await client.send(
+              new HeadObjectCommand({ Bucket: bucketName, Key: dest })
+            )
+            throw new Error(`Object already exists at ${dest}.`)
+          } catch (err: any) {
+            if (err.$metadata?.httpStatusCode !== 404 && err.name !== 'NotFound')
+              throw err
+          }
+        }
 
-        await client.deleteObject({
-          Bucket: bucketName,
-          Key: key,
-          ...deleteOptions
-        }).promise()
+        await client.send(
+          new CopyObjectCommand({
+            Bucket: bucketName,
+            Key: dest,
+            CopySource: `${bucketName}/${obj.Key}`,
+            ...copyOptions
+          })
+        )
+
+        await client.send(
+          new DeleteObjectCommand({
+            Bucket: bucketName,
+            Key: obj.Key,
+            ...deleteOptions
+          })
+        )
       }
 
-      token = list.IsTruncated ? list.NextContinuationToken : undefined
+      token = listResp.IsTruncated ? listResp.NextContinuationToken : undefined
     } while (token)
 
     return Outcome.makeSuccess(true)

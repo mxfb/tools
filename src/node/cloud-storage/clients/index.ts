@@ -1,5 +1,5 @@
 import { Bucket as GCSBucket } from '@google-cloud/storage'
-import { S3 as S3Client } from 'aws-sdk'
+import { S3Client } from '@aws-sdk/client-s3'
 import { Client as FtpClient } from 'basic-ftp'
 import SftpClient from 'ssh2-sftp-client'
 
@@ -11,7 +11,8 @@ export type S3ClientWithBucket = {
 export type AnyClient = GCSBucket | S3ClientWithBucket | FtpClient | SftpClient
 
 export const isGcsBucket = (client: AnyClient): client is GCSBucket => client instanceof GCSBucket
-export const isS3ClientWithBucket = (client: AnyClient): client is S3ClientWithBucket => ('bucketName' in client)
+export const isS3ClientWithBucket = (client: AnyClient): client is S3ClientWithBucket =>
+  ('bucketName' in client)
   && typeof client.bucketName === 'string'
   && ('client' in client)
   && client.client instanceof S3Client

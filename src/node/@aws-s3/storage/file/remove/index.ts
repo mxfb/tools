@@ -1,51 +1,47 @@
-import { S3 } from 'aws-sdk'
+import { S3Client, HeadObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { Outcome } from '../../../../../agnostic/misc/outcome'
 import { unknownToString } from '../../../../../agnostic/errors/unknown-to-string'
 
 export type RemoveOptions = {
-  ignoreMissing?: boolean /* defaults to false */
+  ignoreMissing?: boolean // defaults to true
 }
 
 /**
- * Removes a file from a specified Amazon S3 bucket.
+ * Removes a file from a specified Amazon S3 bucket (AWS SDK v3).
  *
- * This function deletes the object located at the specified target path in the given bucket.
- * If the `ignoreMissing` option is true, a missing object is treated as a success instead of an error.
+ * If `ignoreMissing` is true (default), a missing object is considered success.
  *
- * @param {S3} s3 - The AWS S3 client instance.
- * @param {string} bucketName - The name of the S3 bucket.
- * @param {string} targetPath - The key of the object to remove from the bucket.
- * @param {RemoveOptions} [options] - Optional settings for configuring the removal process.
- * @returns {Promise<Outcome.Either<true, string>>} A promise that resolves to an Outcome.Either.
- * - On success: Outcome.makeSuccess(true) indicating the removal was successful.
- * - On failure: Outcome.makeFailure(errStr) with an error message if the removal fails.
+ * @param {S3Client} s3 - The AWS S3 client instance.
+ * @param {string} bucketName - The name of the bucket.
+ * @param {string} targetPath - The key of the object to delete.
+ * @param {RemoveOptions} [options] - Optional settings.
+ * @returns {Promise<Outcome.Either<true, string>>}
  */
 export async function remove (
-  s3: S3,
+  s3: S3Client,
   bucketName: string,
   targetPath: string,
   options?: RemoveOptions
 ): Promise<Outcome.Either<true, string>> {
-  const { ignoreMissing = false } = options ?? {}
+  const { ignoreMissing = true } = options ?? {}
+
   try {
-    // Check if the object exists first (to respect ignoreMissing)
+    // Check if object exists, respecting ignoreMissing
     try {
-      await s3.headObject({ Bucket: bucketName, Key: targetPath }).promise()
+      await s3.send(new HeadObjectCommand({ Bucket: bucketName, Key: targetPath }))
     } catch (err: any) {
-      const code = (err as any)?.code ?? (err as any)?.statusCode
-      if ((code === 'NotFound' || code === 404)) {
+      const code = err?.name ?? err?.Code ?? err?.code
+      if (code === 'NotFound' || code === 'NoSuchKey' || code === 'NotFoundException') {
         if (ignoreMissing) return Outcome.makeSuccess(true)
         return Outcome.makeFailure(`File not found at ${targetPath}.`)
       }
-      const errStr = unknownToString(err)
-      return Outcome.makeFailure(errStr)
+      return Outcome.makeFailure(unknownToString(err))
     }
 
-    // Remove the object from S3
-    await s3.deleteObject({ Bucket: bucketName, Key: targetPath }).promise()
+    // Delete the object
+    await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: targetPath }))
     return Outcome.makeSuccess(true)
   } catch (err) {
-    const errStr = unknownToString(err)
-    return Outcome.makeFailure(errStr)
+    return Outcome.makeFailure(unknownToString(err))
   }
 }

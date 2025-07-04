@@ -3,7 +3,7 @@ import { unknownToString } from '../../../../agnostic/errors/unknown-to-string'
 import { Outcome } from '../../../../agnostic/misc/outcome'
 
 export type RemoveOptions = {
-  ignoreMissing?: boolean /* defaults to false */
+  ignoreMissing?: boolean /* defaults to true */
 }
 
 /**
@@ -25,7 +25,7 @@ export async function remove (
   targetPath: string,
   options?: RemoveOptions
 ): Promise<Outcome.Either<true, string>> {
-  const { ignoreMissing = false } = options ?? {}
+  const { ignoreMissing = true } = options ?? {}
   try {
     let fileExists = true
     try { await ftpClient.size(targetPath) }

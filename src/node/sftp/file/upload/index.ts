@@ -4,7 +4,7 @@ import { unknownToString } from '../../../../agnostic/errors/unknown-to-string'
 import { Outcome } from '../../../../agnostic/misc/outcome'
 
 export type UploadOptions = TransferOptions & {
-  ensureDir?: boolean /* defaults to false */
+  ensureDir?: boolean /* defaults to true */
   overwrite?: boolean   /* defaults to false */
 }
 
@@ -31,7 +31,7 @@ export async function upload (
   options?: UploadOptions 
 ): Promise<Outcome.Either<true, string>> {
   const {
-    ensureDir = false,
+    ensureDir = true,
     overwrite = false
   } = options ?? {}
   try {

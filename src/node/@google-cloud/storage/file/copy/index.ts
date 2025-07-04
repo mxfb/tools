@@ -3,23 +3,34 @@ import { unknownToString } from '../../../../../agnostic/errors/unknown-to-strin
 import { Outcome } from '../../../../../agnostic/misc/outcome'
 
 export type CopyOptions = {
+  /** Additional options for constructing the `File` handles. */
   fileOptions?: FileOptions
+  /** Additional parameters forwarded to the underlying `copy` call. */
   copyOptions?: GCSFileCopyOptions
+  /**
+   * If `false` (default) and `targetPath` already exists, the copy aborts with
+   * an error.
+   * @default false
+   */
+  overwrite?: boolean
 }
 
 /**
  * Copies a file from one location to another within a Google Cloud Storage bucket.
  *
- * This function copies the file located at `sourcePath` to `targetPath` in the same or a different Google Cloud Storage bucket. 
- * It can be customized using optional `fileOptions` and `copyOptions` to control the copying behavior.
+ * If `overwrite` is **false** (default) and the destination object already
+ * exists, the operation aborts.
  *
- * @param {Bucket} bucket - The Google Cloud Storage bucket object containing the file to be copied.
- * @param {string} sourcePath - The path of the source file to be copied.
- * @param {string} targetPath - The target path where the file will be copied to.
- * @param {CopyOptions} [options] - Optional configuration options for the file copy operation.
- * @returns {Promise<Outcome.Either<true, string>>} A promise that resolves to an `Outcome.Either`.
- * - On success: `Outcome.makeSuccess(true)` indicating the file was successfully copied.
- * - On failure: `Outcome.makeFailure(errStr)` with an error message if the copy operation fails.
+ * @param {Bucket} bucket - The Google Cloud Storage bucket containing the file.
+ * @param {string} sourcePath - The path of the source object to copy.
+ * @param {string} targetPath - The destination path for the copied object.
+ * @param {CopyOptions} [options] - Optional copy configuration.
+ * @param {FileOptions} [options.fileOptions] - Extra options for `bucket.file`.
+ * @param {GCSFileCopyOptions} [options.copyOptions] - Extra options for `file.copy`.
+ * @param {boolean} [options.overwrite=false] - Whether to overwrite an existing destination object.
+ * @returns {Promise<Outcome.Either<true, string>>}
+ * - On success:  `Outcome.makeSuccess(true)`.
+ * - On failure:  `Outcome.makeFailure(errStr)`.
  */
 export async function copy (
   bucket: Bucket,
@@ -27,13 +38,26 @@ export async function copy (
   targetPath: string,
   options?: CopyOptions
 ): Promise<Outcome.Either<true, string>> {
-  const { fileOptions, copyOptions } = options ?? {}
+  const {
+    fileOptions,
+    copyOptions,
+    overwrite = false
+  } = options ?? {}
+
   try {
-    const file = bucket.file(sourcePath, fileOptions)
-    await file.copy(targetPath, copyOptions)
+    const srcFile  = bucket.file(sourcePath, fileOptions)
+    const destFile = bucket.file(targetPath, fileOptions)
+
+    if (!overwrite) {
+      const [destExists] = await destFile.exists()
+      if (destExists) {
+        return Outcome.makeFailure(`Object already exists at ${targetPath}.`)
+      }
+    }
+
+    await srcFile.copy(destFile, copyOptions)
     return Outcome.makeSuccess(true)
   } catch (err) {
-    const errStr = unknownToString(err)
-    return Outcome.makeFailure(errStr)
+    return Outcome.makeFailure(unknownToString(err))
   }
 }

@@ -1,48 +1,96 @@
-import S3, { CopyObjectRequest, DeleteObjectRequest } from 'aws-sdk/clients/s3'
-import { unknownToString } from '../../../../../agnostic/errors/unknown-to-string'
+import {
+  S3Client,
+  HeadObjectCommand,
+  CopyObjectCommand,
+  DeleteObjectCommand,
+  CopyObjectCommandInput,
+  DeleteObjectCommandInput
+} from '@aws-sdk/client-s3'
 import { Outcome } from '../../../../../agnostic/misc/outcome'
+import { unknownToString } from '../../../../../agnostic/errors/unknown-to-string'
 
 export type MoveOptions = {
-  copyOptions?: Omit<CopyObjectRequest, 'Bucket' | 'Key' | 'CopySource'>
-  deleteOptions?: Omit<DeleteObjectRequest, 'Bucket' | 'Key'>
+  /** Extra parameters forwarded to `CopyObjectCommand` (`Bucket`, `Key`, `CopySource` are filled internally). */
+  copyOptions?:   Omit<CopyObjectCommandInput,  'Bucket' | 'Key' | 'CopySource'>
+  /** Extra parameters forwarded to `DeleteObjectCommand` (`Bucket`, `Key` are filled internally). */
+  deleteOptions?: Omit<DeleteObjectCommandInput,'Bucket' | 'Key'>
+  /**
+   * If **false** (default) and `targetPath` already exists, the move aborts
+   * with an error.
+   * @default false
+   */
+  overwrite?: boolean
 }
 
 /**
- * Moves an object from one location to another within an S3 bucket.
+ * Moves an object from one key to another within the same S3 bucket (AWS SDK v3).
  *
- * The function first copies the object at `sourcePath` to `targetPath`, then deletes the
- * original object on successful copy. Custom behaviour can be provided via `copyOptions`
- * and `deleteOptions`.
+ * The function copies the object from `sourcePath` to `targetPath` and, upon
+ * successful copy, deletes the original object.
  *
- * @param {S3} client - The S3 client used to interact with the bucket.
- * @param {string} bucketName - The name of the S3 bucket containing the object.
- * @param {string} sourcePath - The key of the source object to move.
- * @param {string} targetPath - The key where the object will be moved to.
- * @param {MoveOptions} [options] - Optional configuration for the move operation.
+ * @param {S3Client} client - The S3 client instance.
+ * @param {string}   bucketName - The name of the bucket.
+ * @param {string}   sourcePath - The source object's key.
+ * @param {string}   targetPath - The destination object's key.
+ * @param {MoveOptions} [options] - Optional copy/delete behaviour.
+ * @param {Omit<CopyObjectCommandInput,'Bucket'|'Key'|'CopySource'>} [options.copyOptions]   - Extra copy params.
+ * @param {Omit<DeleteObjectCommandInput,'Bucket'|'Key'>}            [options.deleteOptions] - Extra delete params.
+ * @param {boolean} [options.overwrite=false] - Whether to overwrite an existing `targetPath`.
  * @returns {Promise<Outcome.Either<true, string>>}
- * - On success: `Outcome.makeSuccess(true)`.
- * - On failure:  `Outcome.makeFailure(errStr)`.
+ * - Success: `Outcome.makeSuccess(true)`
+ * - Failure: `Outcome.makeFailure(errStr)`
  */
 export async function move (
-  client: S3,
+  client: S3Client,
   bucketName: string,
   sourcePath: string,
   targetPath: string,
   options?: MoveOptions
 ): Promise<Outcome.Either<true, string>> {
-  const { copyOptions, deleteOptions } = options ?? {}
+  const {
+    copyOptions,
+    deleteOptions,
+    overwrite = false
+  } = options ?? {}
+
   try {
-    await client.copyObject({
-      Bucket: bucketName,
-      Key: targetPath,
-      CopySource: `${bucketName}/${sourcePath}`,
-      ...copyOptions
-    }).promise()
-    await client.deleteObject({
-      Bucket: bucketName,
-      Key: sourcePath,
-      ...deleteOptions
-    }).promise()
+    // Abort early if destination exists and overwrite is disabled
+    if (!overwrite) {
+      try {
+        await client.send(new HeadObjectCommand({ Bucket: bucketName, Key: targetPath }))
+        return Outcome.makeFailure(`Object already exists at ${targetPath}.`)
+      } catch (err: any) {
+        const notFound =
+          err.$metadata?.httpStatusCode === 404 ||
+          err.name === 'NotFound' ||
+          err.Code === 'NotFound' ||
+          err.Code === 'NoSuchKey'
+        if (!notFound) {
+          return Outcome.makeFailure(unknownToString(err))
+        }
+        // If not found, proceed with copy
+      }
+    }
+
+    // Copy to the new key
+    await client.send(
+      new CopyObjectCommand({
+        Bucket: bucketName,
+        Key: targetPath,
+        CopySource: `${bucketName}/${sourcePath}`,
+        ...copyOptions
+      })
+    )
+
+    // Delete the original key
+    await client.send(
+      new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: sourcePath,
+        ...deleteOptions
+      })
+    )
+
     return Outcome.makeSuccess(true)
   } catch (err) {
     return Outcome.makeFailure(unknownToString(err))

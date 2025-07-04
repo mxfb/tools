@@ -1,35 +1,33 @@
 import { Readable } from 'node:stream'
-import { S3 } from 'aws-sdk'
+import {
+  S3Client,
+  HeadObjectCommand,
+  PutObjectCommandInput
+} from '@aws-sdk/client-s3'
+import { Upload } from '@aws-sdk/lib-storage'
 import { Outcome } from '../../../../../agnostic/misc/outcome'
 import { unknownToString } from '../../../../../agnostic/errors/unknown-to-string'
 
 export type UploadOptions = {
-  fileMetadata?: S3.Types.PutObjectRequest
-  uploadSettings?: S3.ManagedUpload.ManagedUploadOptions
-  overwrite?: boolean
+  fileMetadata?: Partial<PutObjectCommandInput>
+  uploadSettings?: ConstructorParameters<typeof Upload>[0] // UploadOptions from lib-storage
+  overwrite?: boolean /* defaults to false */
 }
 
 /**
- * Uploads a file stream to a specified Amazon S3 bucket.
+ * Uploads a file stream to a specified Amazon S3 bucket using AWS SDK v3.
  *
- * This function uploads the provided file stream to the specified bucket at the given target path.
- * The upload can be customized using optional `fileMetadata` and `uploadSettings`.
- * If the `overwrite` option is false and a file already exists at the target path, the upload is aborted.
+ * If `overwrite` is false and the target file exists, upload is aborted.
  *
- * @param {S3} s3 - The AWS S3 client instance.
- * @param {string} bucketName - The name of the S3 bucket.
- * @param {string} targetPath - The target path where the file will be saved in the bucket.
- * @param {Readable} fileStream - The file content to be uploaded.
- * @param {UploadOptions} [options] - Optional options to configure the upload process.
- * @param {S3.Types.PutObjectRequest} [options.fileMetadata] - Additional metadata for the file being uploaded.
- * @param {S3.ManagedUpload.ManagedUploadOptions} [options.uploadSettings] - Settings for the managed upload process.
- * @param {boolean} [options.overwrite] - If false and a file exists at the target path, the upload is aborted.
- * @returns {Promise<Outcome.Either<true, string>>} A promise that resolves to an Outcome.Either.
- * - On success: Outcome.makeSuccess(true) indicating the upload was successful.
- * - On failure: Outcome.makeFailure(errStr) with an error message if the upload fails.
+ * @param {S3Client} s3 - The AWS S3 v3 client instance.
+ * @param {string} bucketName - The S3 bucket name.
+ * @param {string} targetPath - The key to upload the file to.
+ * @param {Readable} fileStream - The file content as a stream.
+ * @param {UploadOptions} [options] - Optional configuration.
+ * @returns {Promise<Outcome.Either<true, string>>}
  */
-export async function upload (
-  s3: S3,
+export async function upload(
+  s3: S3Client,
   bucketName: string,
   targetPath: string,
   fileStream: Readable,
@@ -40,26 +38,42 @@ export async function upload (
     fileMetadata,
     overwrite = false
   } = options ?? {}
+
   if (!overwrite) {
     try {
-      const fileLookup = await s3.headObject({ Bucket: bucketName, Key: targetPath }).promise()
-      if (fileLookup.Metadata !== undefined) return Outcome.makeFailure(`File already exists at ${targetPath}.`)
+      const headCommand = new HeadObjectCommand({
+        Bucket: bucketName,
+        Key: targetPath
+      })
+      await s3.send(headCommand)
+      // If no error, object exists
+      return Outcome.makeFailure(`File already exists at ${targetPath}.`)
     } catch (err: any) {
-      const errStr = unknownToString(err)
-      return Outcome.makeFailure(errStr)
+      const code = err?.name ?? err?.$metadata?.httpStatusCode
+      if (code !== 'NotFound' && code !== 404) {
+        return Outcome.makeFailure(unknownToString(err))
+      }
+      // Object not found, proceed with upload
     }
   }
-  const params: S3.Types.PutObjectRequest = {
+
+  const params: PutObjectCommandInput = {
     ...fileMetadata,
     Bucket: bucketName,
     Key: targetPath,
     Body: fileStream
   }
+
   try {
-    await s3.upload(params, uploadSettings).promise()
+    const upload = new Upload({
+      client: s3,
+      params,
+      ...uploadSettings
+    })
+
+    await upload.done()
     return Outcome.makeSuccess(true)
   } catch (err) {
-    const errStr = unknownToString(err)
-    return Outcome.makeFailure(errStr)
+    return Outcome.makeFailure(unknownToString(err))
   }
 }

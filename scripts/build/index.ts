@@ -45,18 +45,21 @@ await new Promise((resolve, reject) => {
     format: 'esm',
     target: ['esnext'],
     external: [
-      "@google-cloud/storage",
-      "archiver",
-      "aws-sdk",
-      "basic-ftp",
-      "chalk",
-      "express",
-      "multer",
-      "quantize",
-      "react",
-      "react-dom",
-      "sharp",
-      "ssh2-sftp-client"
+      '@aws-sdk/client-s3',
+      '@aws-sdk/lib-storage',
+      '@google-cloud/storage',
+      'archiver',
+      'basic-ftp',
+      'chalk',
+      'express',
+      'multer',
+      'puppeteer',
+      'quantize',
+      'react',
+      'react-dom',
+      'sharp',
+      'ssh2-sftp-client',
+      'xss'
     ],
     logLevel: 'info'
   }).then(() => {

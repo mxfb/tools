@@ -1,4 +1,4 @@
-export type ConstructorFunction = new (...args: any[]) => any
+export type ConstructorFunction<T extends any = any> = new (...args: any[]) => T
 
 export function isConstructorFunction (input: unknown): input is ConstructorFunction {
   if (typeof input !== 'function') return false

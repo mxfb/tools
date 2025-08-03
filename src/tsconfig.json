@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "lib": ["ESNext"],
     "strict": true,
     "baseUrl": ".",
     "esModuleInterop": true,
@@ -9,14 +10,7 @@
     "moduleResolution": "Node",
     "rootDir": ".",
     "noUncheckedIndexedAccess": true,
-    "jsx": "react-jsx",
-    "paths": {
-      "~/agnostic/*": ["./agnostic/*"],
-      "~/browser/*": ["./browser/*"],
-      "~/components/*": ["./components/*"],
-      "~/node/*": ["./node/*"],
-      "~/shared/*": ["./shared/*"]
-    }
+    "jsx": "react-jsx"
   },
   "exclude": [
     "../node_modules",

@@ -1,6 +1,8 @@
 import { Assert as AssertNamespace } from './assert'
 import { Cast as CastNamespace } from './cast'
+import { Crawler as CrawlerNamespace } from './crawler'
 import { Crossenv as CrossenvNamespace } from './crossenv'
+import * as DataSizeNamespace from './data-size'
 import { getCurrentDownlink as getCurrentDownlinkFunc } from './get-current-downlink'
 import {
   ConstructorFunction as ConstructorFunctionType,
@@ -8,13 +10,14 @@ import {
 } from './is-constructor-function'
 import {
   nullishValues as nullishValuesConst,
-  Nullish as NullishType,
   isNullish as isNullishFunc,
   isNotNullish as isNotNullishFunc,
+  Nullish as NullishType
 } from './is-nullish'
 import { Logs as LogsNamespace } from './logs'
-import { Random as RandomNamespace } from './random'
 import { Tennis as TennisNamespace } from './tennis'
+import { LoremIpsum as LoremIpsumNamespace } from './lorem-ipsum'
+import { Outcome as OutcomeNamespace } from './outcome'
 
 export namespace Misc {
   // Assert
@@ -35,9 +38,13 @@ export namespace Misc {
   export const isNotNullish = isNotNullishFunc
   // Logs
   export import Logs = LogsNamespace
-  // Random
-  export import Random = RandomNamespace
   // Tennis
   export import Tennis = TennisNamespace
+  // Crawler
+  export import Crawler = CrawlerNamespace
+  // DataSize
+  export import DataSize = DataSizeNamespace
+  // Outcome
+  export import Outcome = OutcomeNamespace
 }
 

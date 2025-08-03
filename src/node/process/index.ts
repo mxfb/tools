@@ -6,11 +6,9 @@ import {
   onAllExits as onAllExitsFunc
 } from './on-exit'
 
-export namespace Process {
-  // On exit
-  export const forceExitEvents = forceExitEventsConst
-  export const beforeForcedExit = beforeForcedExitFunc
-  export const beforeExit = beforeExitFunc
-  export const onExit = onExitFunc
-  export const onAllExits = onAllExitsFunc
-}
+// On exit
+export const forceExitEvents = forceExitEventsConst
+export const beforeForcedExit = beforeForcedExitFunc
+export const beforeExit = beforeExitFunc
+export const onExit = onExitFunc
+export const onAllExits = onAllExitsFunc

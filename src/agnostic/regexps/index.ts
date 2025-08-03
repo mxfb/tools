@@ -1,3 +1,5 @@
+// [WIP] everything should be in its own file here
+
 export namespace Regexps {
   export function mergeFlags (...flagStrs: string[]): string {
     const flagsSet = new Set<string>()
@@ -65,7 +67,7 @@ export namespace Regexps {
     return regexp
   }
 
-  function escape (string: string) {
+  export function escape (string: string) {
     return string
       .replace(/\s/igm, '\\s')
       .replace(/\n/igm, '\\n')

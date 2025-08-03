@@ -5,7 +5,7 @@ export type Format<Input extends {} = any> = { [Key in FormatKey<Input>]: Format
 export type UnwrapPromise<PromiseOrNot> = PromiseOrNot extends Promise<infer Resolved> ? Resolved : PromiseOrNot
 export type Formatted<F extends Format<{}>> = { [Key in keyof F]: UnwrapPromise<ReturnType<F[Key]>> }
 
-export default async function recordFormat<I extends {}, F extends Format<I>> (input: I, format: F): Promise<Formatted<F>> {
+export async function recordFormat<I extends {}, F extends Format<I>> (input: I, format: F): Promise<Formatted<F>> {
   const result: Partial<Formatted<F>> = {}
   for (const key in format) {
     const formatter = format[key]

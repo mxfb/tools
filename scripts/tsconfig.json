@@ -4,30 +4,22 @@
     "baseUrl": "..",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "../.scripts",
+    "outDir": "../.temp/scripts",
     "module": "ESNext",
     "moduleResolution": "Node",
     "target": "ESNext",
     "lib": ["ESNext"],
     "rootDir": "..",
+    "jsx": "react-jsx",
     "noUncheckedIndexedAccess": true,
-    "declaration": true,
-    "paths": {
-      "~/agnostic/*": ["src/agnostic/*"],
-      "~/browser/*": ["src/browser/*"],
-      "~/node/*": ["src/node/*"],
-      "~/shared/*": ["src/shared/*"],
-      "~/src/*": ["src/*"],
-      "~/scripts/*": ["scripts/*"]
-    }
+    "declaration": true
   },
   "include": [
-    "../scripts/**/*",
-    "../src/**/*"
+    "../scripts/**/*"
   ],
   "exclude": [
     "../node_modules",
-    "../.scripts",
-    "../src/**/*"
+    "../.temp/scripts",
+    "../src/components/**/*"
   ]
 }

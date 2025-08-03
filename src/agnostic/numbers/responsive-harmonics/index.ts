@@ -1,4 +1,4 @@
-import { round } from '~/agnostic/numbers/round'
+import { round } from '../../numbers/round'
 
 export function getHarmonic (
   min: number,

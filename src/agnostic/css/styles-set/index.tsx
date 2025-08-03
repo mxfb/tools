@@ -1,15 +1,7 @@
-import { JSX, Component } from 'react'
-import { render as reactRender } from 'react-dom'
-import {
-  createRoot as reactCreateRoot,
-  Root as ReactRoot
-} from 'react-dom/client'
-import { Crossenv } from '~/agnostic/misc/crossenv'
-import { Random } from '~/agnostic/misc/random'
-import {
-  Codes as LibErrorCodes,
-  register as libErrorsRegister
-} from '~/shared/errors'
+import { Component } from 'react'
+import { createRoot as reactCreateRoot, Root as ReactRoot } from 'react-dom/client'
+import { Random } from '../../random'
+import * as ERR from '../../../shared/errors'
 
 export type StylesSetItem = {
   type: 'string' | 'url'
@@ -20,23 +12,23 @@ export type StylesSetItem = {
 }
 
 export class StylesSet {
+
   static defaultPrivateIDAttribute = 'data-styleset-private-id'
   static defaultPublicIDAttribute = 'data-styleset-public-id'
+  tagsPrivateIDAttribute = StylesSet.defaultPrivateIDAttribute
+  tagsPublicIDAttribute = StylesSet.defaultPublicIDAttribute
+
   private _items = new Map<string, StylesSetItem>()
+
   get items () {
     const sortedItemsArray = Array.from(this._items).map(([privateId, item]) => {
-      return {
-        targetPosition: this.getTargetPosition(privateId) ?? 0,
-        privateId,
-        item
-      }
+      const targetPosition = this.getTargetPosition(privateId) ?? 0
+      return { targetPosition, privateId, item }
     }).sort((a, b) => a.targetPosition - b.targetPosition)
      .map(({ item, privateId }) => ([privateId, item] as [string, StylesSetItem]))
     const sortedItemsMap = new Map(sortedItemsArray)
     return sortedItemsMap
   }
-  tagsPrivateIDAttribute = StylesSet.defaultPrivateIDAttribute
-  tagsPublicIDAttribute = StylesSet.defaultPublicIDAttribute
 
   private getTargetPosition (privateId: string) {
     const orderedStyles = Array.from(this._items)
@@ -74,19 +66,15 @@ export class StylesSet {
     return generated
   }
 
-  getComp (): JSX.Element {
-    const items = this.items
-    const comp = <StylesSetComp
-      items={items}
-      privateIDAttribute={this.tagsPrivateIDAttribute}
-      publicIDAttribute={this.tagsPublicIDAttribute} />
-    return comp
-  }
-
   private _rendered = new Map<Element, ReactRoot>()
+
   render (element: Element): this {
     const root = reactCreateRoot(element)
-    root.render(this.getComp())
+    const items = this.items
+    root.render(<StylesSetComp
+      items={items}
+      privateIDAttribute={this.tagsPrivateIDAttribute}
+      publicIDAttribute={this.tagsPublicIDAttribute} />)
     this._rendered.set(element, root)
     return this
   }
@@ -101,7 +89,11 @@ export class StylesSet {
   }
 
   updateRendered (): this {
-    this._rendered.forEach((root) => root.render(this.getComp()))
+    const { items } = this
+    this._rendered.forEach((root) => root.render(<StylesSetComp
+      items={items}
+      privateIDAttribute={this.tagsPrivateIDAttribute}
+      publicIDAttribute={this.tagsPublicIDAttribute} />))
     return this
   }
 
@@ -142,11 +134,22 @@ export class StylesSet {
   }
 
   async getDomString (documentObj?: Document): Promise<string> {
-    const actualDocumentObj = documentObj ?? Crossenv.getDocument()
-    if (actualDocumentObj === null) throw libErrorsRegister.getError(LibErrorCodes.NO_DOCUMENT)
+    const actualDocumentObj = documentObj ?? window.document
+    if (actualDocumentObj === null) throw ERR.register.getError(ERR.Codes.NO_DOCUMENT)
     return new Promise(resolve => {
       const tempElt = actualDocumentObj.createElement('div')
-      reactRender(this.getComp(), tempElt, () => resolve(tempElt.innerHTML))
+      const tempRoot = reactCreateRoot(tempElt)
+      const { items } = this
+      const onRendered = () => {
+        resolve(tempElt.innerHTML)
+        tempRoot.unmount()
+        tempElt.remove()
+      }
+      tempRoot.render(<StylesSetComp
+        items={items}
+        privateIDAttribute={this.tagsPrivateIDAttribute}
+        publicIDAttribute={this.tagsPublicIDAttribute}
+        onRendered={onRendered} />)
     })
   }
 }
@@ -155,9 +158,22 @@ export type StylesSetCompProps = {
   items?: StylesSet['items']
   privateIDAttribute?: StylesSet['tagsPrivateIDAttribute']
   publicIDAttribute?: StylesSet['tagsPublicIDAttribute']
+  onRendered?: (...any: any[]) => any
 }
 
 export class StylesSetComp extends Component<StylesSetCompProps> {
+  componentDidMount (): void {
+    const { props } = this
+    const { onRendered } = props
+    if (onRendered !== undefined) onRendered()
+  }
+
+  componentDidUpdate (): void {
+    const { props } = this
+    const { onRendered } = props
+    if (onRendered !== undefined) onRendered()
+  }
+
   render () {
     const { props } = this
     const items: StylesSet['items'] = props.items ?? new Map()

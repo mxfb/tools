@@ -1,9 +1,9 @@
 import { getNodeAncestors as getNodeAncestorsFunc } from './get-node-ancestors'
 import { getPositionInsideParent as getPositionInsideParentFunc } from './get-position-inside-parent'
+import { HyperJson as HyperJsonNamespace } from './hyper-json'
 import {
   InsertNodePosition as InsertNodePositionType,
-  insertNode as insertNodeFunc
-} from './insert-node'
+  insertNode as insertNodeFunc } from './insert-node'
 import { Placeholders as PlaceholdersNamespace } from './placeholders'
 import { Sanitize as SanitizeNamespace } from './sanitize'
 import { selectorToElement as selectorToElementFunc } from './selector-to-element'
@@ -14,6 +14,8 @@ export namespace Html {
   export const getNodeAncestors = getNodeAncestorsFunc
   // Get position inside parnet
   export const getPositionInsideParent = getPositionInsideParentFunc
+  // HyperJson
+  export import HyperJson = HyperJsonNamespace
   // Insert node
   export type InsertNodePosition = InsertNodePositionType
   export const insertNode = insertNodeFunc

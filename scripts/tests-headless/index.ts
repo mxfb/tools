@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer'
-import { Duration } from '../../src/agnostic/time/duration/index.js'
-import { timeout } from '../../src/agnostic/time/timeout/index.js'
+import { Duration } from '@design-edito/tools/agnostic/time/duration/index.js'
+import { timeout } from '@design-edito/tools/agnostic/time/timeout/index.js'
 
 const PORT = process.env.PORT || '3000'
 

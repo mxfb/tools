@@ -52,9 +52,9 @@
     "start": "npm run _serve:tests & serve_pid=$! && trap 'kill $serve_pid; npm run _remove:temp' EXIT && npm run build && npx concurrently -n '_bundle:watch:tests,_tests:watch' 'npm run _bundle:watch:tests' 'PORT=${PORT:-3000} npm run _tests:watch'"
   },
   "peerDependencies": {
+    "@design-edito/tools": "^0.1.73",
     "chalk": "^5.3.0",
     "fs-extra": "^11.2.0",
-    "get-image-colors": "^4.0.1",
     "jsdom": "^24.1.1",
     "node-fetch": "^3.3.2",
     "react": "^18.3.1",
@@ -77,8 +77,5 @@
     "sharp": "^0.34.2",
     "simple-git": "^3.27.0",
     "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "@design-edito/tools": "^0.1.73"
   }
 }

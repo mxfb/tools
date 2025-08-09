@@ -1,5 +1,5 @@
-import { Logs } from '~/agnostic/misc/logs'
-import { HyperJson } from '~/agnostic/html/hyper-json'
+import { Logs } from '@design-edito/tools/agnostic/misc/logs'
+import { HyperJson } from '@design-edito/tools/agnostic/html/hyper-json'
 
 console.log(Logs.styles.title('Browser tests.'))
 

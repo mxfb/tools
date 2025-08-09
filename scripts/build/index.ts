@@ -1,9 +1,11 @@
 import process from 'node:process'
 import { promises as fs } from 'node:fs'
 import { exec } from 'node:child_process'
+import chalk from 'chalk'
 import esbuild from 'esbuild'
 import { COMPONENTS, AGNOSTIC, NODE, LIB } from '../_config/index.js'
-import * as Files from '../../src/node/files/index'
+import * as Files from '@design-edito/tools/node/files/index.js'
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -28,7 +30,7 @@ const entryPoints = (await Promise.all(rootDirs.map(async dirPath => {
   })
 }))).flat()
 
-console.log(entryPoints)
+entryPoints.forEach(entryPoint => console.log(chalk.green.bold(entryPoint)))
 
 await new Promise((resolve, reject) => {
   esbuild.build({
